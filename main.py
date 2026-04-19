@@ -84,14 +84,11 @@ def health():
 @app.get("/status")
 def status():
     return {
-        "server": "running",
+        "server": "running!!!!",
         "mode": "development (mock data)",
         "ready_for": "PostgreSQL + Ollama"
     }
 
-@app.get("/ping")
-def ping():
-    return {"message": "CI/CD работает! Сервер обновился автоматически", "status": "alive"}
 
 @app.post("/query", response_model=QueryResponse)
 async def process_query(req: QueryRequest):
