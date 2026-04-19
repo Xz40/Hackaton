@@ -90,10 +90,6 @@ def status():
     }
 
 
-@app.get("/lol")
-def lol():
-    return {"message": "Сука работает наконец то"}
-
 @app.post("/query", response_model=QueryResponse)
 async def process_query(req: QueryRequest):
     """
