@@ -81,6 +81,9 @@ def root():
 def health():
     return {"status": "alive", "database": "mock", "llm": "mock"}
 
+@app.get("/ping")
+def ping():
+    return {"message": "CI/CD работает! Сервер обновился автоматически", "status": "alive"}
 
 @app.get("/status")
 def status():
