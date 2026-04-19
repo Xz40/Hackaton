@@ -83,7 +83,7 @@ def health():
 
 @app.get("/ping")
 def ping():
-    return {"message": "CI/CD работает! Сервер обновился автоматически", "status": "alive"}
+    return {"message": "CI/CD работает! ", "status": "alive"}
 
 @app.get("/lol")
 def ping():
