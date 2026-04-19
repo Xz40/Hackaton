@@ -72,7 +72,7 @@ def root():
         "endpoints": {
             "POST /query": "Отправить вопрос на русском",
             "GET /health": "Проверка состояния",
-            "GET /status": "Статус сервера lol"
+            "GET /status": "Статус сервера lolahahhaha"
         }
     }
 
