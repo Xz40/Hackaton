@@ -89,6 +89,10 @@ def status():
         "ready_for": "PostgreSQL + Ollama"
     }
 
+@app.get("/ping")
+def ping():
+    return {"message": "CI/CD работает! Сервер обновился автоматически", "status": "alive"}
+
 @app.post("/query", response_model=QueryResponse)
 async def process_query(req: QueryRequest):
     """
