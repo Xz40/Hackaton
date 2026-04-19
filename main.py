@@ -88,7 +88,7 @@ def ping():
 @app.get("/lol")
 def ping():
     return {"message": "lol6"}
-
+print("lmao")
 @app.get("/status")
 def status():
     return {
