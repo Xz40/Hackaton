@@ -94,7 +94,7 @@ def ping():
     return {"message": "CI/CD работает! Сервер обновился автоматически", "status": "alive"}
 
 @app.get("/lol")
-def ping():
+def lol()):
     return {"message": "Сука работает наконец то"}
 
 @app.post("/query", response_model=QueryResponse)
