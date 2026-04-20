@@ -33,6 +33,48 @@ def health():
     except Exception as e:
         return {"status": "unhealthy", "database": "disconnected", "error": str(e)}
 
+@app.post("/init_db")
+async def init_database():
+    import psycopg2
+    from .database import DB_CONFIG
+    
+    conn = psycopg2.connect(**DB_CONFIG)
+    cur = conn.cursor()
+    
+    # Создаём таблицу
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS orders (
+            id SERIAL PRIMARY KEY,
+            order_date DATE NOT NULL,
+            city VARCHAR(100),
+            amount DECIMAL(10,2),
+            status VARCHAR(20)
+        );
+    """)
+    
+    # Проверяем, есть ли данные
+    cur.execute("SELECT COUNT(*) FROM orders;")
+    count = cur.fetchone()[0]
+    
+    if count == 0:
+        # Добавляем тестовые данные
+        cur.execute("""
+            INSERT INTO orders (order_date, city, amount, status) VALUES
+            ('2025-09-01', 'Москва', 15000, 'completed'),
+            ('2025-09-02', 'СПб', 8000, 'cancelled'),
+            ('2025-09-03', 'Москва', 22000, 'completed'),
+            ('2025-09-04', 'Казань', 5000, 'cancelled'),
+            ('2025-09-05', 'Москва', 12000, 'completed'),
+            ('2025-09-06', 'СПб', 3000, 'pending');
+        """)
+        conn.commit()
+        message = "Таблица создана, добавлено 6 записей"
+    else:
+        message = f"Таблица уже существует, {count} записей"
+    
+    conn.close()
+    return {"status": "ok", "message": message} 
+
 @app.post("/query", response_model=QueryResponse)
 async def query(req: QueryRequest):
     if not req.question or len(req.question.strip()) < 3:
