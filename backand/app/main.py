@@ -103,6 +103,25 @@ async def query(req: QueryRequest):
         message=f"Найдено {len(data)} записей"
     )
 
+@app.get("/download_excel")
+async def download_excel(question: str, user_id: str):
+    sql = generate_sql(question)
+    conn = get_db_connection()
+    df = pd.read_sql(sql, conn)
+    conn.close()
+    
+    excel_buffer = io.BytesIO()
+    with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False)
+    excel_buffer.seek(0)
+    
+    return StreamingResponse(
+        excel_buffer,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=report.xlsx"}
+    )
+
+
 @app.post("/query_with_chart")
 async def query_with_chart(req: QueryRequest):
     sql = generate_sql(req.question)
@@ -110,23 +129,29 @@ async def query_with_chart(req: QueryRequest):
     df = pd.read_sql(sql, conn)
     conn.close()
     
-    # График
+    if df.empty:
+        return {"error": "Нет данных"}
+    
+    # График в формате HTML
     fig = px.bar(df.head(20), title=req.question)
     chart_html = fig.to_html(full_html=False)
     
-    # Excel
-    buffer = io.BytesIO()
-    with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+    # Excel файл
+    excel_buffer = io.BytesIO()
+    with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
         df.to_excel(writer, index=False)
-    buffer.seek(0)
+    excel_buffer.seek(0)
     
+    # Возвращаем JSON с графиком + отдельный эндпоинт для скачивания
     return {
         "question": req.question,
         "sql": sql,
         "data": df.to_dict(orient="records"),
-        "chart": chart_html,
-        "excel": StreamingResponse(buffer, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", headers={"Content-Disposition": "attachment; filename=report.xlsx"})
+        "row_count": len(df),
+        "chart_html": chart_html,
+        "excel_available": True
     }
+
 
 REPORTS_DIR = Path("./reports")
 REPORTS_DIR.mkdir(exist_ok=True)
