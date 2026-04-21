@@ -45,7 +45,7 @@ if prompt := st.chat_input("Например: покажи продажи по �
                     df = pd.DataFrame(data["data"])
                     st.dataframe(df, use_container_width=True)
                     
-                    excel_url = f"{API_URL}/download_excel?question={prompt}&user_id={st.session_state.username}"
+                    excel_url = f"{API_URL}/download_excel?question={prompt}"
                     st.markdown(f"[Скачать Excel]({excel_url})")
                     
                     st.session_state.messages.append({

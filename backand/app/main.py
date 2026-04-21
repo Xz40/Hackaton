@@ -130,7 +130,7 @@ async def query_with_chart(req: QueryRequest):
 
 
 @app.get("/download_excel")
-async def download_excel(question: str, user_id: str):
+async def download_excel(question: str):
     sql = generate_sql(question)
     conn = get_db_connection()
     df = pd.read_sql(sql, conn)
