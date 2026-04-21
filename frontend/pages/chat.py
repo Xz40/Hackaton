@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 import pandas as pd
+from plotly.io import from_json
 
 if "authenticated" not in st.session_state or not st.session_state.authenticated:
     st.switch_page("app.py")
@@ -17,8 +18,9 @@ if "messages" not in st.session_state:
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
-        if "chart" in msg:
-            st.components.v1.html(msg["chart"], height=400)
+        if "graph_json" in msg:
+            fig = from_json(msg["graph_json"])
+            st.plotly_chart(fig, use_container_width=True)
 
 if prompt := st.chat_input("Например: покажи продажи по городам"):
     st.session_state.messages.append({"role": "user", "content": prompt})
@@ -36,7 +38,10 @@ if prompt := st.chat_input("Например: покажи продажи по �
                 if resp.status_code == 200:
                     data = resp.json()
                     st.code(data["sql"], language="sql")
-                    st.components.v1.html(data["chart_html"], height=400)
+                    
+                    fig = from_json(data["graph_json"])
+                    st.plotly_chart(fig, use_container_width=True)
+                    
                     df = pd.DataFrame(data["data"])
                     st.dataframe(df, use_container_width=True)
                     
@@ -46,7 +51,7 @@ if prompt := st.chat_input("Например: покажи продажи по �
                     st.session_state.messages.append({
                         "role": "assistant",
                         "content": f"SQL:\n```sql\n{data['sql']}\n```",
-                        "chart": data["chart_html"]
+                        "graph_json": data["graph_json"]
                     })
                 else:
                     st.error(f"Ошибка сервера: {resp.status_code}")

@@ -1,17 +1,19 @@
+import json
+import uuid
+import io
+from datetime import datetime
+from pathlib import Path
+
+import pandas as pd
+import plotly.express as px
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
+
 from .database import get_db_connection
 from .models import QueryRequest, QueryResponse, SaveReportRequest
 from .sql_generator import generate_sql
 from .sql_validator import validate_sql
-from fastapi.responses import StreamingResponse
-import plotly.express as px
-import pandas as pd
-import io
-import json
-from pathlib import Path
-import uuid
-from datetime import datetime
 
 app = FastAPI(title="Drivee SQL Assistant", version="1.0.0")
 
@@ -22,9 +24,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get("/")
 def root():
     return {"status": "online", "product": "Drivee SQL Assistant"}
+
 
 @app.get("/health")
 def health():
@@ -35,15 +39,15 @@ def health():
     except Exception as e:
         return {"status": "unhealthy", "database": "disconnected", "error": str(e)}
 
+
 @app.post("/init_db")
 async def init_database():
     import psycopg2
     from .database import DB_CONFIG
-    
+
     conn = psycopg2.connect(**DB_CONFIG)
     cur = conn.cursor()
-    
-    # Создаём таблицу
+
     cur.execute("""
         CREATE TABLE IF NOT EXISTS orders (
             id SERIAL PRIMARY KEY,
@@ -53,13 +57,11 @@ async def init_database():
             status VARCHAR(20)
         );
     """)
-    
-    # Проверяем, есть ли данные
+
     cur.execute("SELECT COUNT(*) FROM orders;")
     count = cur.fetchone()[0]
-    
+
     if count == 0:
-        # Добавляем тестовые данные
         cur.execute("""
             INSERT INTO orders (order_date, city, amount, status) VALUES
             ('2025-09-01', 'Москва', 15000, 'completed'),
@@ -73,21 +75,22 @@ async def init_database():
         message = "Таблица создана, добавлено 6 записей"
     else:
         message = f"Таблица уже существует, {count} записей"
-    
+
     conn.close()
-    return {"status": "ok", "message": message} 
+    return {"status": "ok", "message": message}
+
 
 @app.post("/query", response_model=QueryResponse)
 async def query(req: QueryRequest):
     if not req.question or len(req.question.strip()) < 3:
         raise HTTPException(status_code=400, detail="Вопрос слишком короткий")
-    
+
     sql = generate_sql(req.question)
-    
+
     validation = validate_sql(sql)
     if not validation["safe"]:
         raise HTTPException(status_code=400, detail=validation["reason"])
-    
+
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -96,31 +99,13 @@ async def query(req: QueryRequest):
         conn.close()
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка БД: {str(e)}")
-    
+
     return QueryResponse(
         question=req.question,
         sql=sql,
         data=data[:100],
         row_count=len(data),
         message=f"Найдено {len(data)} записей"
-    )
-
-@app.get("/download_excel")
-async def download_excel(question: str, user_id: str):
-    sql = generate_sql(question)
-    conn = get_db_connection()
-    df = pd.read_sql(sql, conn)
-    conn.close()
-    
-    excel_buffer = io.BytesIO()
-    with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
-        df.to_excel(writer, index=False)
-    excel_buffer.seek(0)
-    
-    return StreamingResponse(
-        excel_buffer,
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": "attachment; filename=report.xlsx"}
     )
 
 
@@ -130,33 +115,42 @@ async def query_with_chart(req: QueryRequest):
     conn = get_db_connection()
     df = pd.read_sql(sql, conn)
     conn.close()
-    
-    if df.empty:
-        return {"error": "Нет данных"}
-    
-    # График в формате HTML
+
     fig = px.bar(df.head(20), title=req.question)
-    chart_html = fig.to_html(full_html=False)
-    
-    # Excel файл
-    excel_buffer = io.BytesIO()
-    with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
-        df.to_excel(writer, index=False)
-    excel_buffer.seek(0)
-    
-    # Возвращаем JSON с графиком + отдельный эндпоинт для скачивания
+    graph_json = fig.to_json()
+
     return {
         "question": req.question,
         "sql": sql,
         "data": df.to_dict(orient="records"),
         "row_count": len(df),
-        "chart_html": chart_html,
+        "graph_json": graph_json,
         "excel_available": True
     }
 
 
+@app.get("/download_excel")
+async def download_excel(question: str, user_id: str):
+    sql = generate_sql(question)
+    conn = get_db_connection()
+    df = pd.read_sql(sql, conn)
+    conn.close()
+
+    excel_buffer = io.BytesIO()
+    with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False)
+    excel_buffer.seek(0)
+
+    return StreamingResponse(
+        excel_buffer,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=report.xlsx"}
+    )
+
+
 REPORTS_DIR = Path("./reports")
 REPORTS_DIR.mkdir(exist_ok=True)
+
 
 @app.post("/save_report")
 async def save_report(req: SaveReportRequest):
