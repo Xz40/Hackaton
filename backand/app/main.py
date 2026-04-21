@@ -10,6 +10,7 @@ import pandas as pd
 import io
 import json
 from pathlib import Path
+import uuid
 
 app = FastAPI(title="Drivee SQL Assistant", version="1.0.0")
 
