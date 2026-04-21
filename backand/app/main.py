@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from .database import get_db_connection
-from .models import QueryRequest, QueryResponse
+from .models import QueryRequest, QueryResponse, SaveReportRequest
 from .sql_generator import generate_sql
 from .sql_validator import validate_sql
 from fastapi.responses import StreamingResponse
@@ -157,15 +157,16 @@ REPORTS_DIR = Path("./reports")
 REPORTS_DIR.mkdir(exist_ok=True)
 
 @app.post("/save_report")
-async def save_report(req: QueryRequest, sql: str, data: list):
+async def save_report(req: SaveReportRequest):
     report_id = str(uuid.uuid4())
     report = {
         "id": report_id,
         "question": req.question,
-        "sql": sql,
-        "data": data,
+        "user_id": req.user_id,
+        "sql": req.sql,
+        "data": req.data,
         "created_at": datetime.now().isoformat()
     }
-    with open(REPORTS_DIR / f"{report_id}.json", "w") as f:
-        json.dump(report, f)
-    return {"report_id": report_id}
+    with open(REPORTS_DIR / f"{report_id}.json", "w", encoding="utf-8") as f:
+        json.dump(report, f, ensure_ascii=False, indent=2)
+    return {"report_id": report_id, "message": "Отчёт сохранён"}
