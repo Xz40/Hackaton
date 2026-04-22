@@ -9,6 +9,28 @@
 </head>
 <body>
     <div class="app-container">
+        <div class="app-container">
+    <main class="main-content">
+        </main>
+
+    <aside class="right-panel">
+        <div class="side-box">
+            <h3>Быстрые действия</h3>
+            <div class="box-content">
+                <button class="action-item"><i data-lucide="bar-chart"></i> Графики</button>
+                <button class="action-item"><i data-lucide="download"></i> Экспорт</button>
+            </div>
+        </div>
+
+        <div class="side-box">
+            <h3>Популярные запросы</h3>
+            <div class="box-content">
+                <p onclick="document.getElementById('queryInput').value='Топ заказов за неделю'">📈 Топ заказов за неделю</p>
+                <p onclick="document.getElementById('queryInput').value='Отмены по городам'">📍 Отмены по городам</p>
+            </div>
+        </div>
+    </aside>
+</div>
         <aside class="sidebar">
             <div class="sidebar-top">
                 <div class="logo-wrapper">
@@ -31,7 +53,7 @@
                 <div class="logout" onclick="logout()">
                     <i data-lucide="log-out"></i> Выйти
                 </div>
-                
+
                 <div class="promo-wrapper">
                     <img src="analitycs_for_all.png" alt="Promo">
                 </div>

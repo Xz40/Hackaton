@@ -118,3 +118,62 @@ body, html { height: 100vh; width: 100vw; overflow: hidden; font-family: sans-se
 .input-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
 .engine-info { font-size: 9px; font-weight: 800; color: #DDD; letter-spacing: 1px; }
 .send-btn { background: #A5F52C; border: none; width: 40px; height: 40px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+
+.right-panel {
+    width: 280px;
+    min-width: 280px;
+    background: #FBFBFB;
+    border-left: 1px solid #EEE;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.side-box {
+    background: #FFF;
+    border: 1px solid #EEE;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+}
+
+.side-box h3 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.action-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background: #F9FAFB;
+    border: 1px solid #EEE;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: 0.2s;
+}
+
+.action-item:hover {
+    background: #F0F9E6;
+    border-color: #A5F52C;
+}
+
+.box-content p {
+    font-size: 13px;
+    color: #666;
+    padding: 8px 0;
+    cursor: pointer;
+    border-bottom: 1px solid #F5F5F5;
+}
+
+.box-content p:hover {
+    color: #A5F52C;
+}
