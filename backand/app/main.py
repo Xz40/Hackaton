@@ -65,18 +65,18 @@ async def process_question(request: QueryRequest):
     # 2. Валидация
     validation = sql_validator.validate_sql(sql)
     
-    # 3. Логируем в историю (даже если запрос не безопасен)
+    # 3. Логируем в историю (теперь с user_id)
     try:
         conn = database.get_db_connection()
         with conn.cursor() as cur:
             cur.execute("""
-                INSERT INTO query_history (question, sql_query, status) 
-                VALUES (%s, %s, %s)
-            """, (request.question, sql, "success" if validation["safe"] else "blocked"))
+                INSERT INTO query_history (user_id, question, sql_query, status) 
+                VALUES (%s, %s, %s, %s)
+            """, (request.user_id, request.question, sql, "success" if validation["safe"] else "blocked"))
         conn.commit()
         conn.close()
     except Exception as e:
-        print(f"Ошибка сохранения истории: {e}")
+        print(f"❌ Ошибка сохранения истории: {e}")
 
     if not validation["safe"]:
         raise HTTPException(status_code=400, detail=validation["reason"])
