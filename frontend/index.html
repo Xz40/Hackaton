@@ -48,6 +48,11 @@
                 <i data-lucide="log-out"></i>
                 Выйти из системы
             </div>
+            
+            <div class="promo-box">
+                <h5>Drivee Pro</h5>
+                <p>Откройте расширенную аналитику и прогнозирование спроса для вашего региона.</p>
+            </div>
         </div>
     </aside>
 
@@ -72,7 +77,7 @@
 
                 <div class="footer">
                     <div class="input-card">
-                        <textarea id="queryInput" placeholder="Спроси меня что-нибудь о заказах, водителях или выручке..."></textarea>
+                        <textarea id="queryInput" placeholder="Введите ваш запрос к базе данных..."></textarea>
                         <div class="input-actions">
                             <div class="engine-info">DRIVEE AI ENGINE v1.0</div>
                             <button class="send-btn" onclick="sendQuery()">
@@ -86,8 +91,8 @@
             <section id="historyView" class="view-section hidden">
                 <div class="section-content">
                     <div class="view-header">
-                        <h2>Личная история запросов</h2>
-                        <p style="color: #888; margin-top: 5px;">Здесь хранятся только ваши аналитические отчеты</p>
+                        <h2 style="font-size: 24px; font-weight: 800;">Личная история запросов</h2>
+                        <p style="color: #888; margin-top: 5px;">Ваши отчеты, сохраненные в системе</p>
                     </div>
                     <div class="list-container" id="historyList">
                         </div>
@@ -97,8 +102,8 @@
             <section id="dataView" class="view-section hidden">
                 <div class="section-content">
                     <div class="view-header">
-                        <h2>Источники данных</h2>
-                        <p style="color: #888; margin-top: 5px;">Активные подключения к рабочим базам Drivee</p>
+                        <h2 style="font-size: 24px; font-weight: 800;">Источники данных</h2>
+                        <p style="color: #888; margin-top: 5px;">Активные подключения к хранилищам</p>
                     </div>
                     <div class="list-container" id="dbList">
                         </div>
@@ -107,9 +112,9 @@
 
             <aside class="right-panel">
                 <div class="side-box">
-                    <div class="box-title">Статистика аккаунта</div>
-                    <div class="stat-item">Запросов сегодня: <span id="statRequests">0</span></div>
-                    <div class="stat-item">Точность AI: <span id="statAccuracy">98%</span></div>
+                    <div class="box-title">Статистика</div>
+                    <div class="stat-item" id="statRequests">Запросов сегодня: 0</div>
+                    <div class="stat-item">Точность AI: 98%</div>
                 </div>
 
                 <div class="side-box">
