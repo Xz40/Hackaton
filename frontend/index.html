@@ -3,97 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Драйвиум — Аналитика</title>
+    <title>Драйвиум — Аналитическая платформа</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #FBFBFB; overflow: hidden; }
+        body { font-family: 'Inter', sans-serif; background-color: #FBFBFB; overflow: hidden; color: #2D2D2D; }
         
-        .sidebar { width: 280px; height: 100vh; background: #FBFBFB; border-right: 1px solid #F1F3F4; display: flex; flex-direction: column; }
-        
-        /* Навигация */
-        .nav-container { flex-grow: 1; overflow-y: auto; }
+        /* Sidebar */
+        .sidebar { width: 280px; height: 100vh; background: #FBFBFB; border-right: 1px solid #F1F3F4; display: flex; flex-direction: column; padding: 24px; }
         .nav-item { 
             display: flex; align-items: center; gap: 12px; padding: 12px 16px; 
-            border-radius: 12px; cursor: pointer; color: #5F6368; font-size: 14px; 
-            margin-bottom: 4px; transition: all 0.2s;
+            border-radius: 12px; cursor: pointer; color: #5F6368; font-size: 14px; transition: all 0.2s;
         }
         .nav-item:hover { background: #F1F3F4; color: #2D2D2D; }
         .nav-item.active { background: #E8F5E9; color: #2E7D32; font-weight: 600; }
         
-        /* Кнопка нового запроса */
         .btn-new-query {
             border: 1px solid #DADCE0; border-radius: 12px; padding: 14px;
             display: flex; align-items: center; gap: 10px; width: 100%;
-            font-size: 14px; margin-bottom: 30px; background: white; font-weight: 500;
+            font-size: 14px; margin: 24px 0; background: white; font-weight: 500;
         }
 
-        /* Чат и рабочая область */
+        /* Чат - лента сообщений */
         .chat-area { 
             flex: 1; display: flex; flex-direction: column; 
             background: white; border-radius: 32px 0 0 0; 
             border-left: 1px solid #F1F3F4; border-top: 1px solid #F1F3F4;
-            box-shadow: -10px 0 30px rgba(0,0,0,0.02);
         }
+        .message { display: flex; gap: 20px; padding: 24px 0; max-width: 800px; margin: 0 auto; width: 100%; border-bottom: 1px solid #F9FAFB; }
+        .message-avatar { width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0; display: flex; items-center: center; justify-content: center; font-weight: bold; font-size: 14px; }
+        .bot-avatar { background: #F1F3F4; color: #5F6368; }
+        .user-avatar { background: #A5F52C; color: black; }
+        .message-body { flex: 1; font-size: 15px; line-height: 1.6; }
+        .message-name { font-size: 12px; font-weight: 700; color: #9AA0A6; margin-bottom: 4px; text-transform: uppercase; }
 
-        /* Поле ввода */
-        .input-wrapper {
-            max-width: 900px; margin: 0 auto; width: 100%; position: relative;
-        }
+        /* Input Zone */
         .input-container {
-            border: 1px solid #DADCE0; border-radius: 24px; padding: 10px 10px 10px 24px;
-            display: flex; align-items: center; background: white;
+            border: 1px solid #DADCE0; border-radius: 24px; padding: 8px 8px 8px 24px;
+            display: flex; align-items: center; background: white; box-shadow: 0 4px 20px rgba(0,0,0,0.03);
         }
-        .query-input { flex: 1; border: none; outline: none; font-size: 16px; height: 50px; }
-        .btn-send { 
-            background: #A5F52C; width: 48px; height: 48px; border-radius: 16px; 
-            display: flex; align-items: center; justify-content: center; 
-            flex-shrink: 0; margin-left: 12px;
-        }
+        .query-input { flex: 1; border: none; outline: none; font-size: 16px; height: 48px; }
+        .btn-send { background: #A5F52C; width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
 
-        /* Промо и нижние кнопки */
-        .sidebar-bottom { padding: 16px 0; border-top: 1px solid #F1F3F4; }
-        .promo-img { width: 100%; border-radius: 16px; margin-top: 16px; cursor: pointer; }
+        /* Promo */
+        .promo-img { width: 100%; border-radius: 16px; margin-top: 16px; display: block; }
     </style>
 </head>
 <body class="flex h-screen">
 
-    <aside class="sidebar p-6">
-        <div class="mb-10 px-2">
-            <img src="logo.png" alt="Drivee" class="h-10"> </div>
+    <aside class="sidebar">
+        <div class="px-2"><img src="logo.png" alt="Drivee" style="height: 40px;"></div>
 
         <button class="btn-new-query" onclick="showScreen('main')">
-            <i data-lucide="edit-3" class="w-5 h-5 text-gray-400"></i>
-            <span>Новый запрос</span>
+            <i data-lucide="edit-3" class="w-5 h-5 text-gray-400"></i><span>Новый запрос</span>
         </button>
 
-        <nav class="nav-container">
-            <div onclick="handleNav(this, 'main')" class="nav-item active">
-                <i data-lucide="home" class="w-5 h-5"></i><span>Главная</span>
-            </div>
-            <div onclick="handleNav(this, 'history')" class="nav-item">
-                <i data-lucide="clock" class="w-5 h-5"></i><span>История запросов</span>
-            </div>
-            <div class="nav-item">
-                <i data-lucide="star" class="w-5 h-5"></i><span>Избранное</span>
-            </div>
-            <div onclick="handleNav(this, 'dashboards')" class="nav-item">
-                <i data-lucide="layout" class="w-5 h-5"></i><span>Дашборды</span>
-            </div>
-            <div onclick="handleNav(this, 'database')" class="nav-item">
-                <i data-lucide="database" class="w-5 h-5"></i><span>База данных</span>
-            </div>
-            <div class="nav-item">
-                <i data-lucide="settings" class="w-5 h-5"></i><span>Настройки</span>
-            </div>
+        <nav class="flex-grow overflow-y-auto">
+            <div onclick="handleNav(this, 'main')" class="nav-item active"><i data-lucide="home" class="w-5 h-5"></i><span>Главная</span></div>
+            <div onclick="handleNav(this, 'history')" class="nav-item"><i data-lucide="clock" class="w-5 h-5"></i><span>История запросов</span></div>
+            <div class="nav-item"><i data-lucide="star" class="w-5 h-5"></i><span>Избранное</span></div>
+            <div onclick="handleNav(this, 'dashboards')" class="nav-item"><i data-lucide="layout" class="w-5 h-5"></i><span>Дашборды</span></div>
+            <div onclick="handleNav(this, 'database')" class="nav-item"><i data-lucide="database" class="w-5 h-5"></i><span>База данных</span></div>
+            <div class="nav-item"><i data-lucide="settings" class="w-5 h-5"></i><span>Настройки</span></div>
         </nav>
 
-        <div class="sidebar-bottom">
+        <div class="pt-4 border-t border-gray-100">
             <div class="nav-item"><i data-lucide="help-circle" class="w-5 h-5"></i><span>Помощь</span></div>
             <div onclick="logout()" class="nav-item"><i data-lucide="log-out" class="w-5 h-5"></i><span>Выйти</span></div>
-            <img src="analitycs_for_all.png" alt="Промо" class="promo-img"> </div>
+            <img src="analitycs_for_all.png" alt="Промо" class="promo-img">
+        </div>
     </aside>
 
     <main class="flex-1 flex flex-col">
@@ -102,43 +82,33 @@
                 <i data-lucide="sparkles" class="w-6 h-6 text-green-500"></i>
                 <h1 id="screen-title" class="text-lg font-bold">Драйвиум — Аналитическая платформа</h1>
             </div>
-            
-            <div class="flex items-center gap-4">
-                <div class="flex items-center gap-2 cursor-pointer">
-                    <div id="avatar" class="w-10 h-10 rounded-full bg-[#A5F52C] flex items-center justify-center font-bold">Ж</div>
-                    <span id="userName" class="font-medium text-sm">Жанна</span>
-                    <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
-                </div>
+            <div class="flex items-center gap-3 cursor-pointer">
+                <div id="avatar" class="w-10 h-10 rounded-full bg-[#A5F52C] flex items-center justify-center font-bold">Ж</div>
+                <span id="userName" class="font-medium text-sm">Пользователь</span>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
             </div>
         </header>
 
         <div class="flex-1 flex overflow-hidden">
             <section class="chat-area">
-                <div id="main-content" class="flex-1 overflow-y-auto p-10 flex flex-col">
-                    </div>
-
+                <div id="main-content" class="flex-1 overflow-y-auto px-10"></div>
+                
                 <div id="input-zone" class="p-8">
-                    <div class="input-wrapper space-y-4">
+                    <div class="max-w-[800px] mx-auto w-full space-y-4">
                         <div class="input-container">
                             <input id="queryInput" type="text" placeholder="Напишите ваш запрос..." class="query-input">
-                            <button onclick="sendQuery()" class="btn-send hover:brightness-105 transition-all">
-                                <i data-lucide="send" class="w-5 h-5 text-black"></i>
-                            </button>
+                            <button onclick="sendQuery()" class="btn-send"><i data-lucide="send" class="w-5 h-5"></i></button>
                         </div>
-                        <div class="flex gap-3">
-                            <div class="px-4 py-2 border border-gray-100 rounded-xl text-xs text-gray-500 flex items-center gap-2 cursor-pointer hover:bg-gray-50">
+                        <div class="flex gap-2">
+                            <div class="px-3 py-1.5 border border-gray-100 rounded-lg text-[11px] text-gray-500 flex items-center gap-2 cursor-pointer hover:bg-gray-50">
                                 <i data-lucide="sparkles" class="w-3 h-3"></i> Примеры запросов
-                            </div>
-                            <div class="px-4 py-2 border border-gray-100 rounded-xl text-xs text-gray-500 flex items-center gap-2 cursor-pointer hover:bg-gray-50">
-                                <i data-lucide="upload-cloud" class="w-3 h-3"></i> Загрузить файл
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <aside id="right-panel" class="w-[340px] p-8 hidden xl:block bg-white">
-                </aside>
+            <aside id="right-panel" class="w-[320px] border-l border-gray-100 p-8 hidden xl:block"></aside>
         </div>
     </main>
 
