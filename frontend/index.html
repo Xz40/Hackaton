@@ -6,47 +6,42 @@
     <title>Драйвиум — Аналитическая платформа</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #FBFBFB; overflow: hidden; color: #2D2D2D; }
-        .sidebar { width: 280px; height: 100vh; background: #FBFBFB; border-right: 1px solid #F1F3F4; display: flex; flex-direction: column; padding: 24px; }
+        .sidebar { width: 280px; height: 100vh; background: #FBFBFB; border-right: 1px solid #F1F3F4; display: flex; flex-direction: column; padding: 24px; flex-shrink: 0; }
         .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; cursor: pointer; color: #5F6368; font-size: 14px; transition: all 0.2s; margin-bottom: 4px; }
         .nav-item:hover { background: #F1F3F4; color: #2D2D2D; }
         .nav-item.active { background: #E8F5E9; color: #2E7D32; font-weight: 600; }
         .btn-new-query { border: 1px solid #DADCE0; border-radius: 12px; padding: 14px; display: flex; align-items: center; gap: 10px; width: 100%; font-size: 14px; margin: 24px 0; background: white; font-weight: 500; }
-        .chat-area { flex: 1; display: flex; flex-direction: column; background: white; border-radius: 32px 0 0 0; border-left: 1px solid #F1F3F4; border-top: 1px solid #F1F3F4; }
-        #main-content { scroll-behavior: smooth; }
-        .message { display: flex; gap: 20px; padding: 24px 0; max-width: 850px; margin: 0 auto; width: 100%; border-bottom: 1px solid #F9FAFB; }
+        .chat-area { flex: 1; display: flex; flex-direction: column; background: white; border-radius: 32px 0 0 0; border-left: 1px solid #F1F3F4; border-top: 1px solid #F1F3F4; overflow: hidden; }
+        #main-content { overflow-y: auto; flex: 1; scroll-behavior: smooth; }
+        .message { display: flex; gap: 20px; padding: 24px 0; max-width: 850px; margin: 0 auto; width: 90%; border-bottom: 1px solid #F9FAFB; }
         .message-avatar { width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
         .bot-avatar { background: #F1F3F4; color: #5F6368; }
         .user-avatar { background: #A5F52C; color: black; }
-        .message-body { flex: 1; font-size: 15px; line-height: 1.6; }
-        .message-name { font-size: 11px; font-weight: 700; color: #9AA0A6; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .message-body { flex: 1; font-size: 15px; line-height: 1.6; min-width: 0; }
+        .message-name { font-size: 11px; font-weight: 700; color: #9AA0A6; margin-bottom: 4px; text-transform: uppercase; }
         .input-container { border: 1px solid #DADCE0; border-radius: 24px; padding: 8px 8px 8px 24px; display: flex; align-items: center; background: white; }
-        .query-input { flex: 1; border: none; outline: none; font-size: 16px; height: 48px; }
-        .btn-send { background: #A5F52C; width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; transition: transform 0.1s; }
-        .btn-send:active { transform: scale(0.95); }
-        .promo-img { width: 100%; border-radius: 16px; margin-top: 16px; }
-        
-        /* Стили для таблиц в чате */
-        .data-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 13px; border: 1px solid #F1F3F4; border-radius: 8px; overflow: hidden; }
-        .data-table th { background: #F8F9FA; padding: 10px; text-align: left; color: #5F6368; border-bottom: 1px solid #F1F3F4; }
-        .data-table td { padding: 10px; border-bottom: 1px solid #F9FAFB; }
+        .query-input { flex: 1; border: none; outline: none; font-size: 16px; height: 48px; background: transparent; }
+        .btn-send { background: #A5F52C; width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.1s; }
+        .promo-img { width: 100%; border-radius: 16px; margin-top: 16px; object-fit: cover; }
+        .data-table-wrapper { margin-top: 15px; border: 1px solid #F1F3F4; border-radius: 12px; overflow-x: auto; background: white; }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+        .data-table th { background: #F8F9FA; padding: 12px 16px; color: #5F6368; border-bottom: 1px solid #F1F3F4; }
+        .data-table td { padding: 12px 16px; border-bottom: 1px solid #F9FAFB; white-space: nowrap; }
     </style>
 </head>
 <body class="flex h-screen">
     <aside class="sidebar">
         <div class="px-2"><img src="logo.png" alt="Drivee" style="height: 40px;"></div>
-        <button class="btn-new-query" onclick="showScreen('main')">
+        <button class="btn-new-query" onclick="handleNav(this, 'main')">
             <i data-lucide="edit-3" class="w-5 h-5 text-gray-400"></i><span>Новый запрос</span>
         </button>
-        <nav class="flex-grow overflow-y-auto" id="side-nav">
+        <nav class="flex-grow overflow-y-auto">
             <div onclick="handleNav(this, 'main')" class="nav-item active"><i data-lucide="home" class="w-5 h-5"></i><span>Главная</span></div>
             <div onclick="handleNav(this, 'history')" class="nav-item"><i data-lucide="clock" class="w-5 h-5"></i><span>История</span></div>
             <div onclick="handleNav(this, 'database')" class="nav-item"><i data-lucide="database" class="w-5 h-5"></i><span>База данных</span></div>
-            <div class="nav-item"><i data-lucide="layout" class="w-5 h-5"></i><span>Дашборды</span></div>
-            <div class="nav-item"><i data-lucide="settings" class="w-5 h-5"></i><span>Настройки</span></div>
         </nav>
         <div class="pt-4 border-t border-gray-100">
             <div class="nav-item"><i data-lucide="help-circle" class="w-5 h-5"></i><span>Помощь</span></div>
@@ -55,8 +50,8 @@
         </div>
     </aside>
 
-    <main class="flex-1 flex flex-col">
-        <header class="h-20 flex items-center justify-between px-10">
+    <main class="flex-1 flex flex-col min-w-0">
+        <header class="h-20 flex items-center justify-between px-10 flex-shrink-0">
             <div class="flex items-center gap-3">
                 <i data-lucide="sparkles" class="w-6 h-6 text-green-500"></i>
                 <h1 id="screen-title" class="text-lg font-bold">Аналитический чат</h1>
@@ -69,11 +64,11 @@
 
         <div class="flex-1 flex overflow-hidden">
             <section class="chat-area">
-                <div id="main-content" class="flex-1 overflow-y-auto px-10"></div>
-                <div id="input-zone" class="p-8">
+                <div id="main-content" class="p-4"></div>
+                <div id="input-zone" class="p-8 border-t border-gray-50">
                     <div class="max-w-[850px] mx-auto w-full">
                         <div class="input-container">
-                            <input id="queryInput" type="text" placeholder="Напишите ваш запрос..." class="query-input" onkeypress="if(event.key==='Enter') sendQuery()">
+                            <input id="queryInput" type="text" placeholder="Задайте вопрос по данным..." class="query-input" onkeypress="if(event.key==='Enter') sendQuery()">
                             <button onclick="sendQuery()" class="btn-send"><i data-lucide="send" class="w-5 h-5"></i></button>
                         </div>
                     </div>
@@ -83,5 +78,6 @@
         </div>
     </main>
     <script src="app.js"></script>
+    <script>lucide.createIcons();</script>
 </body>
 </html>

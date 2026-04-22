@@ -1,74 +1,47 @@
-const API_URL = `http://${window.location.hostname}:8000`;
+// Автоматическое определение URL бэкенда
+const API_URL = `${window.location.protocol}//${window.location.hostname}:8000`;
 
 document.addEventListener('DOMContentLoaded', () => {
     const user = localStorage.getItem('drivee_user');
     if (!user) { window.location.href = 'login.html'; return; }
     
-    document.getElementById('userName').innerText = user;
-    document.getElementById('avatar').innerText = user[0].toUpperCase();
+    const nameElem = document.getElementById('userName');
+    const avElem = document.getElementById('avatar');
+    if(nameElem) nameElem.innerText = user;
+    if(avElem) avElem.innerText = user[0].toUpperCase();
     
     showScreen('main');
-    lucide.createIcons();
 });
 
 function handleNav(el, screen) {
     document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-    el.classList.add('active');
+    if (el) el.classList.add('active');
     showScreen(screen);
 }
 
 function showScreen(type) {
     const main = document.getElementById('main-content');
     const inputZone = document.getElementById('input-zone');
-    const title = document.getElementById('screen-title');
     const right = document.getElementById('right-panel');
+    const title = document.getElementById('screen-title');
 
     main.innerHTML = "";
-    inputZone.style.display = (type === 'main') ? 'block' : 'none';
-    right.style.display = (type === 'main') ? 'block' : 'none';
+    // Показываем поле ввода и правую панель только на главном экране
+    if (inputZone) inputZone.style.display = (type === 'main') ? 'block' : 'none';
+    if (right) right.style.display = (type === 'main') ? 'block' : 'none';
     
     if (type === 'main') {
         title.innerText = "Аналитический чат";
-        appendMessage('bot', 'Привет! Я готов проанализировать данные Drivee. Что хочешь узнать?');
+        appendMessage('bot', 'Привет! Я аналитическая система Drivee. Я подключен к базе заказов и готов отвечать на вопросы.');
         renderRightPanel();
     } else if (type === 'database') {
-        title.innerText = "База данных (Последние заказы)";
+        title.innerText = "Просмотр базы заказов";
         fetchDatabase();
     } else if (type === 'history') {
-        title.innerText = "История ваших запросов";
+        title.innerText = "История запросов";
         fetchHistory();
     }
     lucide.createIcons();
-}
-
-function appendMessage(role, text, tableData = null) {
-    const container = document.getElementById('main-content');
-    const isBot = role === 'bot';
-    const user = localStorage.getItem('drivee_user');
-
-    let tableHtml = '';
-    if (tableData && tableData.length > 0) {
-        const headers = Object.keys(tableData[0]);
-        tableHtml = `<table class="data-table">
-            <thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
-            <tbody>${tableData.map(row => `<tr>${headers.map(h => `<td>${row[h]}</td>`).join('')}</tr>`).join('')}</tbody>
-        </table>`;
-    }
-
-    const html = `
-        <div class="message">
-            <div class="message-avatar ${isBot ? 'bot-avatar' : 'user-avatar'}">
-                ${isBot ? 'AI' : user[0].toUpperCase()}
-            </div>
-            <div class="message-body">
-                <div class="message-name">${isBot ? 'Драйвиум ИИ' : 'Вы'}</div>
-                <div class="message-text">${text}</div>
-                ${tableHtml}
-            </div>
-        </div>
-    `;
-    container.insertAdjacentHTML('beforeend', html);
-    container.scrollTop = container.scrollHeight;
 }
 
 async function sendQuery() {
@@ -80,65 +53,110 @@ async function sendQuery() {
     input.value = "";
 
     try {
-        const res = await fetch(`${API_URL}/query`, {
+        const response = await fetch(`${API_URL}/query`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 question: question,
-                user_id: localStorage.getItem('drivee_user')
+                user_id: localStorage.getItem('drivee_user') || "guest"
             })
         });
-        const data = await res.json();
-        appendMessage('bot', data.message, data.data);
+        const data = await response.json();
+        // В main.py QueryResponse возвращает message и data
+        appendMessage('bot', data.message || "Результаты запроса:", data.data);
     } catch (e) {
-        appendMessage('bot', 'Ошибка связи с сервером. Проверь, запущен ли бэкенд.');
+        appendMessage('bot', `Ошибка: Не удалось связаться с бэкендом по адресу ${API_URL}. Проверь, проброшен ли порт 8000.`);
     }
 }
 
 async function fetchDatabase() {
     const main = document.getElementById('main-content');
-    main.innerHTML = '<div class="p-10 text-gray-400">Загрузка данных...</div>';
+    main.innerHTML = '<div class="p-10 text-gray-400">Загрузка данных из БД...</div>';
     try {
         const res = await fetch(`${API_URL}/get_data`);
         const data = await res.json();
-        appendMessage('bot', 'Ниже представлены последние 20 записей из таблицы заказов:', data);
+        appendMessage('bot', 'Последние 20 заказов из системы:', data);
     } catch (e) {
-        main.innerHTML = '<div class="p-10 text-red-400">Ошибка загрузки БД</div>';
+        main.innerHTML = `<div class="p-10 text-red-400">Ошибка подключения к ${API_URL}/get_data</div>`;
     }
 }
 
 async function fetchHistory() {
-    const main = document.getElementById('main-content');
     const user = localStorage.getItem('drivee_user');
     try {
         const res = await fetch(`${API_URL}/get_history?user_id=${user}`);
         const data = await res.json();
-        appendMessage('bot', 'Ваша история запросов:', data);
+        appendMessage('bot', 'Ваша история аналитических запросов:', data);
     } catch (e) {
         appendMessage('bot', 'Не удалось загрузить историю.');
     }
 }
 
+function appendMessage(role, text, tableData = null) {
+    const container = document.getElementById('main-content');
+    const isBot = role === 'bot';
+    const user = localStorage.getItem('drivee_user') || "U";
+
+    let tableHtml = '';
+    if (tableData && Array.isArray(tableData) && tableData.length > 0) {
+        const headers = Object.keys(tableData[0]);
+        tableHtml = `
+            <div class="mt-4 border border-gray-100 rounded-xl overflow-x-auto bg-white shadow-sm">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead class="bg-gray-50 text-gray-500 uppercase font-bold">
+                        <tr>${headers.map(h => `<th class="p-3 border-b">${h}</th>`).join('')}</tr>
+                    </thead>
+                    <tbody>
+                        ${tableData.map(row => `
+                            <tr class="hover:bg-gray-50">
+                                ${headers.map(h => `<td class="p-3 border-b text-gray-700">${row[h]}</td>`).join('')}
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>`;
+    }
+
+    const html = `
+        <div class="flex gap-4 py-6 border-b border-gray-50 max-w-[850px] mx-auto w-full">
+            <div class="w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center font-bold ${isBot ? 'bg-gray-100 text-gray-500' : 'bg-[#A5F52C] text-black'}">
+                ${isBot ? 'AI' : user[0].toUpperCase()}
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">${isBot ? 'Драйвиум ИИ' : 'Вы'}</div>
+                <div class="text-[15px] leading-relaxed text-gray-800">${text}</div>
+                ${tableHtml}
+            </div>
+        </div>
+    `;
+    container.insertAdjacentHTML('beforeend', html);
+    container.scrollTop = container.scrollHeight;
+}
+
 function renderRightPanel() {
     const panel = document.getElementById('right-panel');
+    if(!panel) return;
     panel.innerHTML = `
-        <h3 class="text-[12px] font-bold text-gray-400 uppercase tracking-widest mb-6">Быстрые действия</h3>
-        <div class="space-y-4">
-            <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors" onclick="quickQuery('Покажи продажи по городам')">
-                <p class="text-sm font-bold mb-1">Продажи по городам</p>
-                <p class="text-xs text-gray-500">Общая выручка в разрезе регионов</p>
+        <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-6">Быстрые шаблоны</h3>
+        <div class="space-y-3">
+            <div onclick="quickQuery('Покажи продажи по городам')" class="p-4 bg-gray-50 rounded-2xl border border-transparent hover:border-green-200 hover:bg-green-50 cursor-pointer transition-all">
+                <p class="text-sm font-bold text-gray-800">Выручка по городам</p>
+                <p class="text-[11px] text-gray-500 mt-1">Сравнение дохода по регионам</p>
             </div>
-            <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors" onclick="quickQuery('Покажи отмены по городам')">
-                <p class="text-sm font-bold mb-1">Анализ отмен</p>
-                <p class="text-xs text-gray-500">Где чаще всего отменяют заказы</p>
+            <div onclick="quickQuery('Покажи отмены по городам')" class="p-4 bg-gray-50 rounded-2xl border border-transparent hover:border-green-200 hover:bg-green-50 cursor-pointer transition-all">
+                <p class="text-sm font-bold text-gray-800">Анализ отмен</p>
+                <p class="text-[11px] text-gray-500 mt-1">Где заказы срываются чаще всего</p>
             </div>
         </div>
     `;
 }
 
 function quickQuery(text) {
-    document.getElementById('queryInput').value = text;
-    sendQuery();
+    const input = document.getElementById('queryInput');
+    if(input) {
+        input.value = text;
+        sendQuery();
+    }
 }
 
 function logout() {
