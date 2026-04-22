@@ -47,5 +47,12 @@ async function sendQuery() {
     input.value = "";
     chat.scrollTop = chat.scrollHeight;
 
-    // Тут твой fetch запрос к бэкенду...
+    const response = await fetch('http://78.36.198.54:8080/ask', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+        question: text, 
+        user_id: localStorage.getItem('drivee_user') || 'Admin' 
+    })
+});
 }
