@@ -7,7 +7,6 @@ from models import QueryRequest, QueryResponse
 
 app = FastAPI(title="Drivee Analytics API")
 
-# Настраиваем CORS, чтобы фронтенд мог достучаться с любого устройства в сети
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -17,10 +16,11 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup_event():
-    """Проверка подключения и создание таблицы, если её нет"""
+    """Инициализация таблиц в PostgreSQL при старте"""
     try:
         conn = database.get_db_connection()
         with conn.cursor() as cur:
+            # Таблица заказов (основная)
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS orders (
                     id SERIAL PRIMARY KEY,
@@ -30,35 +30,65 @@ async def startup_event():
                     order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """)
-            # Проверим, пустая ли база, и добавим пару строк если надо
+            
+            # Таблица истории (для нового экрана History)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS query_history (
+                    id SERIAL PRIMARY KEY,
+                    question TEXT,
+                    sql_query TEXT,
+                    status VARCHAR(20),
+                    query_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            
+            # Проверка на пустую базу (синтаксис Postgres с RealDictCursor)
             cur.execute("SELECT COUNT(*) FROM orders")
-            if cur.fetchone()['count'] == 0:
-                cur.execute("INSERT INTO orders (city, amount, status) VALUES ('Якутск', 450, 'completed'), ('Москва', 1200, 'completed')")
+            count_result = cur.fetchone()
+            if count_result['count'] == 0:
+                cur.execute("""
+                    INSERT INTO orders (city, amount, status) 
+                    VALUES (%s, %s, %s), (%s, %s, %s)
+                """, ('Якутск', 450, 'completed', 'Москва', 1200, 'completed'))
+                
         conn.commit()
         conn.close()
-        print("✅ База данных готова к работе")
+        print("✅ PostgreSQL: Таблицы проверены и готовы")
     except Exception as e:
-        print(f"⚠️ Ошибка БД при старте: {e}")
+        print(f"❌ Ошибка БД при старте: {e}")
 
 @app.post("/ask", response_model=QueryResponse)
 async def process_question(request: QueryRequest):
-    # 1. Генерируем SQL на основе вопроса
+    # 1. Генерация
     sql = sql_generator.generate_sql(request.question)
     
-    # 2. Валидируем SQL на безопасность (убираем DROP, DELETE и т.д.)
+    # 2. Валидация
     validation = sql_validator.validate_sql(sql)
+    
+    # 3. Логируем в историю (даже если запрос не безопасен)
+    try:
+        conn = database.get_db_connection()
+        with conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO query_history (question, sql_query, status) 
+                VALUES (%s, %s, %s)
+            """, (request.question, sql, "success" if validation["safe"] else "blocked"))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"Ошибка сохранения истории: {e}")
+
     if not validation["safe"]:
         raise HTTPException(status_code=400, detail=validation["reason"])
     
     safe_sql = validation["sql"]
-    print(f"🔍 Исполняю SQL: {safe_sql}") # Для отладки в терминале
     
-    # 3. Выполняем запрос в БД
+    # 4. Выполнение
     try:
         conn = database.get_db_connection()
         with conn.cursor() as cur:
             cur.execute(safe_sql)
-            results = cur.fetchall() # RealDictCursor вернет список словарей
+            results = cur.fetchall()
         conn.close()
         
         return QueryResponse(
@@ -66,14 +96,14 @@ async def process_question(request: QueryRequest):
             sql=safe_sql,
             data=results,
             row_count=len(results),
-            message="Аналитика успешно сформирована"
+            message="Данные получены"
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Ошибка БД: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Ошибка SQL: {str(e)}")
 
 @app.get("/get_data")
 async def get_data():
-    """Эндпоинт для вкладки 'База данных' на фронте"""
+    """Для вкладки 'База данных'"""
     try:
         conn = database.get_db_connection()
         with conn.cursor() as cur:
@@ -82,14 +112,21 @@ async def get_data():
         conn.close()
         return results
     except Exception as e:
-        print(f"Ошибка получения данных: {e}")
-        # Заглушка для фронтенда, если PostgreSQL недоступен
-        return [
-            {"id": "DEMO-1", "city": "Якутск", "amount": 500, "status": "completed"},
-            {"id": "DEMO-2", "city": "Иркутск", "amount": 350, "status": "completed"}
-        ]
+        return [{"id": "ERR", "city": "Ошибка БД", "amount": 0, "status": "error"}]
+
+@app.get("/get_history")
+async def get_history():
+    """Для нового экрана 'History'"""
+    try:
+        conn = database.get_db_connection()
+        with conn.cursor() as cur:
+            cur.execute("SELECT id, question, status, query_date FROM query_history ORDER BY query_date DESC LIMIT 50")
+            results = cur.fetchall()
+        conn.close()
+        return results
+    except Exception as e:
+        return []
 
 if __name__ == "__main__":
     import uvicorn
-    # Запускаем на 8080 порту
     uvicorn.run(app, host="0.0.0.0", port=8080)

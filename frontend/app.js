@@ -112,3 +112,62 @@ function sendQuery() {
 function handleFileUpload(input) {
     if(input.files[0]) alert('Файл ' + input.files[0].name + ' готов к загрузке на бэк');
 }
+
+// Добавь в app.js
+
+async function renderHistoryScreen(container) {
+    container.innerHTML = '<div class="p-10 text-center">Загрузка истории...</div>';
+    
+    try {
+        const response = await fetch(`http://${window.location.hostname}:8080/get_history`);
+        const history = await response.json();
+        
+        let historyHtml = history.map(item => `
+            <div class="card p-5 mb-4 flex items-center justify-between hover:border-[#A5F52C] transition-all cursor-pointer">
+                <div class="flex items-center gap-4">
+                    <div class="p-3 bg-gray-50 rounded-xl text-gray-400">
+                        <i data-lucide="message-square" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-800">${item.question}</h4>
+                        <p class="text-xs text-gray-400">${new Date(item.query_date).toLocaleString('ru-RU')}</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 ${item.status === 'success' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'} rounded-full text-[11px] font-bold uppercase">
+                        ${item.status}
+                    </span>
+                    <i data-lucide="chevron-right" class="w-4 h-4 text-gray-300"></i>
+                </div>
+            </div>
+        `).join('');
+
+        container.innerHTML = `
+            <div class="p-8 max-w-4xl mx-auto overflow-y-auto h-full">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-2xl font-bold">История запросов</h1>
+                    <button class="text-sm text-gray-400 hover:text-red-500 transition-colors">Очистить всё</button>
+                </div>
+                ${historyHtml || '<p class="text-center text-gray-400 mt-20">История пока пуста</p>'}
+            </div>
+        `;
+        lucide.createIcons();
+    } catch (e) {
+        container.innerHTML = '<div class="p-10 text-red-500 text-center">Не удалось загрузить историю</div>';
+    }
+}
+
+
+function showScreen(type) {
+    const container = document.getElementById('main-content');
+    if (type === 'main') {
+        container.innerHTML = renderMainScreen();
+    } else if (type === 'database') {
+        renderDatabaseScreen(container);
+    } else if (type === 'dashboards') {
+        renderDashboardsScreen(container);
+    } else if (type === 'history') {
+        renderHistoryScreen(container); // Теперь вызываем новую функцию
+    }
+    lucide.createIcons();
+}
