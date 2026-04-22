@@ -5,41 +5,98 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Drivee - Вход</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body { background-color: #1a1a1a; font-family: 'Inter', sans-serif; }
-        .drivee-bg-green { background-color: #A5F52C; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap');
+        body { 
+            background-color: #f4f4f4; 
+            font-family: 'Inter', sans-serif; 
+        }
+        .header-link { color: #2D2D2D; font-weight: 500; font-size: 18px; }
+        .login-card { 
+            background: white; 
+            border-radius: 40px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        .green-banner {
+            background-color: #A5F52C;
+            border-radius: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        .input-field {
+            background-color: #F5F5F5;
+            border-radius: 18px;
+            padding: 20px;
+            width: 100%;
+            outline: none;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .input-field:focus { border-color: #A5F52C; background-color: white; }
+        .btn-submit {
+            background-color: #A5F52C;
+            border-radius: 18px;
+            padding: 20px;
+            width: 100%;
+            font-weight: 800;
+            color: #2D2D2D;
+            transition: transform 0.1s;
+        }
+        .btn-submit:active { transform: scale(0.98); }
+        .heart-icon {
+            position: absolute;
+            bottom: -20px;
+            right: 10px;
+            width: 220px;
+            opacity: 0.4;
+        }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
-    <div class="bg-white rounded-[40px] p-6 md:p-12 flex flex-col md:flex-row gap-8 max-w-5xl w-full shadow-2xl">
-        <div class="drivee-bg-green rounded-[32px] p-10 flex-1 flex flex-col justify-between min-h-[400px] relative overflow-hidden border-2 border-[#8ed426]">
-            <h1 class="text-4xl font-bold text-[#2D2D2D] leading-tight z-10 relative">Стань частью<br>команды в Drivee</h1>
-            <div class="absolute bottom-[-30px] right-[-30px] opacity-20">
-                <svg width="250" height="250" viewBox="0 0 100 100" fill="white">
-                    <path d="M50 85c-1.2 0-2.4-.5-3.3-1.4L15.4 52.3C9.5 46.4 9.5 36.9 15.4 31c5.9-5.9 15.4-5.9 21.3 0L50 44.3l13.3-13.3c5.9-5.9 15.4-5.9 21.3 0 5.9 5.9 5.9 15.4 0 21.3L53.3 83.6c-.9.9-2.1 1.4-3.3 1.4z"/>
+<body class="min-h-screen flex flex-col">
+
+    <header class="w-full py-6 px-10 flex items-center justify-between max-w-7xl mx-auto">
+        <div class="flex items-center gap-12">
+            <img src="logo.png" alt="Drivee" class="h-10 w-auto">
+            <nav class="hidden md:flex gap-8">
+                <a href="#" class="header-link flex items-center gap-1">Пассажирам <span class="text-xs">▼</span></a>
+                <a href="#" class="header-link flex items-center gap-1">Водителям <span class="text-xs">▼</span></a>
+                <a href="#" class="header-link">Партнёрам</a>
+                <a href="#" class="header-link flex items-center gap-1">О нас <span class="text-xs">▼</span></a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-1 flex items-center justify-center p-4">
+        <div class="login-card flex flex-col md:flex-row p-6 gap-8 max-w-5xl w-full">
+            
+            <div class="green-banner flex-1 p-10 min-h-[400px] flex flex-col">
+                <h1 class="text-[44px] font-extrabold text-[#2D2D2D] leading-[1.1] z-10">
+                    Стань частью<br>команды в Drivee
+                </h1>
+                
+                <svg class="heart-icon" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M100 160C100 160 30 110 30 65C30 40 50 25 70 25C85 25 95 35 100 45C105 35 115 25 130 25C150 25 170 40 170 65C170 110 100 160 100 160Z" stroke="white" stroke-width="12" stroke-linejoin="round"/>
                 </svg>
             </div>
-        </div>
 
-        <div class="flex-1 flex flex-col justify-center px-4">
-            <div class="mb-10">
-                <img src="logo.png" alt="Drivee" class="h-10 w-auto">
-            </div>
-            <div class="space-y-4">
-                <input id="username" type="text" placeholder="Логин" class="w-full bg-gray-50 border-2 border-gray-100 p-5 rounded-2xl outline-none focus:border-[#A5F52C] transition-all">
-                <input type="password" placeholder="Пароль" class="w-full bg-gray-50 border-2 border-gray-100 p-5 rounded-2xl outline-none focus:border-[#A5F52C] transition-all">
-                
-                <label class="flex items-center text-sm text-gray-400 cursor-pointer py-2">
-                    <input type="checkbox" class="mr-2 w-4 h-4 accent-[#A5F52C]"> Запомнить меня на этом устройстве
-                </label>
+            <div class="flex-1 flex flex-col justify-center px-4 py-8">
+                <div class="space-y-4">
+                    <input id="username" type="text" placeholder="Логин" class="input-field text-lg">
+                    <input type="password" placeholder="Пароль" class="input-field text-lg">
+                    
+                    <div class="flex items-center gap-3 py-2">
+                        <input type="checkbox" id="remember" class="w-5 h-5 accent-[#A5F52C] rounded">
+                        <label for="remember" class="text-gray-500 text-sm">Запомнить меня на этом устройстве</label>
+                    </div>
 
-                <button onclick="login()" class="w-full drivee-bg-green py-5 rounded-2xl font-bold text-[#2D2D2D] border-b-4 border-[#8ed426] hover:brightness-105 active:border-b-0 transition-all shadow-lg">
-                    Войти в профиль
-                </button>
+                    <button onclick="login()" class="btn-submit text-xl shadow-lg shadow-green-200">
+                        Войти в профиль
+                    </button>
+                </div>
             </div>
+
         </div>
-    </div>
+    </main>
 
     <script>
         function login() {
