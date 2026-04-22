@@ -1,6 +1,15 @@
 // Определяем базу API один раз
 const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:8080`;
 
+// Проверка авторизации при входе
+(function checkAuth() {
+    const user = localStorage.getItem('drivee_user');
+    // Если в хранилище нет юзера и мы не на странице логина — редирект
+    if (!user && !window.location.pathname.includes('login.html')) {
+        window.location.href = 'login.html';
+    }
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
     const user = localStorage.getItem('drivee_user') || 'Admin';
