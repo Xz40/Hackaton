@@ -43,16 +43,42 @@ async function sendQuery() {
 
     if (!text) return;
 
+    // 1. Отображаем сообщение пользователя
     chat.innerHTML += `<div class="msg user">${text}</div>`;
     input.value = "";
     chat.scrollTop = chat.scrollHeight;
 
-    const response = await fetch('http://78.36.198.54:8080/ask', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ 
-        question: text, 
-        user_id: localStorage.getItem('drivee_user') || 'Admin' 
-    })
-});
+    try {
+        // 2. Отправляем запрос на бекенд
+        const response = await fetch('http://78.36.198.54:8080/ask', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                question: text, 
+                user_id: localStorage.getItem('drivee_user') || 'Admin' 
+            })
+        });
+
+        if (!response.ok) throw new Error('Ошибка сервера');
+
+        // 3. ПОЛУЧАЕМ ОТВЕТ ОТ БЕКА
+        const data = await response.json();
+
+        // 4. ОТОБРАЖАЕМ ОТВЕТ В ЧАТЕ
+        // Добавляем сообщение от бота и (опционально) сгенерированный SQL для красоты
+        chat.innerHTML += `
+            <div class="msg bot">
+                ${data.message}
+                ${data.sql ? `<div style="font-size: 10px; opacity: 0.4; margin-top: 10px; font-family: monospace; border-top: 1px solid #ddd; pt-1">SQL: ${data.sql}</div>` : ''}
+            </div>
+        `;
+
+    } catch (err) {
+        // Если бек упал или нет интернета
+        chat.innerHTML += `<div class="msg bot" style="color: red;">Ошибка: не удалось получить ответ от сервера.</div>`;
+        console.error('Fetch error:', err);
+    }
+
+    // Прокрутка вниз
+    chat.scrollTop = chat.scrollHeight;
 }
