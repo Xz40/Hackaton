@@ -1,8 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
-    const user = localStorage.getItem('drivee_user') || 'Жанна'; // Дефолт из Фигмы
-    document.getElementById('userName').innerText = user;
-    document.getElementById('avatar').innerText = user[0].toUpperCase();
     showScreen('main');
 });
 
@@ -13,111 +10,96 @@ function handleNav(el, screen) {
 }
 
 function showScreen(type) {
-    const mainContainer = document.getElementById('chat-content-area');
-    const rightContainer = document.getElementById('right-panel-area');
-    
-    // Очищаем оба контейнера
-    mainContainer.innerHTML = "";
-    rightContainer.innerHTML = "";
+    const main = document.getElementById('main-content');
+    const right = document.getElementById('right-panel');
+    const title = document.getElementById('screen-title');
+
+    main.innerHTML = "";
+    right.innerHTML = "";
 
     if (type === 'main') {
-        // Чат в центре
-        mainContainer.innerHTML = renderChatSubScreen();
+        title.innerText = "Аналитический чат";
+        main.innerHTML = `
+            <div class="chat-container" id="chatMessages">
+                <div class="bot-message message">Привет! Я помогу с аналитикой. Какой отчет подготовить сегодня?</div>
+            </div>
+            <div class="p-6 bg-white border-t">
+                <div class="flex gap-4 max-w-4xl mx-auto">
+                    <input id="queryInput" type="text" placeholder="Задайте вопрос по данным..." class="flex-1 bg-gray-50 p-4 rounded-xl outline-none ring-[#A5F52C] focus:ring-2">
+                    <button onclick="sendQuery()" class="bg-[#A5F52C] px-6 rounded-xl font-bold hover:scale-105 transition-transform"><i data-lucide="send"></i></button>
+                </div>
+            </div>
+        `;
+        right.innerHTML = renderQuickActions();
         setupChatListeners();
-        // Действия и Баннер справа
-        rightContainer.innerHTML = renderRightPanelActions();
-    } else if (type === 'history') {
-        renderHistoryScreen(mainContainer);
-        // Справа можно оставить баннер или очистить
-        rightContainer.innerHTML = renderRightPanelActions(false); // Без кнопок, только баннер
-    } else if (type === 'dashboards') {
-        renderDashboardsScreen(mainContainer);
-        rightContainer.innerHTML = renderRightPanelActions(false);
-    } else if (type === 'database') {
-        renderDatabaseScreen(mainContainer);
-        rightContainer.innerHTML = renderRightPanelActions(false);
-    } else {
-        mainContainer.innerHTML = '<div class="p-10 text-gray-500">Экран в разработке</div>';
+    } 
+    else if (type === 'dashboards') {
+        title.innerText = "Дашборды";
+        renderDashboards(main);
+    } 
+    else if (type === 'history') {
+        title.innerText = "История";
+        renderHistory(main);
+    }
+    else if (type === 'database') {
+        title.innerText = "База заказов";
+        renderDatabase(main);
     }
     lucide.createIcons();
 }
 
-// --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ОТРИСОВКИ ---
-
-// 1. Центральная часть Главной (только Чат)
-function renderChatSubScreen() {
+function renderQuickActions() {
     return `
-        <div class="flex-1 flex flex-col p-8 overflow-hidden">
-            <div id="chatMessages" class="flex-1 chat-container mb-6 pr-3">
-                <div class="bot-message message">Привет! Я готов проанализировать данные Drivee. Какой отчет подготовить?</div>
+        <h3 class="text-sm font-bold uppercase text-gray-400 mb-6 tracking-widest">Быстрые действия</h3>
+        <div class="space-y-4">
+            <div class="border p-4 rounded-2xl hover:border-[#A5F52C] cursor-pointer transition-all" onclick="showScreen('dashboards')">
+                <div class="bg-green-50 text-green-600 w-10 h-10 rounded-lg flex items-center justify-center mb-3"><i data-lucide="pie-chart"></i></div>
+                <div class="font-bold text-sm">Сформировать отчет</div>
+                <p class="text-xs text-gray-400">Автоматический PDF отчет за неделю</p>
             </div>
-
-            <div class="card p-4 bg-white shadow-lg border border-gray-100 rounded-2xl sticky bottom-0">
-                <div class="flex gap-4 items-center">
-                    <input id="queryInput" type="text" placeholder="Спросите о продажах, отменах или городах..." 
-                           class="flex-1 bg-gray-50 border-none p-4 rounded-xl outline-none focus:ring-1 ring-[#A5F52C] text-sm placeholder:text-gray-400">
-                    <button onclick="sendQuery()" class="bg-[#A5F52C] w-12 h-12 rounded-xl flex items-center justify-center hover:scale-105 transition-transform">
-                        <i data-lucide="send" class="w-5 h-5 text-black"></i>
-                    </button>
-                </div>
+            <div class="border p-4 rounded-2xl hover:border-[#A5F52C] cursor-pointer transition-all" onclick="alert('Загрузка...')">
+                <div class="bg-blue-50 text-blue-600 w-10 h-10 rounded-lg flex items-center justify-center mb-3"><i data-lucide="file-text"></i></div>
+                <div class="font-bold text-sm">Экспорт в Excel</div>
+                <p class="text-xs text-gray-500">Выгрузить текущую таблицу</p>
             </div>
         </div>
     `;
 }
 
-// 2. Правая панель (Действия + Промо-баннер)
-function renderRightPanelActions(showActions = true) {
-    let actionsHtml = '';
-    if (showActions) {
-        actionsHtml = `
-            <div class="mb-10">
-                <h3 class="text-sm font-semibold text-gray-900 mb-5">Быстрые действия</h3>
-                <div class="space-y-3">
-                    <div class="card action-card p-4 flex items-center gap-4" onclick="showScreen('dashboards')">
-                        <div class="p-3 bg-green-50 text-green-600 rounded-xl"><i data-lucide="bar-chart-3" class="w-5 h-5"></i></div>
-                        <div>
-                            <h4 class="font-semibold text-sm text-gray-950">Создать дашборд</h4>
-                            <p class="text-xs text-gray-500">Визуализируйте метрики</p>
-                        </div>
-                    </div>
-                    <div class="card action-card p-4 flex items-center gap-4" onclick="document.getElementById('fileInput').click()">
-                        <div class="p-3 bg-blue-50 text-blue-600 rounded-xl"><i data-lucide="file-up" class="w-5 h-5"></i></div>
-                        <div>
-                            <h4 class="font-semibold text-sm text-gray-950">Подключить данные</h4>
-                            <p class="text-xs text-gray-500">Добавить базу данных</p>
-                        </div>
-                    </div>
-                </div>
+// ИСПРАВЛЕННЫЕ ДАШБОРДЫ
+function renderDashboards(container) {
+    container.innerHTML = `
+        <div class="p-8 grid grid-cols-1 gap-8 overflow-y-auto h-full">
+            <div class="bg-white border p-6 rounded-3xl">
+                <h4 class="font-bold mb-4">Выручка по городам</h4>
+                <canvas id="barChart"></canvas>
             </div>
-        `;
-    }
-
-    // ПРОМО-БАННЕР ВНИЗУ СПРАВА
-    const bannerHtml = `
-        <div class="mt-auto pt-8">
-            <img src="analitycs_for_all.png" alt="Аналитика доступна каждому" class="w-full h-auto rounded-2xl shadow-sm">
+            <div class="bg-white border p-6 rounded-3xl">
+                <h4 class="font-bold mb-4">Динамика заказов</h4>
+                <canvas id="lineChart"></canvas>
+            </div>
         </div>
     `;
-
-    return actionsHtml + bannerHtml;
+    
+    // Таймаут, чтобы дождаться отрисовки canvas в DOM
+    setTimeout(() => {
+        const ctx1 = document.getElementById('barChart');
+        const ctx2 = document.getElementById('lineChart');
+        if (ctx1 && ctx2) {
+            new Chart(ctx1, { type: 'bar', data: { labels: ['Якутск', 'Иркутск', 'Москва'], datasets: [{ label: 'Выручка', data: [50000, 35000, 80000], backgroundColor: '#A5F52C' }] } });
+            new Chart(ctx2, { type: 'line', data: { labels: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт'], datasets: [{ label: 'Заказы', data: [12, 19, 15, 25, 22], borderColor: '#A5F52C', tension: 0.3 }] } });
+        }
+    }, 100);
 }
 
-// --- ЛОГИКА ЧАТА И ОСТАЛЬНЫХ ЭКРАНОВ ---
-
-function setupChatListeners() {
-    const input = document.getElementById('queryInput');
-    if(input) {
-        input.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendQuery(); });
-    }
-}
-
+// ЧАТ ЛОГИКА
 async function sendQuery() {
     const input = document.getElementById('queryInput');
     const chat = document.getElementById('chatMessages');
     const text = input.value.trim();
-    if (!text || !chat) return;
+    if (!text) return;
 
-    chat.innerHTML += `<div class="user-message message">${text}</div>`;
+    chat.innerHTML += `<div class="user-message message shadow-sm">${text}</div>`;
     input.value = '';
     chat.scrollTop = chat.scrollHeight;
 
@@ -125,50 +107,27 @@ async function sendQuery() {
         const response = await fetch(`http://${window.location.hostname}:8080/ask`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ question: text, user_id: 'admin' })
+            body: JSON.stringify({ question: text, user_id: 'Жанна' })
         });
         const data = await response.json();
-        
-        chat.innerHTML += `
-            <div class="bot-message message">
-                <div class="text-[11px] text-gray-400 mb-2 font-mono">${data.sql}</div>
-                <div class="font-medium">${data.message}</div>
-                <div class="mt-2 text-xs text-blue-600 font-bold">Найдено строк: ${data.row_count}</div>
-            </div>`;
+        chat.innerHTML += `<div class="bot-message message shadow-sm"><b>Результат:</b><br>${data.message}<br><span class="text-[10px] text-gray-400">SQL: ${data.sql}</span></div>`;
     } catch (e) {
-        chat.innerHTML += `<div class="bot-message message text-red-500">Ошибка: Бэкенд не отвечает</div>`;
+        chat.innerHTML += `<div class="bot-message message text-red-500">Ошибка бэкенда</div>`;
     }
     chat.scrollTop = chat.scrollHeight;
-    lucide.createIcons();
 }
 
-async function renderHistoryScreen(container) {
-    container.innerHTML = '<div class="p-10 text-center">Загрузка истории...</div>';
-    try {
-        const res = await fetch(`http://${window.location.hostname}:8080/get_history`);
-        const history = await res.json();
-        const html = history.map(h => `
-            <div class="card p-5 mb-3 flex justify-between items-center bg-white hover:border-gray-300">
-                <p class="font-medium text-sm text-gray-800">${h.question}</p>
-                <span class="text-[10px] font-bold uppercase px-3 py-1 rounded-full ${h.status === 'success' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}">${h.status}</span>
-            </div>
-        `).join('');
-        container.innerHTML = `<div class="p-8 overflow-y-auto h-full"><h1 class="text-xl font-bold mb-6">История</h1>${html || 'История пуста'}</div>`;
-    } catch (e) { container.innerHTML = '<div class="p-10 text-red-500">Ошибка бэкенда</div>'; }
+function setupChatListeners() {
+    const input = document.getElementById('queryInput');
+    if(input) input.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendQuery(); });
 }
 
-function renderDashboardsScreen(container) {
-    container.innerHTML = `<div class="p-8 overflow-y-auto h-full"><h1 class="text-xl font-bold mb-6">Дашборды</h1><p class="text-gray-500">Графики Chart.js...</p></div>`;
-}
-
-async function renderDatabaseScreen(container) {
-    container.innerHTML = '<div class="p-10 text-center">Загрузка БД...</div>';
+async function renderDatabase(container) {
+    container.innerHTML = '<div class="p-10">Загрузка данных из PostgreSQL...</div>';
     try {
         const res = await fetch(`http://${window.location.hostname}:8080/get_data`);
         const data = await res.json();
-        let rows = data.map(r => `<tr class="border-b"><td class="p-3 text-sm">#${r.id}</td><td class="p-3 text-sm">${r.city}</td><td class="p-3 text-sm font-bold">${r.amount}₽</td></tr>`).join('');
-        container.innerHTML = `<div class="p-8 overflow-y-auto h-full"><h1 class="text-xl font-bold mb-6">База данных</h1><table class="w-full text-left card"><thead><tr class="bg-gray-50"><th class="p-3">ID</th><th class="p-3">Город</th><th class="p-3">Сумма</th></tr></thead><tbody>${rows}</tbody></table></div>`;
-    } catch (e) { container.innerHTML = '<div class="p-10 text-red-500">Ошибка базы</div>'; }
+        let rows = data.map(r => `<tr class="border-b"><td class="p-4">${r.id}</td><td class="p-4">${r.city}</td><td class="p-4 font-bold">${r.amount}₽</td></tr>`).join('');
+        container.innerHTML = `<div class="p-8 h-full overflow-y-auto"><table class="w-full bg-white border rounded-2xl overflow-hidden"><thead><tr class="bg-gray-50 text-left"><th class="p-4">ID</th><th class="p-4">Город</th><th class="p-4">Сумма</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    } catch (e) { container.innerHTML = '<div class="p-10 text-red-500">Ошибка базы данных</div>'; }
 }
-
-function handleFileUpload(input) { if(input.files[0]) alert('Файл ' + input.files[0].name + ' готов'); }
