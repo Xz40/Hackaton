@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Drivee Analytics | Panel</title>
+    <title>Drivee Analytics | AI</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -13,13 +13,12 @@
 <div class="app-container">
     <aside class="sidebar">
         <div class="sidebar-top">
-            <div class="logo-area">
+            <div class="logo-box">
                 <img src="logo.png" alt="Drivee" class="main-logo">
             </div>
 
             <button class="btn-new" onclick="clearChat(); showView('Главная')">
-                <i data-lucide="plus"></i>
-                <span>Новый запрос</span>
+                <i data-lucide="plus"></i> <span>Новый запрос</span>
             </button>
 
             <nav class="nav">
@@ -58,16 +57,12 @@
 
         <div class="workspace">
             <section class="view-section" id="mainView">
-                <div class="chat-viewport" id="chatMessages">
-                    </div>
-                
+                <div class="chat-viewport" id="chatMessages"></div>
                 <div class="chat-footer">
-                    <div class="input-card">
+                    <div class="input-container">
                         <textarea id="queryInput" placeholder="Спросите AI о данных Drivee..." rows="1"></textarea>
                         <div class="input-actions">
-                            <span class="engine-tag">
-                                <i data-lucide="zap" style="width:12px; height:12px;"></i> DRIVEE INTELLIGENCE
-                            </span>
+                            <span class="engine-tag"><i data-lucide="zap"></i> DRIVEE AI</span>
                             <button class="send-btn" onclick="sendQuery()">
                                 <i data-lucide="arrow-up"></i>
                             </button>
@@ -77,28 +72,28 @@
             </section>
 
             <section id="historyView" class="view-section hidden">
-                <div class="content-padding">
-                    <h2 class="section-title">История запросов</h2>
-                    <div class="cards-grid" id="historyList"></div>
+                <div class="scroll-container">
+                    <h2 class="page-title">История запросов</h2>
+                    <div class="cards-stack" id="historyList"></div>
                 </div>
             </section>
 
             <section id="dataView" class="view-section hidden">
-                <div class="content-padding">
-                    <h2 class="section-title">Базы данных</h2>
-                    <div class="cards-grid" id="dbList"></div>
+                <div class="scroll-container">
+                    <h2 class="page-title">Базы данных</h2>
+                    <div class="cards-stack" id="dbList"></div>
                 </div>
             </section>
 
             <aside class="right-panel">
-                <div class="stat-box">
-                    <div class="box-label">СТАТИСТИКА</div>
-                    <div class="stat-line" id="statRequests">Запросов сегодня: 3</div>
-                    <div class="stat-line">Точность: 98%</div>
+                <div class="info-card">
+                    <div class="card-label">АНАЛИТИКА</div>
+                    <div class="info-val" id="statRequests">Запросов: 0</div>
+                    <div class="info-val">Точность: 98%</div>
                 </div>
-                <div class="stat-box">
-                    <div class="box-label">СТАТУС</div>
-                    <div class="status-indicator">
+                <div class="info-card">
+                    <div class="card-label">СИСТЕМА</div>
+                    <div class="status-box">
                         <span class="status-dot"></span>
                         SQL Engine Online
                     </div>

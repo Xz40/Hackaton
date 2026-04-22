@@ -1,4 +1,4 @@
-// Одна декларация API
+// Определяем базу API один раз
 const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:8080`;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -16,55 +16,13 @@ function showView(mode) {
         if(i.innerText.includes(mode)) i.classList.add('active');
     });
 
-    document.getElementById('mainView').classList.add('hidden');
-    document.getElementById('historyView').classList.add('hidden');
-    document.getElementById('dataView').classList.add('hidden');
+    // Скрываем всё
+    ['mainView', 'historyView', 'dataView'].forEach(id => document.getElementById(id).classList.add('hidden'));
 
-    if (mode === 'Главная') {
-        document.getElementById('mainView').classList.remove('hidden');
-    } else if (mode === 'История') {
-        document.getElementById('historyView').classList.remove('hidden');
-        loadHistory();
-    } else if (mode === 'Данные') {
-        document.getElementById('dataView').classList.remove('hidden');
-        loadDatabases();
-    }
-}
-
-async function loadHistory() {
-    const user = localStorage.getItem('drivee_user') || 'Admin';
-    try {
-        const res = await fetch(`${API_BASE_URL}/history?user_id=${user}`);
-        const data = await res.json();
-        const container = document.getElementById('historyList');
-        container.innerHTML = data.map(h => `
-            <div class="data-box">
-                <div>
-                    <strong>${h.question}</strong><br>
-                    <small style="color: #888;">${new Date(h.timestamp).toLocaleString()}</small>
-                </div>
-                <i data-lucide="chevron-right" style="color: #DDD;"></i>
-            </div>
-        `).join('');
-        lucide.createIcons();
-    } catch(e) { console.error("History fail", e); }
-}
-
-async function loadDatabases() {
-    try {
-        const res = await fetch(`${API_BASE_URL}/databases`);
-        const data = await res.json();
-        const container = document.getElementById('dbList');
-        container.innerHTML = data.map(db => `
-            <div class="data-box">
-                <div>
-                    <strong>${db.name}</strong><br>
-                    <small style="color: #888;">${db.db_type}</small>
-                </div>
-                <div class="status-dot" style="background:${db.status === 'Online' ? '#A5F52C' : '#FF4D4D'}"></div>
-            </div>
-        `).join('');
-    } catch(e) { console.error("DB fail", e); }
+    // Показываем нужное
+    if (mode === 'Главная') document.getElementById('mainView').classList.remove('hidden');
+    if (mode === 'История') { document.getElementById('historyView').classList.remove('hidden'); loadHistory(); }
+    if (mode === 'Данные') { document.getElementById('dataView').classList.remove('hidden'); loadDatabases(); }
 }
 
 async function sendQuery() {
@@ -73,8 +31,10 @@ async function sendQuery() {
     const text = input.value.trim();
     if (!text) return;
 
-    chat.innerHTML += `<div class="msg user" style="align-self: flex-end; background: #f5f5f5; padding: 15px; border-radius: 15px; margin-bottom: 10px;">${text}</div>`;
+    // Сообщение юзера
+    chat.innerHTML += `<div class="msg user">${text}</div>`;
     input.value = "";
+    chat.scrollTop = chat.scrollHeight;
 
     try {
         const response = await fetch(`${API_BASE_URL}/ask`, {
@@ -83,12 +43,44 @@ async function sendQuery() {
             body: JSON.stringify({ question: text, user_id: localStorage.getItem('drivee_user') || 'Admin' })
         });
         const data = await response.json();
-        chat.innerHTML += `<div class="msg bot" style="align-self: flex-start; background: #fff; border: 1px solid #EEE; padding: 15px; border-radius: 15px; margin-bottom: 10px;">${data.message}</div>`;
+        // Ответ бота
+        chat.innerHTML += `<div class="msg bot">${data.message}</div>`;
         updateStats();
     } catch (e) {
-        chat.innerHTML += `<div class="msg bot" style="color:red">Ошибка связи с сервером</div>`;
+        chat.innerHTML += `<div class="msg bot" style="color:red">Ошибка соединения с сервером</div>`;
     }
     chat.scrollTop = chat.scrollHeight;
+}
+
+async function loadHistory() {
+    const user = localStorage.getItem('drivee_user') || 'Admin';
+    try {
+        const res = await fetch(`${API_BASE_URL}/history?user_id=${user}`);
+        const data = await res.json();
+        document.getElementById('historyList').innerHTML = data.map(h => `
+            <div class="item-box">
+                <div>
+                    <strong>${h.question}</strong><br>
+                    <small style="color:#AAA">${new Date(h.timestamp).toLocaleString()}</small>
+                </div>
+                <i data-lucide="chevron-right" style="color:#EEE"></i>
+            </div>
+        `).join('');
+        lucide.createIcons();
+    } catch(e) {}
+}
+
+async function loadDatabases() {
+    try {
+        const res = await fetch(`${API_BASE_URL}/databases`);
+        const data = await res.json();
+        document.getElementById('dbList').innerHTML = data.map(db => `
+            <div class="item-box">
+                <div><strong>${db.name}</strong><br><small style="color:#AAA">${db.db_type}</small></div>
+                <div class="status-dot" style="background:${db.status === 'Online' ? '#A5F52C' : '#FF4D4D'}"></div>
+            </div>
+        `).join('');
+    } catch(e) {}
 }
 
 async function updateStats() {
@@ -96,12 +88,12 @@ async function updateStats() {
     try {
         const res = await fetch(`${API_BASE_URL}/stats?user_id=${user}`);
         const data = await res.json();
-        document.getElementById('statRequests').innerText = `Запросов сегодня: ${data.requests_today}`;
+        document.getElementById('statRequests').innerText = `Запросов: ${data.requests_today}`;
     } catch(e) {}
 }
 
 function clearChat() {
-    document.getElementById('chatMessages').innerHTML = '<div class="msg bot" style="align-self: flex-start; background: #fff; border: 1px solid #EEE; padding: 15px; border-radius: 15px;">Привет! Я AI-аналитик Drivee. Чем помочь?</div>';
+    document.getElementById('chatMessages').innerHTML = '<div class="msg bot">Привет! Я готов анализировать данные Drivee. Какой отчет подготовить?</div>';
 }
 
 function logout() {
