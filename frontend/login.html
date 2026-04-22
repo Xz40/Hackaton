@@ -2,30 +2,49 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Drivee - Вход</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { background-color: #1a1a1a; font-family: 'Inter', sans-serif; }
+        .drivee-bg-green { background-color: #A5F52C; }
+    </style>
 </head>
-<body class="bg-[#1A1A1A] flex items-center justify-center min-h-screen font-sans p-4">
-    <div class="bg-white rounded-[40px] p-6 md:p-12 flex flex-col md:flex-row gap-8 max-w-5xl w-full border border-gray-800">
-        <div class="bg-[#A5F52C] rounded-[32px] p-10 flex-1 flex flex-col justify-between min-h-[350px] relative overflow-hidden border-2 border-[#8ed426]">
-            <h1 class="text-4xl font-bold text-[#2D2D2D] leading-tight z-10">Стань частью<br>команды в Drivee</h1>
-            <i data-lucide="shield-check" class="absolute bottom-[-20px] right-[-20px] w-48 h-48 text-[#8ed426] opacity-30"></i>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white rounded-[40px] p-6 md:p-12 flex flex-col md:flex-row gap-8 max-w-5xl w-full shadow-2xl">
+        <div class="drivee-bg-green rounded-[32px] p-10 flex-1 flex flex-col justify-between min-h-[400px] relative overflow-hidden border-2 border-[#8ed426]">
+            <h1 class="text-4xl font-bold text-[#2D2D2D] leading-tight z-10 relative">Стань частью<br>команды в Drivee</h1>
+            <div class="absolute bottom-[-30px] right-[-30px] opacity-20">
+                <svg width="250" height="250" viewBox="0 0 100 100" fill="white">
+                    <path d="M50 85c-1.2 0-2.4-.5-3.3-1.4L15.4 52.3C9.5 46.4 9.5 36.9 15.4 31c5.9-5.9 15.4-5.9 21.3 0L50 44.3l13.3-13.3c5.9-5.9 15.4-5.9 21.3 0 5.9 5.9 5.9 15.4 0 21.3L53.3 83.6c-.9.9-2.1 1.4-3.3 1.4z"/>
+                </svg>
+            </div>
         </div>
+
         <div class="flex-1 flex flex-col justify-center px-4">
-            <div class="mb-10 text-2xl font-bold italic">drive<span class="text-[#A5F52C]">ee</span></div>
+            <div class="mb-10">
+                <img src="logo.png" alt="Drivee" class="h-10 w-auto">
+            </div>
             <div class="space-y-4">
-                <input id="username" type="text" placeholder="Логин" class="w-full bg-gray-100 p-5 rounded-2xl outline-none border-2 border-transparent focus:border-[#A5F52C] transition-all">
-                <input type="password" placeholder="Пароль" class="w-full bg-gray-100 p-5 rounded-2xl outline-none border-2 border-transparent focus:border-[#A5F52C] transition-all">
-                <button onclick="login()" class="w-full bg-[#A5F52C] py-5 rounded-2xl font-bold text-[#2D2D2D] border-b-4 border-[#8ed426] hover:brightness-105 active:border-b-0 transition-all">Войти в профиль</button>
+                <input id="username" type="text" placeholder="Логин" class="w-full bg-gray-50 border-2 border-gray-100 p-5 rounded-2xl outline-none focus:border-[#A5F52C] transition-all">
+                <input type="password" placeholder="Пароль" class="w-full bg-gray-50 border-2 border-gray-100 p-5 rounded-2xl outline-none focus:border-[#A5F52C] transition-all">
+                
+                <label class="flex items-center text-sm text-gray-400 cursor-pointer py-2">
+                    <input type="checkbox" class="mr-2 w-4 h-4 accent-[#A5F52C]"> Запомнить меня на этом устройстве
+                </label>
+
+                <button onclick="login()" class="w-full drivee-bg-green py-5 rounded-2xl font-bold text-[#2D2D2D] border-b-4 border-[#8ed426] hover:brightness-105 active:border-b-0 transition-all shadow-lg">
+                    Войти в профиль
+                </button>
             </div>
         </div>
     </div>
+
     <script>
-        lucide.createIcons();
         function login() {
             const user = document.getElementById('username').value;
-            if (!user) return alert('Введи логин!');
+            if (!user) return alert('Введите логин!');
             localStorage.setItem('drivee_user', user);
             window.location.href = 'index.html';
         }
