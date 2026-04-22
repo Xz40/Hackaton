@@ -1,3 +1,5 @@
+const API_URL = `http://${window.location.hostname}:8000`;
+
 document.addEventListener('DOMContentLoaded', () => {
     const user = localStorage.getItem('drivee_user');
     if (!user) { window.location.href = 'login.html'; return; }
@@ -6,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('avatar').innerText = user[0].toUpperCase();
     
     showScreen('main');
+    lucide.createIcons();
 });
 
 function handleNav(el, screen) {
@@ -17,27 +20,40 @@ function handleNav(el, screen) {
 function showScreen(type) {
     const main = document.getElementById('main-content');
     const inputZone = document.getElementById('input-zone');
-    const rightPanel = document.getElementById('right-panel');
     const title = document.getElementById('screen-title');
+    const right = document.getElementById('right-panel');
 
     main.innerHTML = "";
     inputZone.style.display = (type === 'main') ? 'block' : 'none';
+    right.style.display = (type === 'main') ? 'block' : 'none';
     
     if (type === 'main') {
         title.innerText = "Аналитический чат";
+        appendMessage('bot', 'Привет! Я готов проанализировать данные Drivee. Что хочешь узнать?');
         renderRightPanel();
-        appendMessage('bot', 'Привет! Я аналитический ассистент Drivee. Чем могу помочь сегодня?');
     } else if (type === 'database') {
-        title.innerText = "База данных";
-        renderDatabaseView();
+        title.innerText = "База данных (Последние заказы)";
+        fetchDatabase();
+    } else if (type === 'history') {
+        title.innerText = "История ваших запросов";
+        fetchHistory();
     }
     lucide.createIcons();
 }
 
-function appendMessage(role, text) {
+function appendMessage(role, text, tableData = null) {
     const container = document.getElementById('main-content');
     const isBot = role === 'bot';
     const user = localStorage.getItem('drivee_user');
+
+    let tableHtml = '';
+    if (tableData && tableData.length > 0) {
+        const headers = Object.keys(tableData[0]);
+        tableHtml = `<table class="data-table">
+            <thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+            <tbody>${tableData.map(row => `<tr>${headers.map(h => `<td>${row[h]}</td>`).join('')}</tr>`).join('')}</tbody>
+        </table>`;
+    }
 
     const html = `
         <div class="message">
@@ -47,6 +63,7 @@ function appendMessage(role, text) {
             <div class="message-body">
                 <div class="message-name">${isBot ? 'Драйвиум ИИ' : 'Вы'}</div>
                 <div class="message-text">${text}</div>
+                ${tableHtml}
             </div>
         </div>
     `;
@@ -56,16 +73,50 @@ function appendMessage(role, text) {
 
 async function sendQuery() {
     const input = document.getElementById('queryInput');
-    const q = input.value.trim();
-    if (!q) return;
+    const question = input.value.trim();
+    if (!question) return;
 
-    appendMessage('user', q);
+    appendMessage('user', question);
     input.value = "";
 
-    // Здесь будет твой fetch к бэкенду
-    setTimeout(() => {
-        appendMessage('bot', 'Анализирую данные по вашему запросу...');
-    }, 500);
+    try {
+        const res = await fetch(`${API_URL}/query`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                question: question,
+                user_id: localStorage.getItem('drivee_user')
+            })
+        });
+        const data = await res.json();
+        appendMessage('bot', data.message, data.data);
+    } catch (e) {
+        appendMessage('bot', 'Ошибка связи с сервером. Проверь, запущен ли бэкенд.');
+    }
+}
+
+async function fetchDatabase() {
+    const main = document.getElementById('main-content');
+    main.innerHTML = '<div class="p-10 text-gray-400">Загрузка данных...</div>';
+    try {
+        const res = await fetch(`${API_URL}/get_data`);
+        const data = await res.json();
+        appendMessage('bot', 'Ниже представлены последние 20 записей из таблицы заказов:', data);
+    } catch (e) {
+        main.innerHTML = '<div class="p-10 text-red-400">Ошибка загрузки БД</div>';
+    }
+}
+
+async function fetchHistory() {
+    const main = document.getElementById('main-content');
+    const user = localStorage.getItem('drivee_user');
+    try {
+        const res = await fetch(`${API_URL}/get_history?user_id=${user}`);
+        const data = await res.json();
+        appendMessage('bot', 'Ваша история запросов:', data);
+    } catch (e) {
+        appendMessage('bot', 'Не удалось загрузить историю.');
+    }
 }
 
 function renderRightPanel() {
@@ -73,13 +124,21 @@ function renderRightPanel() {
     panel.innerHTML = `
         <h3 class="text-[12px] font-bold text-gray-400 uppercase tracking-widest mb-6">Быстрые действия</h3>
         <div class="space-y-4">
-            <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                <p class="text-sm font-bold mb-1">Топ городов</p>
-                <p class="text-xs text-gray-500 mb-3">Показать выручку по всем городам за неделю</p>
-                <button class="w-full py-2 bg-white border border-gray-200 rounded-lg text-[11px] font-bold">ЗАПУСТИТЬ</button>
+            <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors" onclick="quickQuery('Покажи продажи по городам')">
+                <p class="text-sm font-bold mb-1">Продажи по городам</p>
+                <p class="text-xs text-gray-500">Общая выручка в разрезе регионов</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors" onclick="quickQuery('Покажи отмены по городам')">
+                <p class="text-sm font-bold mb-1">Анализ отмен</p>
+                <p class="text-xs text-gray-500">Где чаще всего отменяют заказы</p>
             </div>
         </div>
     `;
+}
+
+function quickQuery(text) {
+    document.getElementById('queryInput').value = text;
+    sendQuery();
 }
 
 function logout() {
