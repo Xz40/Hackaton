@@ -15,30 +15,48 @@
         .header-link:hover { opacity: 0.7; }
         
         /* Стили для выпадающего меню */
-        .dropdown { position: relative; display: inline-block; }
+        .dropdown { 
+            position: relative; 
+            display: inline-block; 
+            padding-bottom: 20px; /* Создаем невидимый мост между кнопкой и меню */
+            margin-bottom: -20px;
+        }
         .dropdown-content {
             display: none;
             position: absolute;
             background-color: white;
-            min-width: 240px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1);
+            min-width: 260px;
+            box-shadow: 0px 10px 30px rgba(0,0,0,0.08);
             z-index: 50;
-            border-radius: 12px;
-            padding: 12px 0;
-            top: 100%;
+            border-radius: 20px;
+            padding: 10px 0;
+            top: 45px; /* Регулируй высоту под кнопку */
             left: 0;
-            margin-top: 10px;
+            border: 1px solid rgba(0,0,0,0.05);
         }
         .dropdown-content a {
             color: #2D2D2D;
-            padding: 12px 20px;
+            padding: 14px 24px;
             text-decoration: none;
             display: block;
             font-size: 16px;
             font-weight: 500;
+            transition: all 0.2s;
         }
-        .dropdown-content a:hover { background-color: #f9f9f9; color: #A5F52C; }
-        .dropdown:hover .dropdown-content { display: block; }
+        .dropdown-content a:hover { 
+            background-color: #f9f9f9; 
+            color: #A5F52C; 
+            padding-left: 28px; /* Небольшой эффект сдвига при наведении */
+        }
+        .dropdown:hover .dropdown-content { 
+            display: block;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
         .login-card { 
             background: white; 
@@ -81,7 +99,7 @@
                 
                 <div class="dropdown">
                     <button class="header-link flex items-center gap-1 outline-none">
-                        О нас <span class="text-[10px]">▼</span>
+                        О нас <span class="text-[10px] opacity-50">▼</span>
                     </button>
                     <div class="dropdown-content">
                         <a href="https://drivee.com/about-us" target="_blank">О компании</a>
@@ -97,12 +115,8 @@
 
     <main class="flex-1 flex items-center justify-center p-4">
         <div class="login-card flex flex-col md:flex-row p-6 gap-8 max-w-5xl w-full">
-            
             <div class="green-banner flex-1 p-10 min-h-[400px] flex flex-col justify-between">
-                <h1 class="text-[44px] font-extrabold text-[#2D2D2D] leading-[1.1] z-10">
-                    Стань частью<br>команды в Drivee
-                </h1>
-                
+                <h1 class="text-[44px] font-extrabold text-[#2D2D2D] leading-[1.1] z-10">Стань частью<br>команды в Drivee</h1>
                 <div class="relative h-32 w-full flex justify-end items-end opacity-40">
                     <svg width="180" height="180" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M100 160C100 160 30 110 30 65C30 40 50 25 70 25C85 25 95 35 100 45C105 35 115 25 130 25C150 25 170 40 170 65C170 110 100 160 100 160Z" stroke="white" stroke-width="12" stroke-linejoin="round"/>
@@ -114,18 +128,13 @@
                 <div class="space-y-4">
                     <input id="username" type="text" placeholder="Логин" class="input-field text-lg">
                     <input type="password" placeholder="Пароль" class="input-field text-lg">
-                    
                     <div class="flex items-center gap-3 py-2">
                         <input type="checkbox" id="remember" class="w-5 h-5 accent-[#A5F52C] rounded">
                         <label for="remember" class="text-gray-500 text-sm cursor-pointer">Запомнить меня на этом устройстве</label>
                     </div>
-
-                    <button onclick="login()" class="btn-submit text-xl hover:brightness-105 active:scale-[0.98] transition-all">
-                        Войти в профиль
-                    </button>
+                    <button onclick="login()" class="btn-submit text-xl hover:brightness-105 transition-all">Войти в профиль</button>
                 </div>
             </div>
-
         </div>
     </main>
 
