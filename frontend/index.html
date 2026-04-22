@@ -203,7 +203,7 @@
             appendLoader();
 
             try {
-                const response = await fetch('http://78.36.198.54:8080/ask', {
+                const response = await fetch(`http://${window.location.hostname}:8080/ask`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
