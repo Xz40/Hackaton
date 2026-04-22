@@ -2,8 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Драйвиум — Интеллектуальная аналитическая платформа</title>
+    <title>Драйвиум — Аналитическая платформа</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="style.css">
@@ -12,64 +11,45 @@
     <div class="app-container">
         <aside class="sidebar">
             <div class="logo-container">
-                <img src="https://drivee.com/assets/images/logo.svg" alt="Drivee" class="logo-img">
+                <img src="logo.png" alt="Drivee" class="logo-img">
             </div>
 
-            <button class="btn-new-query">
+            <button class="btn-new-query" onclick="clearChat()">
                 <i data-lucide="plus-square"></i> Новый запрос
             </button>
 
             <nav class="side-nav">
-                <a href="#" onclick="handleNav(this, 'main')" class="nav-item active">
-                    <i data-lucide="home"></i> Главная
-                </a>
-                <a href="#" onclick="handleNav(this, 'history')" class="nav-item">
-                    <i data-lucide="history"></i> История запросов
-                </a>
-                <a href="#" onclick="handleNav(this, 'favorites')" class="nav-item">
-                    <i data-lucide="star"></i> Избранное
-                </a>
-                <a href="#" onclick="handleNav(this, 'dashboards')" class="nav-item">
-                    <i data-lucide="layout-dashboard"></i> Графики
-                </a>
-                <a href="#" onclick="handleNav(this, 'database')" class="nav-item">
-                    <i data-lucide="database"></i> База данных
-                </a>
+                <a href="#" onclick="handleNav(this, 'main')" class="nav-item active"><i data-lucide="home"></i> Главная</a>
+                <a href="#" onclick="handleNav(this, 'history')" class="nav-item"><i data-lucide="history"></i> История</a>
+                <a href="#" onclick="handleNav(this, 'database')" class="nav-item"><i data-lucide="database"></i> Данные</a>
             </nav>
 
             <div class="sidebar-footer">
-                <a href="#" class="nav-item"><i data-lucide="help-circle"></i> Помощь</a>
-                <a href="#" onclick="logout()" class="nav-item"><i data-lucide="log-out"></i> Выйти</a>
-                
-                <div class="promo-card">
-                    <p class="promo-text"><strong>Аналитика</strong> доступна каждому</p>
+                <div class="sidebar-promo">
+                    <img src="analitycs_for_all.png" alt="Analytics for all" class="promo-img">
                 </div>
+                <button onclick="logout()" class="nav-item logout-btn"><i data-lucide="log-out"></i> Выйти</button>
             </div>
         </aside>
 
         <main class="main-content">
             <header class="top-bar">
-                <div class="status-indicator">
-                    <i data-lucide="sparkles" class="icon-spark"></i>
-                    <span class="platform-name">Драйвиум — Интеллектуальная аналитическая платформа</span>
+                <div class="header-logo">
+                    <img src="header.png" alt="Драйвиум" class="header-img">
                 </div>
                 <div class="user-profile">
-                    <div class="user-avatar">Ж</div>
-                    <span class="user-name">Жанна</span>
+                    <div id="userAvatar" class="user-avatar">?</div>
+                    <span id="userNameDisplay" class="user-name">Загрузка...</span>
                 </div>
             </header>
 
-            <section id="content-area" class="content-area">
-                </section>
+            <section id="chatMessages" class="content-area no-scrollbar"></section>
 
             <footer class="input-container">
                 <div class="input-wrapper">
                     <textarea id="queryInput" placeholder="Напишите ваш запрос..."></textarea>
                     <div class="input-actions">
-                        <div class="left-actions">
-                            <button class="action-link"><i data-lucide="sparkles"></i> Примеры запросов</button>
-                            <button class="action-link"><i data-lucide="upload"></i> Загрузить файл</button>
-                        </div>
+                        <span class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">SQL AI Engine v1.2</span>
                         <button onclick="sendQuery()" class="btn-send">
                             <i data-lucide="arrow-up-right"></i>
                         </button>
@@ -77,31 +57,6 @@
                 </div>
             </footer>
         </main>
-
-        <aside class="quick-actions">
-            <h3 class="section-title">Быстрые действия</h3>
-            <div class="action-cards">
-                <div class="action-card" onclick="showScreen('dashboards')">
-                    <div class="card-icon bg-green"><i data-lucide="layout-grid"></i></div>
-                    <div class="card-info">
-                        <h4>Графики</h4>
-                        <p>Визуализируйте важные метрики</p>
-                    </div>
-                    <i data-lucide="chevron-right" class="arrow"></i>
-                </div>
-                <div class="action-card">
-                    <div class="card-icon bg-light"><i data-lucide="file-text"></i></div>
-                </div>
-                <div class="action-card">
-                    <div class="card-icon bg-green-light"><i data-lucide="download"></i></div>
-                    <div class="card-info">
-                        <h4>Экспорт данных</h4>
-                        <p>Выгрузить данные в файл</p>
-                    </div>
-                    <i data-lucide="chevron-right" class="arrow"></i>
-                </div>
-            </div>
-        </aside>
     </div>
     <script src="app.js"></script>
 </body>

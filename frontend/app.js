@@ -1,61 +1,64 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Убираем хардкод Жанны - берем имя из сессии
+    const user = localStorage.getItem('drivee_user') || 'Гость';
+    document.getElementById('userNameDisplay').innerText = user;
+    document.getElementById('userAvatar').innerText = user[0].toUpperCase();
+    
     lucide.createIcons();
-    showScreen('main');
+    clearChat(); // Начинаем с чистого листа
 });
+
+function clearChat() {
+    const chat = document.getElementById('chatMessages');
+    chat.innerHTML = `
+        <div class="bot-msg msg">
+            👋 Привет, ${document.getElementById('userNameDisplay').innerText}! Я готов анализировать данные Drivee. С чего начнем?
+        </div>
+    `;
+}
+
+async function sendQuery() {
+    const input = document.getElementById('queryInput');
+    const chat = document.getElementById('chatMessages');
+    const text = input.value.trim();
+
+    if (!text) return;
+
+    // Отрисовка сообщения юзера
+    chat.innerHTML += `<div class="user-msg msg">${text}</div>`;
+    input.value = "";
+    chat.scrollTop = chat.scrollHeight;
+
+    try {
+        const res = await fetch(`http://${window.location.hostname}:8080/ask`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                question: text, 
+                user_id: localStorage.getItem('drivee_user') 
+            })
+        });
+        const data = await res.json();
+        
+        chat.innerHTML += `
+            <div class="bot-msg msg">
+                <p>${data.message}</p>
+                <div style="font-size:10px; opacity:0.4; margin-top:10px; font-family:monospace">SQL: ${data.sql}</div>
+            </div>
+        `;
+    } catch (e) {
+        chat.innerHTML += `<div class="bot-msg msg" style="color:red">Ошибка связи с сервером.</div>`;
+    }
+    chat.scrollTop = chat.scrollHeight;
+}
 
 function handleNav(el, screen) {
     document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
     el.classList.add('active');
-    showScreen(screen);
+    // Тут можно добавить логику переключения на таблицы/историю
 }
 
-function showScreen(type) {
-    const content = document.getElementById('content-area');
-    content.innerHTML = "";
-
-    if (type === 'main') {
-        content.innerHTML = `
-            <div class="chat-bubble user">
-                Покажи отмены по городам за прошлую неделю
-                <span class="time">10:42 <i data-lucide="check-check" style="width:14px"></i></span>
-            </div>
-            
-            <div class="chat-bubble bot-text">
-                Вот количество отмен по городам за прошлую неделю
-                <span class="time" style="float:right">10:43</span>
-            </div>
-
-            <div class="chart-container">
-                <div class="chart-header" style="display:flex; justify-content:space-between; margin-bottom:20px">
-                    <div>
-                        <h4 style="font-weight:700">Отмены по городам</h4>
-                        <p style="font-size:12px; color:#999">за прошлую неделю (13 апреля - 19 апреля 2026)</p>
-                    </div>
-                    <i data-lucide="maximize-2" style="color:#CCC; cursor:pointer"></i>
-                </div>
-                <div style="height:250px; display:flex; align-items:flex-end; gap:12px; padding-bottom:20px; border-bottom:1px solid #EEE">
-                    <div style="flex:1; background:#A5F52C; height:80%; border-radius:4px"></div>
-                    <div style="flex:1; background:#A5F52C; height:60%; border-radius:4px"></div>
-                    <div style="flex:1; background:#A5F52C; height:40%; border-radius:4px"></div>
-                    <div style="flex:1; background:#A5F52C; height:35%; border-radius:4px"></div>
-                    <div style="flex:1; background:#A5F52C; height:20%; border-radius:4px"></div>
-                </div>
-                <p style="font-size:13px; margin-top:15px">Наибольшее количество отмен зафиксировано в Москве — 2 340.</p>
-                <p style="font-size:11px; color:#BBB; margin-top:10px">Данные актуальны на 22.04.2026</p>
-            </div>
-        `;
-    }
-    // ... другие экраны (history, database) ...
-    lucide.createIcons();
-}
-
-function sendQuery() {
-    const input = document.getElementById('queryInput');
-    if (!input.value.trim()) return;
-    
-    // Эмуляция отправки
-    const content = document.getElementById('content-area');
-    content.innerHTML += `<div class="chat-bubble user">${input.value}</div>`;
-    input.value = "";
-    content.scrollTop = content.scrollHeight;
+function logout() {
+    localStorage.removeItem('drivee_user');
+    window.location.href = 'login.html';
 }
