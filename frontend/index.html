@@ -243,10 +243,13 @@
 
             try {
                 // Не забудь заменить этот URL на свой http://localhost:5000/ask когда запустишь питон!
-                const response = await fetch('YOUR_BACKEND_URL_HERE', {
+                const response = await fetch('http://localhost:5000/ask', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ query: text, user: userName })
+                    body: JSON.stringify({ 
+                        question: text, // Поменял query на question под твою модель
+                        user_id: userName 
+                    })
                 });
                 const data = await response.json();
                 document.getElementById('temp-loader').remove();
