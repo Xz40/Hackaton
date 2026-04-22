@@ -131,21 +131,31 @@ async function sendQuery() {
 
 async function renderHistory(container) {
     container.innerHTML = '<div class="p-10 text-center animate-pulse">Загрузка вашей истории...</div>';
+    
+    // Берем логин того, кто сейчас залогинен
+    const user = localStorage.getItem('drivee_user'); 
+
     try {
-        const res = await fetch(`http://${window.location.hostname}:8080/get_history`);
+        // Передаем user_id в URL как параметр
+        const res = await fetch(`http://${window.location.hostname}:8080/get_history?user_id=${user}`);
         const history = await res.json();
+        
         const html = history.map(h => `
-            <div class="bg-white border p-5 mb-3 rounded-2xl flex justify-between items-center shadow-sm hover:border-gray-300 transition-all">
+            <div class="bg-white border p-5 mb-3 rounded-2xl flex justify-between items-center shadow-sm">
                 <div>
-                    <p class="font-semibold text-gray-900">${h.question}</p>
+                    <p class="font-semibold text-gray-800">${h.question}</p>
                     <p class="text-[10px] text-gray-400 mt-1">${new Date(h.query_date).toLocaleString()}</p>
                 </div>
-                <span class="text-[9px] font-bold uppercase px-3 py-1 rounded-full ${h.status === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${h.status}</span>
+                <span class="text-[9px] font-bold uppercase px-3 py-1 rounded-full ${h.status === 'success' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}">
+                    ${h.status}
+                </span>
             </div>
         `).join('');
-        container.innerHTML = `<div class="p-8 h-full overflow-y-auto">${html || '<p class="text-center text-gray-400 py-20">История пуста</p>'}</div>`;
-    } catch (e) { container.innerHTML = '<div class="p-10 text-red-500 text-center">Не удалось загрузить историю</div>'; }
-    lucide.createIcons();
+        
+        container.innerHTML = `<div class="p-8 h-full overflow-y-auto">${html || '<p class="text-center text-gray-400 py-20">У вас пока нет запросов</p>'}</div>`;
+    } catch (e) { 
+        container.innerHTML = '<div class="p-10 text-red-500 text-center">Ошибка загрузки личной истории</div>'; 
+    }
 }
 
 function setupChatListeners() {

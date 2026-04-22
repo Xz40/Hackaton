@@ -115,17 +115,14 @@ async def get_data():
         return [{"id": "ERR", "city": "Ошибка БД", "amount": 0, "status": "error"}]
 
 @app.get("/get_history")
-async def get_history():
-    """Для нового экрана 'History'"""
-    try:
-        conn = database.get_db_connection()
-        with conn.cursor() as cur:
-            cur.execute("SELECT id, question, status, query_date FROM query_history ORDER BY query_date DESC LIMIT 50")
-            results = cur.fetchall()
-        conn.close()
-        return results
-    except Exception as e:
-        return []
+async def get_history(user_id: str): # Добавляем параметр
+    conn = database.get_db_connection()
+    with conn.cursor() as cur:
+        # Фильтруем запрос по конкретному пользователю
+        cur.execute("SELECT * FROM query_history WHERE user_id = %s ORDER BY query_date DESC", (user_id,))
+        history = cur.fetchall()
+    conn.close()
+    return history
 
 if __name__ == "__main__":
     import uvicorn
