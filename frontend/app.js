@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+ocument.addEventListener('DOMContentLoaded', () => {
     // 1. Проверка авторизации
     const currentUser = localStorage.getItem('drivee_user');
     if (!currentUser) {
@@ -6,13 +6,13 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // 2. Отображение данных юзера
+    // 2. Отображение данных юзера в боковой панели
     const userNameElem = document.getElementById('userName');
     const avatarElem = document.getElementById('avatar');
-    
     if (userNameElem) userNameElem.innerText = currentUser;
     if (avatarElem) avatarElem.innerText = currentUser[0].toUpperCase();
 
+    // 3. Инициализация иконок и первого экрана
     lucide.createIcons();
     showScreen('main');
 });
@@ -42,18 +42,19 @@ function showScreen(type) {
         title.innerText = "Аналитический чат";
         main.innerHTML = `
             <div class="px-6 pt-6">
-                <img src="analitycs_for_all.png" alt="Analytics for all" class="w-full h-48 object-cover rounded-3xl shadow-sm border border-gray-100">
+                <img src="analitycs_for_all.png" alt="Analytics" class="w-full h-44 object-cover rounded-3xl shadow-sm border border-gray-100">
             </div>
 
-            <div class="chat-container" id="chatMessages">
-                <div class="bot-message message shadow-sm">Привет, ${localStorage.getItem('drivee_user')}! Что сегодня проанализируем?</div>
+            <div class="chat-container flex-1" id="chatMessages">
+                <div class="bot-message message shadow-sm">Привет! Я готов проанализировать ваши данные. Что сегодня ищем?</div>
             </div>
-            <div class="p-6 bg-white border-t mt-auto">
+
+            <div class="p-6 bg-white border-t">
                 <div class="flex gap-4 max-w-4xl mx-auto">
-                    <input id="queryInput" type="text" placeholder="Задайте вопрос по данным..." 
-                           class="flex-1 bg-gray-50 p-4 rounded-xl outline-none ring-[#A5F52C] focus:ring-2 border border-gray-100 transition-all">
-                    <button onclick="sendQuery()" class="bg-[#A5F52C] w-14 h-14 rounded-xl flex items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-all">
-                        <i data-lucide="send" class="text-black"></i>
+                    <input id="queryInput" type="text" placeholder="Напишите запрос (например, общая выручка в Якутске)..." 
+                           class="flex-1 bg-gray-50 p-4 rounded-2xl outline-none ring-[#A5F52C] focus:ring-2 border border-gray-100 transition-all">
+                    <button onclick="sendQuery()" class="bg-[#A5F52C] w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all">
+                        <i data-lucide="zap" class="text-black"></i>
                     </button>
                 </div>
             </div>
@@ -72,29 +73,162 @@ function showScreen(type) {
         right.innerHTML = renderQuickActions();
     }
     else if (type === 'database') {
-        title.innerText = "Просмотр базы данных";
+        title.innerText = "Просмотр заказов";
         renderDatabase(main);
         right.innerHTML = renderQuickActions();
     }
+    
     lucide.createIcons();
 }
 
 function renderQuickActions() {
     return `
-        <h3 class="text-xs font-bold uppercase text-gray-400 mb-6 tracking-widest">Быстрые действия</h3>
+        <h3 class="text-[10px] font-bold uppercase text-gray-400 mb-6 tracking-widest">Быстрые отчеты</h3>
         <div class="space-y-4">
             <div class="border p-5 rounded-2xl hover:border-[#A5F52C] cursor-pointer transition-all bg-white shadow-sm group" onclick="showScreen('dashboards')">
-                <div class="bg-green-50 text-green-600 w-10 h-10 rounded-lg flex items-center justify-center mb-3 group-hover:bg-[#A5F52C] group-hover:text-black transition-colors">
+                <div class="bg-green-50 text-green-600 w-10 h-10 rounded-xl flex items-center justify-center mb-3 group-hover:bg-[#A5F52C] group-hover:text-black transition-colors">
                     <i data-lucide="pie-chart" class="w-5 h-5"></i>
                 </div>
-                <div class="font-bold text-sm text-gray-900">Выручка по городам</div>
-                <p class="text-xs text-gray-500 mt-1">Мгновенный срез по регионам</p>
+                <div class="font-bold text-sm text-gray-900">Продажи по городам</div>
+                <p class="text-[10px] text-gray-500 mt-1">Визуальный срез всех завершенных заказов</p>
             </div>
         </div>
     `;
 }
 
-// ОТПРАВКА ЗАПРОСА
 async function sendQuery() {
     const input = document.getElementById('queryInput');
     const chat = document.getElementById('chatMessages');
+    const text = input.value.trim();
+    const user = localStorage.getItem('drivee_user');
+
+    if (!text || !chat) return;
+
+    chat.innerHTML += `<div class="user-message message shadow-sm">${text}</div>`;
+    input.value = '';
+    chat.scrollTop = chat.scrollHeight;
+
+    try {
+        const response = await fetch(`http://${window.location.hostname}:8080/ask`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                question: text, 
+                user_id: user 
+            })
+        });
+
+        if (!response.ok) throw new Error('Ошибка сервера');
+        
+        const data = await response.json();
+        
+        chat.innerHTML += `
+            <div class="bot-message message shadow-sm">
+                <div class="text-[9px] text-gray-400 font-mono border-b pb-1 mb-2 tracking-tighter uppercase">SQL: ${data.sql}</div>
+                <div class="text-gray-800 font-medium">${data.message}</div>
+                <div class="mt-2 text-[10px] bg-gray-50 p-2 rounded-lg text-gray-500 font-bold">
+                    Найдено записей: ${data.row_count}
+                </div>
+            </div>`;
+    } catch (e) {
+        chat.innerHTML += `<div class="bot-message message text-red-500 bg-red-50">Ошибка: проверьте соединение с бэкендом</div>`;
+    }
+    chat.scrollTop = chat.scrollHeight;
+    lucide.createIcons();
+}
+
+async function renderHistory(container) {
+    container.innerHTML = '<div class="p-10 text-center animate-pulse text-gray-400 uppercase font-bold text-xs">Загрузка архива...</div>';
+    const user = localStorage.getItem('drivee_user');
+
+    try {
+        const res = await fetch(`http://${window.location.hostname}:8080/get_history?user_id=${user}`);
+        const history = await res.json();
+        
+        const html = history.map(h => `
+            <div class="bg-white border p-5 mb-3 rounded-2xl flex justify-between items-center shadow-sm hover:border-[#A5F52C] transition-all">
+                <div>
+                    <p class="font-bold text-gray-800 text-sm">${h[0]}</p> <div class="flex gap-3 mt-2 items-center">
+                        <p class="text-[10px] text-gray-400 italic">${new Date(h[1]).toLocaleString()}</p>
+                        <span class="text-[9px] bg-gray-50 px-2 py-0.5 rounded text-gray-400 font-bold uppercase">${h[2]}</span>
+                    </div>
+                </div>
+                <i data-lucide="chevron-right" class="text-gray-300"></i>
+            </div>
+        `).join('');
+        
+        container.innerHTML = `<div class="p-8 h-full overflow-y-auto">${html || '<p class="text-center py-10 text-gray-400">История пока пуста</p>'}</div>`;
+    } catch (e) { 
+        container.innerHTML = '<div class="p-10 text-red-500 text-center uppercase font-bold">Ошибка базы</div>'; 
+    }
+    lucide.createIcons();
+}
+
+async function renderDatabase(container) {
+    container.innerHTML = '<div class="p-10 text-center text-gray-400 font-bold text-xs uppercase tracking-widest">Синхронизация...</div>';
+    try {
+        const res = await fetch(`http://${window.location.hostname}:8080/get_data`);
+        const data = await res.json();
+        
+        let rows = data.map(r => `
+            <tr class="border-b hover:bg-gray-50">
+                <td class="p-4 text-gray-400 text-xs font-mono">#${r[0]}</td>
+                <td class="p-4 text-sm font-semibold text-gray-800">${r[1]}</td>
+                <td class="p-4 text-sm font-bold text-gray-900">${r[2].toLocaleString()}₽</td>
+                <td class="p-4"><span class="px-2 py-1 bg-green-50 text-green-600 rounded-full text-[9px] font-black uppercase">${r[3]}</span></td>
+            </tr>
+        `).join('');
+        
+        container.innerHTML = `
+            <div class="p-8 h-full overflow-y-auto">
+                <table class="w-full bg-white border rounded-3xl overflow-hidden shadow-sm">
+                    <thead class="bg-gray-50 text-left text-[10px] uppercase text-gray-400 font-bold tracking-widest">
+                        <tr><th class="p-4">ID</th><th class="p-4">Город</th><th class="p-4">Сумма</th><th class="p-4">Статус</th></tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>`;
+    } catch (e) { 
+        container.innerHTML = '<div class="p-10 text-red-500 text-center">Ошибка загрузки таблицы</div>'; 
+    }
+}
+
+function setupChatListeners() {
+    const input = document.getElementById('queryInput');
+    if(input) {
+        input.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendQuery(); });
+    }
+}
+
+function renderDashboards(container) {
+    container.innerHTML = `
+        <div class="p-8 h-full overflow-y-auto">
+            <div class="bg-white border p-8 rounded-[2rem] shadow-sm">
+                <h4 class="font-black mb-6 text-gray-400 text-[10px] uppercase tracking-[0.2em]">Выручка по городам</h4>
+                <canvas id="barChart" style="max-height: 400px;"></canvas>
+            </div>
+        </div>
+    `;
+    setTimeout(() => {
+        const ctx = document.getElementById('barChart');
+        if (ctx) {
+            new Chart(ctx, { 
+                type: 'bar', 
+                data: { 
+                    labels: ['Якутск', 'Иркутск', 'Москва', 'Казань'], 
+                    datasets: [{ 
+                        label: 'Выручка (₽)', 
+                        data: [5700, 2300, 5000, 3100], 
+                        backgroundColor: '#A5F52C', 
+                        borderRadius: 12,
+                        barThickness: 40
+                    }] 
+                },
+                options: { 
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }
+                }
+            });
+        }
+    }, 200);
+}
