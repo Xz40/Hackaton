@@ -119,7 +119,7 @@ body, html {
     /* Чтобы фон не косил влево, используем cover и center */
     background-image: url('header.png');
     background-size: cover; 
-    background-position: center; 
+    background-position: 20px center; 
     background-repeat: no-repeat;
     
     display: flex; 
