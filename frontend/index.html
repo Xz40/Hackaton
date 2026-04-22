@@ -13,7 +13,7 @@
 <div class="app-container">
     <aside class="sidebar">
         <div class="sidebar-top">
-            <div class="logo-container">
+            <div class="logo-area">
                 <img src="logo.png" alt="Drivee" class="main-logo">
             </div>
 
@@ -37,8 +37,7 @@
 
         <div class="sidebar-bottom">
             <div class="logout" onclick="logout()">
-                <i data-lucide="log-out"></i>
-                <span>Выйти из системы</span>
+                <i data-lucide="log-out"></i> <span>Выйти</span>
             </div>
             <div class="promo-wrapper">
                 <img src="promo_block.png" alt="Promo" class="promo-img">
@@ -58,13 +57,13 @@
         </header>
 
         <div class="workspace">
-            <section class="chat-container" id="mainView">
+            <section class="view-section" id="mainView">
                 <div class="chat-viewport" id="chatMessages"></div>
-                <div class="footer">
+                <div class="chat-footer">
                     <div class="input-card">
                         <textarea id="queryInput" placeholder="Спросите AI о данных Drivee..."></textarea>
                         <div class="input-actions">
-                            <div class="engine-info">SQL ENGINE v1.0</div>
+                            <span class="engine-tag">SQL ENGINE v1.0</span>
                             <button class="send-btn" onclick="sendQuery()">
                                 <i data-lucide="arrow-up"></i>
                             </button>
@@ -74,29 +73,29 @@
             </section>
 
             <section id="historyView" class="view-section hidden">
-                <div class="view-scroll-area">
-                    <h2 class="view-title">История запросов</h2>
-                    <div class="cards-list" id="historyList"></div>
+                <div class="content-padding">
+                    <h2 class="section-title">История запросов</h2>
+                    <div class="cards-grid" id="historyList"></div>
                 </div>
             </section>
 
             <section id="dataView" class="view-section hidden">
-                <div class="view-scroll-area">
-                    <h2 class="view-title">Подключенные базы данных</h2>
-                    <div class="cards-list" id="dbList"></div>
+                <div class="content-padding">
+                    <h2 class="section-title">Базы данных</h2>
+                    <div class="cards-grid" id="dbList"></div>
                 </div>
             </section>
 
             <aside class="right-panel">
-                <div class="side-box">
-                    <div class="box-title">Статистика аккаунта</div>
-                    <div class="stat-item" id="statRequests">Запросов сегодня: 0</div>
-                    <div class="stat-item">Точность AI: 98%</div>
+                <div class="stat-box">
+                    <div class="box-label">СТАТИСТИКА</div>
+                    <div class="stat-line" id="statRequests">Запросов сегодня: 3</div>
+                    <div class="stat-line">Точность: 98%</div>
                 </div>
-                <div class="side-box">
-                    <div class="box-title">Системный статус</div>
-                    <div class="status-online">
-                        <span class="dot"></span>
+                <div class="stat-box">
+                    <div class="box-label">СТАТУС</div>
+                    <div class="status-indicator">
+                        <span class="status-dot"></span>
                         SQL Engine Online
                     </div>
                 </div>
