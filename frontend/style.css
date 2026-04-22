@@ -14,8 +14,8 @@ body, html { height: 100vh; width: 100vw; overflow: hidden; font-family: sans-se
 /* Ограничиваем ЛОГОТИП */
 .logo-wrapper { 
     width: 100%; 
-    height: 60px; 
-    margin-bottom: 50px; 
+    height: 90px; 
+    margin-bottom: 80px; 
 }
 .logo-wrapper img { 
     height: 100%; 
