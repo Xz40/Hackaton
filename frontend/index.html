@@ -2,55 +2,54 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Драйвиум</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Драйвиум — Аналитика</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-white">
-    <div class="app-layout">
+<body>
+    <div class="app-container">
         <aside class="sidebar">
-            <div class="sidebar-top">
-                <img src="logo.png" alt="Drivee" class="main-logo">
+            <div class="sidebar-content">
+                <img src="logo.png" alt="Drivee" class="logo-img">
                 
-                <button class="new-query-btn" onclick="clearChat()">
-                    <i data-lucide="plus" class="w-4 h-4"></i>
-                    <span>Новый запрос</span>
+                <button class="btn-new" onclick="clearChat()">
+                    <i data-lucide="plus"></i> <span>Новый запрос</span>
                 </button>
 
-                <nav class="menu">
-                    <a href="#" class="menu-item active"><i data-lucide="home"></i> Главная</a>
-                    <a href="#" class="menu-item"><i data-lucide="history"></i> История</a>
-                    <a href="#" class="menu-item"><i data-lucide="database"></i> Данные</a>
+                <nav class="nav-menu">
+                    <div class="nav-item active"><i data-lucide="home"></i> Главная</div>
+                    <div class="nav-item"><i data-lucide="history"></i> История</div>
+                    <div class="nav-item"><i data-lucide="database"></i> Данные</div>
                 </nav>
             </div>
 
             <div class="sidebar-bottom">
-                <img src="analitycs_for_all.png" alt="Promo" class="promo-banner">
-                <button onclick="logout()" class="logout-link">
+                <img src="analitycs_for_all.png" alt="Promo" class="promo-img">
+                <div class="logout-zone" onclick="logout()">
                     <i data-lucide="log-out"></i> Выйти
-                </button>
+                </div>
             </div>
         </aside>
 
-        <main class="main-area">
+        <main class="main-wrapper">
             <header class="header">
-                <img src="header.png" alt="Драйвиум" class="header-title-img">
-                
-                <div class="user-block">
-                    <div id="userAvatar" class="avatar">?</div>
-                    <span id="userNameDisplay" class="username">...</span>
+                <img src="header.png" alt="Драйвиум" class="header-img">
+                <div class="user-info">
+                    <div id="avatar" class="avatar">?</div>
+                    <span id="userName">Загрузка...</span>
                 </div>
             </header>
 
-            <div id="chatMessages" class="chat-viewport"></div>
+            <section id="chatContainer" class="chat-area"></section>
 
-            <footer class="footer-input">
-                <div class="input-box">
+            <footer class="input-section">
+                <div class="input-card">
                     <textarea id="queryInput" placeholder="Напишите ваш запрос..."></textarea>
-                    <div class="input-row">
-                        <span class="engine-tag">SQL AI ENGINE V1.2</span>
-                        <button onclick="sendQuery()" class="send-btn">
+                    <div class="input-footer">
+                        <span class="version">SQL AI ENGINE V1.2</span>
+                        <button class="btn-send" onclick="sendQuery()">
                             <i data-lucide="arrow-up-right"></i>
                         </button>
                     </div>
