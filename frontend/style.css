@@ -1,211 +1,83 @@
-/* ОБЩИЕ СТИЛИ */
-* { 
-    box-sizing: border-box; 
-    margin: 0; 
-    padding: 0; 
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body, html { height: 100vh; width: 100vw; overflow: hidden; font-family: 'Inter', sans-serif; background: #fff; }
 
-body, html { 
-    height: 100vh; 
-    width: 100vw; 
-    overflow: hidden; 
-    font-family: 'Inter', sans-serif; 
-    background-color: #fff;
-    color: #1A1A1A;
-}
-
-.app-container { 
-    display: flex; 
-    height: 100vh; 
-    width: 100vw; 
-}
-
+.app-container { display: flex; height: 100vh; }
 .hidden { display: none !important; }
 
-/* САЙДБАР - Увеличенная ширина и отступы */
+/* САЙДБАР */
 .sidebar { 
-    width: 300px; 
-    min-width: 300px; 
-    height: 100%;
+    width: 320px; 
     background: #FBFBFB; 
-    border-right: 1px solid #EEE;
+    border-right: 1px solid #EEE; 
     display: flex; 
     flex-direction: column; 
+    padding: 40px; 
     justify-content: space-between;
-    padding: 35px; /* Больше пространства */
-    z-index: 10;
 }
-
-.logo-wrapper { width: 100%; height: 60px; margin-bottom: 35px; }
-.logo-wrapper img { height: 100%; width: auto; object-fit: contain; }
-
-.btn-new {
-    width: 100%;
-    background: #A5F52C;
-    border: none;
-    border-radius: 14px;
-    padding: 16px;
-    font-weight: 700;
-    font-size: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    cursor: pointer;
-    margin-bottom: 30px;
+.logo-wrapper img { width: 140px; margin-bottom: 40px; }
+.btn-new { 
+    width: 100%; background: #A5F52C; border: none; padding: 18px; 
+    border-radius: 16px; font-weight: 700; font-size: 16px; 
+    display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; margin-bottom: 30px;
 }
-
-.nav { display: flex; flex-direction: column; gap: 10px; }
-.nav-item {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 14px;
-    border-radius: 12px;
-    color: #666;
-    font-weight: 500;
-    cursor: pointer;
-    transition: 0.2s;
+.nav-item { 
+    display: flex; align-items: center; gap: 15px; padding: 16px; 
+    border-radius: 14px; cursor: pointer; color: #666; font-weight: 500; transition: 0.2s;
 }
-.nav-item i { width: 22px; height: 22px; }
+.nav-item i { width: 24px; height: 24px; }
 .nav-item.active { background: #E8FCD0; color: #1A1A1A; font-weight: 700; }
 
-/* НИЖНЯЯ ЧАСТЬ САЙДБАРА */
-.sidebar-bottom {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.logout { 
-    padding: 10px 5px; 
-    cursor: pointer; 
-    color: #888; 
-    display: flex; 
-    align-items: center; 
-    gap: 10px; 
-    font-size: 14px;
-    transition: color 0.2s;
-}
-.logout:hover { color: #FF4D4D; }
-
-/* ПРОМО БЛОК - Самый низ */
-.promo-box {
-    background: #1A1A1A;
-    color: #fff;
-    padding: 20px;
-    border-radius: 18px;
-    position: relative;
-    overflow: hidden;
-}
-.promo-box h5 { font-size: 14px; font-weight: 700; margin-bottom: 8px; color: #A5F52C; }
-.promo-box p { font-size: 12px; opacity: 0.7; line-height: 1.4; }
+.promo-wrapper { width: 100%; margin-top: 25px; border-radius: 15px; overflow: hidden; }
+.promo-img { width: 100%; display: block; }
+.logout { color: #888; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; }
 
 /* ГЛАВНЫЙ КОНТЕНТ */
-.main-content { 
-    flex: 1; 
-    display: flex; 
-    flex-direction: column; 
+.main-content { flex: 1; display: flex; flex-direction: column; }
+
+/* ХЕДЕР С КАРТИНКОЙ */
+.header { 
+    height: 160px; /* Высота под картинку */
     position: relative; 
+    display: flex; 
+    align-items: center; 
 }
+.header-bg { 
+    width: 100%; height: 100%; object-fit: cover; 
+    position: absolute; top: 0; left: 0; z-index: 1; 
+}
+.header-content { 
+    width: 100%; max-width: 1600px; margin: 0 auto; padding: 0 80px; 
+    position: relative; z-index: 2; display: flex; justify-content: flex-end; 
+}
+.user-block { display: flex; align-items: center; gap: 15px; background: rgba(0,0,0,0.2); padding: 8px 15px; border-radius: 30px; backdrop-filter: blur(5px); }
+.avatar { width: 35px; height: 35px; border-radius: 50%; background: #A5F52C; display: flex; align-items: center; justify-content: center; font-weight: 800; }
 
-/* ХЕДЕР С ПОЛЯМИ */
-.header {
-    height: 80px;
-    border-bottom: 1px solid #EEE;
-    display: flex;
-    align-items: center;
-}
-.header-content {
-    width: 100%;
-    max-width: 1500px;
-    margin: 0 auto;
-    padding: 0 60px; /* Широкие поля */
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-}
+/* РАБОЧАЯ ЗОНА */
+.workspace { display: flex; flex: 1; overflow: hidden; }
+.chat-container { flex: 1; display: flex; flex-direction: column; align-items: center; }
 
-.user-block { display: flex; align-items: center; gap: 15px; }
-.avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: #A5F52C;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
+/* ШИРОКИЕ ПОЛЯ (30%+) */
+.chat-viewport, .footer, .section-content { 
+    width: 100%; max-width: 1600px; padding: 40px 80px; /* Тот самый отступ */
 }
+.chat-viewport { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 25px; }
 
-/* ЧАТ И ФУТЕР - Центрирование и ширина */
-.chat-and-footer {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.chat-viewport {
-    flex: 1;
-    width: 100%;
-    max-width: 1500px;
-    overflow-y: auto;
-    padding: 60px; /* Широкие поля */
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-}
-
-.msg { max-width: 70%; padding: 20px 25px; border-radius: 22px; font-size: 16px; line-height: 1.6; }
+.msg { max-width: 70%; padding: 20px 25px; border-radius: 20px; line-height: 1.6; }
 .msg.user { align-self: flex-end; background: #F5F5F5; border-bottom-right-radius: 4px; }
 .msg.bot { align-self: flex-start; background: #fff; border: 1px solid #EEE; border-bottom-left-radius: 4px; }
 
-.footer { 
-    width: 100%;
-    max-width: 1500px;
-    padding: 0 60px 50px; 
-}
-
 .input-card { 
-    border: 1px solid #EEE; 
-    border-radius: 24px; 
-    padding: 25px; 
-    background: #fff; 
-    box-shadow: 0 10px 40px rgba(0,0,0,0.03); 
+    background: #fff; border: 1px solid #EEE; border-radius: 24px; padding: 25px; 
+    box-shadow: 0 10px 40px rgba(0,0,0,0.04); 
 }
+#queryInput { width: 100%; border: none; outline: none; height: 80px; font-size: 16px; resize: none; }
 
-#queryInput { 
-    width: 100%; border: none; outline: none; height: 80px; resize: none; font-size: 16px; 
+.send-btn { 
+    background: #A5F52C; border: none; width: 55px; height: 55px; 
+    border-radius: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; 
 }
 
 /* ПРАВАЯ ПАНЕЛЬ */
-.right-panel { 
-    width: 350px; 
-    border-left: 1px solid #EEE; 
-    padding: 40px 30px; 
-    background: #FBFBFB; 
-}
+.right-panel { width: 360px; border-left: 1px solid #EEE; padding: 40px; background: #FBFBFB; }
 .side-box { background: #fff; border: 1px solid #EEE; border-radius: 20px; padding: 25px; margin-bottom: 25px; }
-.box-title { font-size: 12px; font-weight: 800; text-transform: uppercase; color: #CCC; margin-bottom: 20px; letter-spacing: 1px; }
-
-/* ИСТОРИЯ И ДАННЫЕ */
-.view-section { flex: 1; overflow-y: auto; }
-.section-content {
-    max-width: 1500px;
-    margin: 0 auto;
-    padding: 60px;
-}
-
-.item-card {
-    background: #FBFBFB;
-    border: 1px solid #EEE;
-    padding: 30px;
-    border-radius: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-    transition: 0.2s ease;
-}
-.item-card:hover { border-color: #A5F52C; transform: translateY(-3px); background: #fff; }
+.box-title { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #CCC; margin-bottom: 15px; letter-spacing: 1.5px; }

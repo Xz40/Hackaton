@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Drivee Analytics | Панель управления</title>
+    <title>Drivee Analytics | Panel</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -15,7 +15,7 @@
     <aside class="sidebar">
         <div class="sidebar-top">
             <div class="logo-wrapper">
-                <img src="logo.png" alt="Drivee Logo">
+                <img src="logo.png" alt="Drivee">
             </div>
 
             <button class="btn-new" onclick="clearChat(); showView('Главная')">
@@ -36,22 +36,16 @@
                     <i data-lucide="database"></i>
                     Данные
                 </div>
-                <div class="nav-item">
-                    <i data-lucide="settings"></i>
-                    Настройки
-                </div>
             </nav>
         </div>
 
         <div class="sidebar-bottom">
             <div class="logout" onclick="logout()">
                 <i data-lucide="log-out"></i>
-                Выйти из системы
+                Выйти
             </div>
-            
-            <div class="promo-box">
-                <h5>Drivee Pro</h5>
-                <p>Откройте расширенную аналитику и прогнозирование спроса для вашего региона.</p>
+            <div class="promo-wrapper">
+                <img src="promo_block.png" alt="Promo" class="promo-img">
             </div>
         </div>
     </aside>
@@ -59,29 +53,26 @@
     <main class="main-content">
         
         <header class="header">
+            <img src="header.png" alt="Header Background" class="header-bg">
             <div class="header-content">
                 <div class="user-block">
                     <div class="avatar" id="avatar">A</div>
-                    <div class="user-info">
-                        <span class="user-name" id="userName">Загрузка...</span>
-                    </div>
+                    <span class="user-name" id="userName">Admin</span>
                 </div>
             </div>
         </header>
 
-        <div style="display: flex; flex: 1; overflow: hidden;">
+        <div class="workspace">
             
-            <section class="chat-and-footer" id="mainView">
-                <div class="chat-viewport" id="chatMessages">
-                    </div>
-
+            <section class="chat-container" id="mainView">
+                <div class="chat-viewport" id="chatMessages"></div>
                 <div class="footer">
                     <div class="input-card">
-                        <textarea id="queryInput" placeholder="Введите ваш запрос к базе данных..."></textarea>
+                        <textarea id="queryInput" placeholder="Спросите AI о данных Drivee..."></textarea>
                         <div class="input-actions">
-                            <div class="engine-info">DRIVEE AI ENGINE v1.0</div>
+                            <div class="engine-info">SQL ENGINE v1.0</div>
                             <button class="send-btn" onclick="sendQuery()">
-                                <i data-lucide="arrow-up" style="color: #000;"></i>
+                                <i data-lucide="arrow-up"></i>
                             </button>
                         </div>
                     </div>
@@ -91,22 +82,18 @@
             <section id="historyView" class="view-section hidden">
                 <div class="section-content">
                     <div class="view-header">
-                        <h2 style="font-size: 24px; font-weight: 800;">Личная история запросов</h2>
-                        <p style="color: #888; margin-top: 5px;">Ваши отчеты, сохраненные в системе</p>
+                        <h2>История запросов</h2>
                     </div>
-                    <div class="list-container" id="historyList">
-                        </div>
+                    <div class="list-container" id="historyList"></div>
                 </div>
             </section>
 
             <section id="dataView" class="view-section hidden">
                 <div class="section-content">
                     <div class="view-header">
-                        <h2 style="font-size: 24px; font-weight: 800;">Источники данных</h2>
-                        <p style="color: #888; margin-top: 5px;">Активные подключения к хранилищам</p>
+                        <h2>Базы данных</h2>
                     </div>
-                    <div class="list-container" id="dbList">
-                        </div>
+                    <div class="list-container" id="dbList"></div>
                 </div>
             </section>
 
@@ -114,18 +101,15 @@
                 <div class="side-box">
                     <div class="box-title">Статистика</div>
                     <div class="stat-item" id="statRequests">Запросов сегодня: 0</div>
-                    <div class="stat-item">Точность AI: 98%</div>
+                    <div class="stat-item">Точность: 98%</div>
                 </div>
-
                 <div class="side-box">
-                    <div class="box-title">Системный статус</div>
-                    <div class="stat-item" style="color: #A5F52C; display: flex; align-items: center; gap: 8px;">
-                        <span class="status-dot"></span>
-                        SQL Engine Online
+                    <div class="box-title">Статус</div>
+                    <div class="status-online">
+                        <span class="dot"></span> SQL Engine Online
                     </div>
                 </div>
             </aside>
-
         </div>
     </main>
 </div>
