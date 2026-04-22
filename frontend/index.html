@@ -2,93 +2,129 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Драйвиум</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drivee Analytics | Панель управления</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
-    <div class="app-container">
-        <aside class="sidebar">
-            <div class="sidebar-top">
-                <div class="logo-wrapper">
-                    <img src="logo.png" alt="Drivee">
-                </div>
-                <button class="btn-new" onclick="clearChat()">
-                    <i data-lucide="plus" class="w-4 h-4"></i>
-                    <span>Новый запрос</span>
-                </button>
-                <nav class="nav">
-                    <div class="nav-item active"><i data-lucide="home"></i> Главная</div>
-                    <div class="nav-item"><i data-lucide="history"></i> История</div>
-                    <div class="nav-item"><i data-lucide="database"></i> Данные</div>
-                </nav>
-            </div>
-            <div class="sidebar-bottom">
-                <div class="logout" onclick="logout()">
-                    <i data-lucide="log-out"></i> Выйти
-                </div>
-                <div class="promo-wrapper">
-                    <img src="analitycs_for_all.png" alt="Promo">
-                </div>
-            </div>
-        </aside>
 
-        <main class="main-content">
-            <header class="header">
+<div class="app-container">
+    
+    <aside class="sidebar">
+        <div class="sidebar-top">
+            <div class="logo-wrapper">
+                <img src="logo.png" alt="Drivee Logo">
+            </div>
+
+            <button class="btn-new" onclick="clearChat(); showView('Главная')">
+                <i data-lucide="plus"></i>
+                Новый запрос
+            </button>
+
+            <nav class="nav">
+                <div class="nav-item active">
+                    <i data-lucide="layout-dashboard"></i>
+                    Главная
+                </div>
+                <div class="nav-item">
+                    <i data-lucide="history"></i>
+                    История
+                </div>
+                <div class="nav-item">
+                    <i data-lucide="database"></i>
+                    Данные
+                </div>
+                <div class="nav-item">
+                    <i data-lucide="settings"></i>
+                    Настройки
+                </div>
+            </nav>
+        </div>
+
+        <div class="sidebar-bottom">
+            <div class="logout" onclick="logout()">
+                <i data-lucide="log-out"></i>
+                Выйти из системы
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        
+        <header class="header">
+            <div class="header-content">
                 <div class="user-block">
-                    <div id="avatar" class="avatar">?</div>
-                    <span id="userName">...</span>
-                </div>
-            </header>
-
-            <div id="chatMessages" class="chat-viewport"></div>
-
-            <footer class="footer">
-                <div class="input-card">
-                    <textarea id="queryInput" placeholder="Напишите ваш запрос..."></textarea>
-                    <div class="input-actions">
-                        <span class="engine-info">SQL AI ENGINE V1.2</span>
-                        <button class="send-btn" onclick="sendQuery()">
-                            <i data-lucide="arrow-up-right"></i>
-                        </button>
+                    <div class="avatar" id="avatar">A</div>
+                    <div class="user-info">
+                        <span class="user-name" id="userName">Загрузка...</span>
                     </div>
                 </div>
-            </footer>
+            </div>
+        </header>
 
-            <div id="historyView" class="view-section hidden">
-                <div class="view-header">
-                    <h2>История запросов</h2>
-                </div>
-                <div id="historyList" class="list-container">
+        <div style="display: flex; flex: 1; overflow: hidden;">
+            
+            <section class="chat-and-footer" id="mainView">
+                <div class="chat-viewport" id="chatMessages">
                     </div>
-            </div>
 
-            <div id="dataView" class="view-section hidden">
-                <div class="view-header">
-                    <h2>Подключенные базы данных</h2>
-                </div>
-                <div id="dbList" class="list-container">
+                <div class="footer">
+                    <div class="input-card">
+                        <textarea id="queryInput" placeholder="Спроси меня что-нибудь о заказах, водителях или выручке..."></textarea>
+                        <div class="input-actions">
+                            <div class="engine-info">DRIVEE AI ENGINE v1.0</div>
+                            <button class="send-btn" onclick="sendQuery()">
+                                <i data-lucide="arrow-up" style="color: #000;"></i>
+                            </button>
+                        </div>
                     </div>
-            </div>
-        </main>
+                </div>
+            </section>
 
-        <aside class="right-panel">
-            <div class="side-box">
-                <h3 class="box-title">Статистика</h3>
-                <div class="box-content">
-                    <div class="stat-item">Запросов сегодня: 12</div>
-                    <div class="stat-item">Точность AI: 98%</div>
+            <section id="historyView" class="view-section hidden">
+                <div class="section-content">
+                    <div class="view-header">
+                        <h2>Личная история запросов</h2>
+                        <p style="color: #888; margin-top: 5px;">Здесь хранятся только ваши аналитические отчеты</p>
+                    </div>
+                    <div class="list-container" id="historyList">
+                        </div>
                 </div>
-            </div>
-            <div class="side-box">
-                <h3 class="box-title">Подсказки</h3>
-                <div class="box-content">
-                    <p class="hint-text">Попробуйте спросить: "Средний чек за вчера"</p>
+            </section>
+
+            <section id="dataView" class="view-section hidden">
+                <div class="section-content">
+                    <div class="view-header">
+                        <h2>Источники данных</h2>
+                        <p style="color: #888; margin-top: 5px;">Активные подключения к рабочим базам Drivee</p>
+                    </div>
+                    <div class="list-container" id="dbList">
+                        </div>
                 </div>
-            </div>
-        </aside>
-    </div>
-    <script src="app.js"></script>
+            </section>
+
+            <aside class="right-panel">
+                <div class="side-box">
+                    <div class="box-title">Статистика аккаунта</div>
+                    <div class="stat-item">Запросов сегодня: <span id="statRequests">0</span></div>
+                    <div class="stat-item">Точность AI: <span id="statAccuracy">98%</span></div>
+                </div>
+
+                <div class="side-box">
+                    <div class="box-title">Системный статус</div>
+                    <div class="stat-item" style="color: #A5F52C; display: flex; align-items: center; gap: 8px;">
+                        <span class="status-dot"></span>
+                        SQL Engine Online
+                    </div>
+                </div>
+            </aside>
+
+        </div>
+    </main>
+</div>
+
+<script src="app.js"></script>
 </body>
 </html>
