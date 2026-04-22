@@ -9,19 +9,16 @@ from pydantic import BaseModel
 from typing import List
 from sql_generator import SQLGenerator
 
-# Инициализируем генератор (путь к ollama.exe подтянется автоматически из нашего скрипта)
+# Инициализируем генератор
 sql_gen = SQLGenerator(model_name="qwen2.5-coder:7b")
 
-#СЛУЖЕБНАЯ БД
+# СЛУЖЕБНАЯ БД
 SYSTEM_DB_URL = "sqlite:///./system.db"
 engine = create_engine(SYSTEM_DB_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-class QuestionRequest(BaseModel):
-    user_id: str
-    question: str
-
+# МОДЕЛИ ТАБЛИЦ
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
@@ -32,7 +29,7 @@ class QueryHistory(Base):
     __tablename__ = "history"
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(String)
-    question = Column(String)
+    question = Column(Text)
     sql_query = Column(Text)
     timestamp = Column(DateTime, default=datetime.utcnow)
 
@@ -41,12 +38,16 @@ class ConnectedDB(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String)
     db_type = Column(String)
-    status = Column(String)
+    status = Column(String, default="Online")
 
 Base.metadata.create_all(bind=engine)
 
-#FASTAPI CONFIG
+class QuestionRequest(BaseModel):
+    user_id: str
+    question: str
+
 app = FastAPI()
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -61,56 +62,33 @@ def get_db():
     finally:
         db.close()
 
-#МОДЕЛИ ДАННЫХ
-class QueryRequest(BaseModel):
-    question: str
-    user_id: str
-
-# --- ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ДЛЯ РАБОЧЕЙ БД ---
-def execute_target_query(sql: str):
-    try:
-        conn = sqlite3.connect('drivee_data.db')
-        cursor = conn.cursor()
-        cursor.execute(sql)
-        columns = [column[0] for column in cursor.description]
-        results = [dict(zip(columns, row)) for row in cursor.fetchall()]
-        conn.close()
-        return results
-    except Exception as e:
-        return str(e)
-
-# --- ЭНДПОИНТЫ ---
-
 @app.post("/ask")
-async def ask(request: QueryRequest, db: Session = Depends(get_db)):
-    q = request.question.lower()
+async def ask_question(request: QuestionRequest, db: Session = Depends(get_db)):
+    # 1. Генерируем SQL
+    gen_result = sql_gen.generate(request.question)
     
-    # 1. Простейший маппинг вопроса в SQL (имитация AI)
-    # В будущем здесь будет вызов LLM
-    if "заказ" in q and "якутск" in q:
-        sql = "SELECT count(*) as count FROM orders WHERE city='Якутск'"
-    elif "москв" in q:
-        sql = "SELECT count(*) as count FROM orders WHERE city='Москва'"
-    elif "цена" in q or "чек" in q:
-        sql = "SELECT AVG(price) as avg_price FROM orders WHERE status='completed'"
-    else:
-        sql = "SELECT * FROM orders ORDER BY date DESC LIMIT 3"
+    if gen_result["status"] == "error":
+        return {"message": f"Ошибка: {gen_result['error']}", "sql": None}
 
-    # 2. Выполняем запрос в РАБОЧЕЙ БД
-    db_results = execute_target_query(sql)
+    sql = gen_result["sql"]
     
-    # Формируем человекочитаемый ответ
-    if isinstance(db_results, list) and len(db_results) > 0:
-        if 'count' in db_results[0]:
-            msg = f"Нашел в базе: количество заказов — {db_results[0]['count']}."
-        elif 'avg_price' in db_results[0]:
-            msg = f"Средний чек по выполненным заказам: {round(db_results[0]['avg_price'], 2)} руб."
-        else:
-            msg = f"Запрос выполнен успешно. Найдено записей: {len(db_results)}."
-    else:
-        msg = "Данные по вашему запросу не найдены или произошла ошибка."
+    # 2. Выполняем SQL (в реальной БД заказов)
+    try:
+        # Здесь подключаемся к твоей БД заказов (orders.db)
+        with sqlite3.connect("orders.db") as conn:
+            cursor = conn.cursor()
+            cursor.execute(sql)
+            db_results = cursor.fetchall()
+            
+            if not db_results:
+                msg = "Данные по вашему запросу не найдены."
+            else:
+                msg = f"Нашел данные: {db_results[0][0]}" if len(db_results) == 1 else f"Найдено строк: {len(db_results)}"
+    except Exception as e:
+        msg = f"Ошибка выполнения SQL: {str(e)}"
+        db_results = []
 
-    # 3. Логируем в СЛУЖЕБНУЮ БД
+    # 3. Логируем в системную БД
     new_log = QueryHistory(user_id=request.user_id, question=request.question, sql_query=sql)
     db.add(new_log)
     
@@ -122,34 +100,23 @@ async def ask(request: QueryRequest, db: Session = Depends(get_db)):
         user.requests_count += 1
     
     db.commit()
-    
     return {"message": msg, "sql": sql, "data": db_results}
 
 @app.get("/history")
 async def get_history(user_id: str = None, db: Session = Depends(get_db)):
     query = db.query(QueryHistory)
-    
-    # Если передан ID пользователя, фильтруем только его историю
     if user_id:
         query = query.filter(QueryHistory.user_id == user_id)
-    
     return query.order_by(QueryHistory.id.desc()).limit(20).all()
 
 @app.get("/databases")
 async def get_dbs(db: Session = Depends(get_db)):
     dbs = db.query(ConnectedDB).all()
     if not dbs:
-        # Если пусто, отдаем дефолтную запись
-        return [{"name": "Drivee_Data_SQLite", "db_type": "SQLite (Embedded)", "status": "Online"}]
+        return [{"name": "Drivee_Orders_SQLite", "db_type": "SQLite", "status": "Online"}]
     return dbs
 
 @app.get("/stats")
-async def get_stats(user_id: str = "Admin", db: Session = Depends(get_db)):
+async def get_stats(user_id: str, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.username == user_id).first()
-    total_q = db.query(QueryHistory).count()
-    return {
-        "requests_today": user.requests_count if user else 0,
-        "total_system_requests": total_q,
-        "active_dbs": 1,
-        "accuracy": "98%"
-    }
+    return {"requests_today": user.requests_count if user else 0}
