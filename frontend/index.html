@@ -3,137 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Drivee Аналитика</title>
+    <title>Драйвиум — Аналитика</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        .drivee-green { color: #A5F52C; }
-        .drivee-bg-green { background-color: #A5F52C; }
-        .sidebar-active { background-color: #F7FEE7; border: 2px solid #A5F52C; color: #2D2D2D; }
-        .card-border { border: 2px solid #F3F4F6; }
-        .card-border:hover { border-color: #A5F52C; background-color: #FAFAF9; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { background-color: #FBFBFB; font-family: 'Inter', sans-serif; color: #2D2D2D; }
+        
+        .sidebar { width: 260px; border-right: 1px solid rgba(0,0,0,0.08); background: #FBFBFB; }
+        .nav-item { display: flex; items-center: center; gap: 12px; padding: 10px 16px; border-radius: 12px; transition: all 0.2s; color: #5F6368; font-weight: 500; }
+        .nav-item:hover { background: #f0f0f0; }
+        .nav-item.active { background: #E9F7D0; color: #2D2D2D; }
+        
+        .chat-container { max-width: 800px; margin: 0 auto; }
+        .message-user { background: #E9F7D0; border-radius: 12px 12px 2px 12px; padding: 12px 16px; align-self: flex-end; }
+        .card { background: white; border-radius: 24px; border: 1px solid rgba(0,0,0,0.08); }
+        
+        .input-area { background: white; border: 1px solid rgba(0,0,0,0.12); border-radius: 20px; padding: 16px; }
+        .btn-action { background: #A5F52C; border-radius: 12px; padding: 10px; transition: transform 0.1s; }
+        .btn-action:active { transform: scale(0.95); }
+        
+        .promo-banner { background: #A5F52C; border-radius: 20px; padding: 20px; position: relative; overflow: hidden; }
     </style>
 </head>
-<body class="bg-gray-50 flex h-screen overflow-hidden text-[#2D2D2D]">
+<body class="flex h-screen overflow-hidden">
 
-    <aside class="w-72 bg-white border-r-2 border-gray-100 flex flex-col p-6">
-        <div class="mb-10 px-2">
-            <img src="logo.png" alt="Drivee" class="h-10 w-auto">
-        </div>
+    <aside class="sidebar flex flex-col p-6 h-full">
+        <img src="logo.png" alt="Drivee" class="h-8 w-auto self-start mb-8">
         
-        <nav class="flex-1 space-y-3 font-medium">
-            <button class="w-full flex items-center p-4 border-2 border-[#A5F52C] rounded-2xl font-bold mb-6 hover:bg-[#F7FEE7] transition-all">
-                <i data-lucide="plus-circle" class="mr-3 w-5 h-5 drivee-green"></i> Новый запрос
-            </button>
-            <div class="flex items-center p-4 sidebar-active rounded-2xl font-bold cursor-pointer">
-                <i data-lucide="home" class="mr-3 w-5 h-5"></i> Главная
-            </div>
-            <div class="flex items-center p-4 text-gray-400 hover:bg-gray-50 rounded-2xl cursor-pointer border border-transparent hover:border-gray-200 transition-all">
-                <i data-lucide="history" class="mr-3 w-5 h-5"></i> История запросов
-            </div>
-            <div class="flex items-center p-4 text-gray-400 hover:bg-gray-50 rounded-2xl cursor-pointer border border-transparent hover:border-gray-200 transition-all">
-                <i data-lucide="star" class="mr-3 w-5 h-5"></i> Избранное
-            </div>
-            <div class="flex items-center p-4 text-gray-400 hover:bg-gray-50 rounded-2xl cursor-pointer border border-transparent hover:border-gray-200 transition-all">
-                <i data-lucide="layout-dashboard" class="mr-3 w-5 h-5"></i> Дашборды
-            </div>
-            <div class="flex items-center p-4 text-gray-400 hover:bg-gray-50 rounded-2xl cursor-pointer border border-transparent hover:border-gray-200 transition-all">
-                <i data-lucide="database" class="mr-3 w-5 h-5"></i> База данных
-            </div>
+        <button class="w-full border border-gray-200 py-3 rounded-xl flex items-center justify-center gap-2 mb-6 hover:bg-gray-50 transition-all">
+            <span class="text-xl">📝</span> Новый запрос
+        </button>
+
+        <nav class="flex-1 space-y-1">
+            <a href="#" class="nav-item active"><span>🏠</span> Главная</a>
+            <a href="#" class="nav-item"><span>🕒</span> История запросов</a>
+            <a href="#" class="nav-item"><span>⭐</span> Избранное</a>
+            <a href="#" class="nav-item"><span>📊</span> Дашборды</a>
+            <a href="#" class="nav-item"><span>🗄️</span> База данных</a>
+            <a href="#" class="nav-item"><span>⚙️</span> Настройки</a>
         </nav>
 
-        <div class="mt-auto">
-            <div class="drivee-bg-green p-5 rounded-[24px] mb-6 shadow-sm border border-[#8ed426]">
-                <p class="font-bold text-xs">Аналитика доступна каждому</p>
-                <div class="mt-2 opacity-30"><i data-lucide="heart" class="w-8 h-8"></i></div>
+        <div class="mt-auto space-y-4">
+            <a href="#" class="nav-item"><span>❓</span> Помощь</a>
+            <a href="login.html" class="nav-item text-red-500"><span>🚪</span> Выйти</a>
+            
+            <div class="promo-banner mt-4">
+                <p class="font-bold text-sm">Аналитика</p>
+                <p class="text-xs opacity-80">доступна каждому</p>
+                <div class="absolute -bottom-2 -right-2 opacity-20">
+                    <svg width="60" height="60" viewBox="0 0 200 200" fill="none"><path d="M100 160C100 160 30 110 30 65C30 40 50 25 70 25C85 25 95 35 100 45C105 35 115 25 130 25C150 25 170 40 170 65C170 110 100 160 100 160Z" stroke="white" stroke-width="12"/></svg>
+                </div>
             </div>
-            <button onclick="logout()" class="flex items-center p-4 text-gray-400 hover:text-red-500 transition-all">
-                <i data-lucide="log-out" class="mr-3 w-5 h-5"></i> Выйти
-            </button>
         </div>
     </aside>
 
-    <main class="flex-1 flex flex-col min-w-0">
-        <header class="h-20 bg-white border-b-2 border-gray-100 flex items-center justify-between px-10 shrink-0">
-            <div class="flex items-center text-sm font-bold text-gray-400 gap-2">
-                <i data-lucide="sparkles" class="drivee-green w-5 h-5"></i>
-                Драйвиум — Интеллектуальная аналитическая платформа
+    <main class="flex-1 flex flex-col overflow-hidden">
+        
+        <header class="h-16 flex items-center justify-between px-8 bg-white border-bottom border-gray-100">
+            <div class="flex items-center gap-2 text-sm font-semibold">
+                <span class="text-[#A5F52C]">✨</span> Драйвиум — Интеллектуальная аналитическая платформа
             </div>
-            <div class="flex items-center gap-4">
-                <div id="avatar" class="w-10 h-10 drivee-bg-green rounded-full flex items-center justify-center font-bold text-white border-2 border-white shadow-sm italic">?</div>
-                <div class="flex items-center gap-1 cursor-pointer">
-                    <span id="userName" class="font-bold text-gray-700">Пользователь</span>
-                    <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
-                </div>
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-[#A5F52C] rounded-full flex items-center justify-center font-bold text-xs">Ж</div>
+                <span class="font-medium text-sm">Жанна</span>
+                <span class="text-[10px]">▼</span>
             </div>
         </header>
 
-        <div class="flex-1 overflow-y-auto p-10">
-            <div class="max-w-4xl mx-auto">
-                <h1 class="text-5xl font-extrabold mb-6 tracking-tight">Спросил — получил данные —<br><span class="drivee-green">принял решение</span></h1>
-                <p class="text-gray-400 text-lg mb-12">Задавайте вопросы на естественном языке, а мы найдем нужные данные.</p>
+        <div class="flex-1 flex p-8 gap-8 overflow-y-auto">
+            
+            <div class="flex-1 flex flex-col gap-6">
+                <div class="flex flex-col gap-4 chat-container w-full">
+                    <div class="message-user">
+                        <p class="text-sm">Покажи отмены по городам за прошлую неделю</p>
+                        <span class="text-[10px] opacity-50 float-right mt-1">10:42 ✓✓</span>
+                    </div>
+                    
+                    <div class="card p-6 w-full">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="font-bold">Отмены по городам</h3>
+                                <p class="text-xs text-gray-400">за прошлую неделю (13 апреля - 19 апреля 2026)</p>
+                            </div>
+                            <button class="text-gray-400">⛶</button>
+                        </div>
+                        <div class="h-64 flex items-center justify-center border-2 border-dashed border-gray-100 rounded-xl">
+                            <p class="text-gray-300 text-sm">График загружается...</p>
+                        </div>
+                    </div>
+                </div>
 
-                <div class="bg-white border-2 border-gray-100 rounded-[32px] p-8 shadow-xl shadow-gray-200/40 mb-12 relative">
-                    <textarea id="queryInput" class="w-full h-32 outline-none text-xl placeholder-gray-200 resize-none" placeholder="Напишите ваш запрос..."></textarea>
-                    <div class="flex justify-between items-center mt-6 pt-6 border-t border-gray-50">
-                        <div class="flex gap-2">
-                            <button class="px-5 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-xs font-bold hover:bg-gray-100 flex items-center gap-2">
-                                <i data-lucide="lightbulb" class="w-4 h-4 text-gray-400"></i> ПРИМЕРЫ ЗАПРОСОВ
-                            </button>
-                            <button class="px-5 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-xs font-bold hover:bg-gray-100 flex items-center gap-2">
-                                <i data-lucide="upload-cloud" class="w-4 h-4 text-gray-400"></i> ЗАГРУЗИТЬ ФАЙЛ
+                <div class="mt-auto chat-container w-full">
+                    <div class="input-area shadow-sm">
+                        <textarea rows="1" placeholder="Напишите ваш запрос..." class="w-full outline-none resize-none text-sm"></textarea>
+                        <div class="flex justify-between items-center mt-4">
+                            <div class="flex gap-2">
+                                <button class="text-xs border px-3 py-1.5 rounded-lg text-gray-500 hover:bg-gray-50">✨ Примеры запросов</button>
+                                <button class="text-xs border px-3 py-1.5 rounded-lg text-gray-500 hover:bg-gray-50">📤 Загрузить файл</button>
+                            </div>
+                            <button class="btn-action">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2"/></svg>
                             </button>
                         </div>
-                        <button id="sendBtn" onclick="askML()" class="drivee-bg-green p-5 rounded-2xl hover:scale-105 active:scale-95 transition-all border-b-4 border-[#8ed426] shadow-lg shadow-[#A5F52C]/30">
-                            <i data-lucide="send" class="w-6 h-6 text-[#2D2D2D]"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-80 flex flex-col gap-6">
+                <div class="card p-6">
+                    <h3 class="font-bold mb-6">Быстрые действия</h3>
+                    <div class="space-y-4">
+                        <button class="w-full flex items-center justify-between group">
+                            <div class="flex items-center gap-3">
+                                <span class="bg-[#E9F7D0] p-2 rounded-lg">📊</span>
+                                <div class="text-left">
+                                    <p class="text-sm font-semibold">Создать дашборд</p>
+                                    <p class="text-[10px] text-gray-400">Визуализируйте важные метрики</p>
+                                </div>
+                            </div>
+                            <span class="text-gray-300 group-hover:text-gray-600">→</span>
+                        </button>
+                        
+                        <button class="w-full flex items-center justify-between group">
+                            <div class="flex items-center gap-3">
+                                <span class="bg-[#E9F7D0] p-2 rounded-lg">🔍</span>
+                                <div class="text-left">
+                                    <p class="text-sm font-semibold">Подключить данные</p>
+                                    <p class="text-[10px] text-gray-400">Добавьте новую базу данных</p>
+                                </div>
+                            </div>
+                            <span class="text-gray-300 group-hover:text-gray-600">→</span>
+                        </button>
+
+                        <button class="w-full flex items-center justify-between group">
+                            <div class="flex items-center gap-3">
+                                <span class="bg-[#E9F7D0] p-2 rounded-lg">📥</span>
+                                <div class="text-left">
+                                    <p class="text-sm font-semibold">Экспорт данных</p>
+                                    <p class="text-[10px] text-gray-400">Выгрузить данные в файл</p>
+                                </div>
+                            </div>
+                            <span class="text-gray-300 group-hover:text-gray-600">→</span>
                         </button>
                     </div>
                 </div>
-
-                <div class="grid grid-cols-2 gap-4 mb-12">
-                    <div onclick="useText('Сравни продажи по регионам за прошлый квартал')" class="p-6 bg-white card-border rounded-[24px] cursor-pointer transition-all flex items-center group shadow-sm">
-                        <div class="w-12 h-12 bg-gray-50 border border-gray-100 rounded-xl flex items-center justify-center mr-4 group-hover:border-[#A5F52C] transition-colors">
-                            <i data-lucide="bar-chart-2" class="w-6 h-6 text-gray-600 group-hover:text-[#A5F52C]"></i>
-                        </div>
-                        <span class="text-sm font-bold leading-tight">Сравни продажи по регионам за прошлый квартал</span>
-                    </div>
-                    <div onclick="useText('Какие заказы принесли наибольшую прибыль?')" class="p-6 bg-white card-border rounded-[24px] cursor-pointer transition-all flex items-center group shadow-sm">
-                        <div class="w-12 h-12 bg-gray-50 border border-gray-100 rounded-xl flex items-center justify-center mr-4 group-hover:border-[#A5F52C] transition-colors">
-                            <i data-lucide="shopping-bag" class="w-6 h-6 text-gray-600 group-hover:text-[#A5F52C]"></i>
-                        </div>
-                        <span class="text-sm font-bold leading-tight">Какие заказы принесли наибольшую прибыль?</span>
-                    </div>
-                </div>
             </div>
+
         </div>
     </main>
 
-    <aside class="w-80 bg-white border-l-2 border-gray-100 p-8 hidden lg:flex flex-col">
-        <h3 class="font-bold text-lg mb-6">Быстрые действия</h3>
-        <div class="space-y-4">
-            <div class="flex items-center justify-between p-4 card-border rounded-2xl cursor-pointer transition-all">
-                <div class="flex items-center">
-                    <div class="w-10 h-10 drivee-bg-green rounded-xl flex items-center justify-center mr-3"><i data-lucide="layout" class="w-5 h-5"></i></div>
-                    <div class="text-xs">
-                        <p class="font-bold">Создать дашборд</p>
-                        <p class="text-gray-400">Визуализация метрик</p>
-                    </div>
-                </div>
-                <i data-lucide="chevron-right" class="w-4 h-4 text-gray-300"></i>
-            </div>
-            <div class="flex items-center justify-between p-4 card-border rounded-2xl cursor-pointer transition-all">
-                <div class="flex items-center">
-                    <div class="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center mr-3"><i data-lucide="link-2" class="w-5 h-5 drivee-green"></i></div>
-                    <div class="text-xs">
-                        <p class="font-bold">Подключить данные</p>
-                        <p class="text-gray-400">Добавьте новую базу</p>
-                    </div>
-                </div>
-                <i data-lucide="chevron-right" class="w-4 h-4 text-gray-300"></i>
-            </div>
-        </div>
-    </aside>
-
-    <script src="app.js"></script>
+    <script>
+        // Проверка авторизации
+        const user = localStorage.getItem('drivee_user');
+        if (!user && window.location.pathname.includes('index.html')) {
+            window.location.href = 'login.html';
+        }
+    </script>
 </body>
 </html>
