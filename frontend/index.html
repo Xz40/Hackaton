@@ -3,26 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Драйвиум — Аналитика</title>
+    <title>Драйвиум — Аналитическая платформа</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        body { background-color: #FBFBFB; font-family: 'Inter', sans-serif; color: #2D2D2D; }
+        body { background-color: #FBFBFB; font-family: 'Inter', sans-serif; color: #2D2D2D; margin: 0; }
         
         .sidebar { width: 260px; border-right: 1px solid rgba(0,0,0,0.08); background: #FBFBFB; }
-        .nav-item { display: flex; items-center: center; gap: 12px; padding: 10px 16px; border-radius: 12px; transition: all 0.2s; color: #5F6368; font-weight: 500; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-radius: 12px; transition: all 0.2s; color: #5F6368; font-weight: 500; font-size: 14px; }
         .nav-item:hover { background: #f0f0f0; }
         .nav-item.active { background: #E9F7D0; color: #2D2D2D; }
         
-        .chat-container { max-width: 800px; margin: 0 auto; }
-        .message-user { background: #E9F7D0; border-radius: 12px 12px 2px 12px; padding: 12px 16px; align-self: flex-end; }
+        .chat-container { max-width: 900px; margin: 0 auto; width: 100%; }
         .card { background: white; border-radius: 24px; border: 1px solid rgba(0,0,0,0.08); }
         
         .input-area { background: white; border: 1px solid rgba(0,0,0,0.12); border-radius: 20px; padding: 16px; }
-        .btn-action { background: #A5F52C; border-radius: 12px; padding: 10px; transition: transform 0.1s; }
-        .btn-action:active { transform: scale(0.95); }
+        .btn-send { background-color: #A5F52C; border-radius: 12px; padding: 12px; transition: all 0.2s; }
+        .btn-send:hover { transform: scale(1.05); brightness: 1.05; }
         
         .promo-banner { background: #A5F52C; border-radius: 20px; padding: 20px; position: relative; overflow: hidden; }
+        
+        /* Стили для SVG иконок */
+        .icon { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; fill: none; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
@@ -30,132 +32,123 @@
     <aside class="sidebar flex flex-col p-6 h-full">
         <img src="logo.png" alt="Drivee" class="h-8 w-auto self-start mb-8">
         
-        <button class="w-full border border-gray-200 py-3 rounded-xl flex items-center justify-center gap-2 mb-6 hover:bg-gray-50 transition-all">
-            <span class="text-xl">📝</span> Новый запрос
+        <button class="w-full border border-gray-200 py-3 rounded-xl flex items-center justify-center gap-2 mb-6 hover:bg-gray-50 transition-all font-semibold text-sm">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Новый запрос
         </button>
 
         <nav class="flex-1 space-y-1">
-            <a href="#" class="nav-item active"><span>🏠</span> Главная</a>
-            <a href="#" class="nav-item"><span>🕒</span> История запросов</a>
-            <a href="#" class="nav-item"><span>⭐</span> Избранное</a>
-            <a href="#" class="nav-item"><span>📊</span> Дашборды</a>
-            <a href="#" class="nav-item"><span>🗄️</span> База данных</a>
-            <a href="#" class="nav-item"><span>⚙️</span> Настройки</a>
+            <a href="#" class="nav-item active"><svg class="icon"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Главная</a>
+            <a href="#" class="nav-item"><svg class="icon"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> История запросов</a>
+            <a href="#" class="nav-item"><svg class="icon"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Избранное</a>
+            <a href="#" class="nav-item"><svg class="icon"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg> Дашборды</a>
+            <a href="#" class="nav-item"><svg class="icon"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg> База данных</a>
+            <a href="#" class="nav-item"><svg class="icon"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Настройки</a>
         </nav>
 
         <div class="mt-auto space-y-4">
-            <a href="#" class="nav-item"><span>❓</span> Помощь</a>
-            <a href="login.html" class="nav-item text-red-500"><span>🚪</span> Выйти</a>
+            <a href="#" class="nav-item"><svg class="icon"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Помощь</a>
+            <a href="login.html" onclick="localStorage.clear()" class="nav-item text-red-500"><svg class="icon"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Выйти</a>
             
             <div class="promo-banner mt-4">
-                <p class="font-bold text-sm">Аналитика</p>
-                <p class="text-xs opacity-80">доступна каждому</p>
-                <div class="absolute -bottom-2 -right-2 opacity-20">
-                    <svg width="60" height="60" viewBox="0 0 200 200" fill="none"><path d="M100 160C100 160 30 110 30 65C30 40 50 25 70 25C85 25 95 35 100 45C105 35 115 25 130 25C150 25 170 40 170 65C170 110 100 160 100 160Z" stroke="white" stroke-width="12"/></svg>
-                </div>
+                <p class="font-bold text-sm text-[#2D2D2D]">Аналитика</p>
+                <p class="text-[11px] text-[#2D2D2D] opacity-70">доступна каждому</p>
             </div>
         </div>
     </aside>
 
-    <main class="flex-1 flex flex-col overflow-hidden">
+    <main class="flex-1 flex flex-col">
         
-        <header class="h-16 flex items-center justify-between px-8 bg-white border-bottom border-gray-100">
-            <div class="flex items-center gap-2 text-sm font-semibold">
-                <span class="text-[#A5F52C]">✨</span> Драйвиум — Интеллектуальная аналитическая платформа
+        <header class="h-16 flex items-center justify-between px-8 bg-white border-b border-gray-100">
+            <div class="flex items-center gap-2 text-sm font-semibold opacity-80">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A5F52C" stroke-width="2.5"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+                Драйвиум — Интеллектуальная аналитическая платформа
             </div>
             <div class="flex items-center gap-3">
-                <div class="w-8 h-8 bg-[#A5F52C] rounded-full flex items-center justify-center font-bold text-xs">Ж</div>
-                <span class="font-medium text-sm">Жанна</span>
-                <span class="text-[10px]">▼</span>
+                <div id="userAvatar" class="w-8 h-8 bg-[#A5F52C] rounded-full flex items-center justify-center font-bold text-xs">?</div>
+                <span id="userNameDisplay" class="font-medium text-sm">Пользователь</span>
+                <span class="text-[10px] opacity-40">▼</span>
             </div>
         </header>
 
-        <div class="flex-1 flex p-8 gap-8 overflow-y-auto">
+        <div class="flex-1 flex p-8 gap-8 overflow-hidden">
             
-            <div class="flex-1 flex flex-col gap-6">
-                <div class="flex flex-col gap-4 chat-container w-full">
-                    <div class="message-user">
-                        <p class="text-sm">Покажи отмены по городам за прошлую неделю</p>
-                        <span class="text-[10px] opacity-50 float-right mt-1">10:42 ✓✓</span>
+            <div class="flex-1 flex flex-col">
+                <div id="chatMessages" class="flex-1 overflow-y-auto chat-container space-y-6 pr-4">
                     </div>
-                    
-                    <div class="card p-6 w-full">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h3 class="font-bold">Отмены по городам</h3>
-                                <p class="text-xs text-gray-400">за прошлую неделю (13 апреля - 19 апреля 2026)</p>
-                            </div>
-                            <button class="text-gray-400">⛶</button>
-                        </div>
-                        <div class="h-64 flex items-center justify-center border-2 border-dashed border-gray-100 rounded-xl">
-                            <p class="text-gray-300 text-sm">График загружается...</p>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="mt-auto chat-container w-full">
+                <div class="chat-container pt-6">
                     <div class="input-area shadow-sm">
-                        <textarea rows="1" placeholder="Напишите ваш запрос..." class="w-full outline-none resize-none text-sm"></textarea>
+                        <textarea id="userInput" rows="1" placeholder="Напишите ваш запрос..." class="w-full outline-none resize-none text-sm"></textarea>
                         <div class="flex justify-between items-center mt-4">
                             <div class="flex gap-2">
-                                <button class="text-xs border px-3 py-1.5 rounded-lg text-gray-500 hover:bg-gray-50">✨ Примеры запросов</button>
-                                <button class="text-xs border px-3 py-1.5 rounded-lg text-gray-500 hover:bg-gray-50">📤 Загрузить файл</button>
+                                <button class="text-[12px] border px-4 py-2 rounded-xl text-gray-500 hover:bg-gray-50 transition-colors flex items-center gap-2">
+                                    <svg class="icon w-3 h-3"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                    Примеры запросов
+                                </button>
+                                <button class="text-[12px] border px-4 py-2 rounded-xl text-gray-500 hover:bg-gray-50 transition-colors flex items-center gap-2">
+                                    <svg class="icon w-3 h-3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                    Загрузить файл
+                                </button>
                             </div>
-                            <button class="btn-action">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2"/></svg>
+                            <button class="btn-send" id="sendBtn">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2D2D2D" stroke-width="2.5"><path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2"/></svg>
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="w-80 flex flex-col gap-6">
+            <div class="w-80 space-y-6">
                 <div class="card p-6">
-                    <h3 class="font-bold mb-6">Быстрые действия</h3>
+                    <h3 class="font-bold text-sm mb-6">Быстрые действия</h3>
                     <div class="space-y-4">
-                        <button class="w-full flex items-center justify-between group">
+                        <div class="flex items-center justify-between group cursor-pointer">
                             <div class="flex items-center gap-3">
-                                <span class="bg-[#E9F7D0] p-2 rounded-lg">📊</span>
+                                <span class="bg-[#E9F7D0] p-2.5 rounded-xl"><svg class="icon w-4 h-4 text-green-700"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></span>
                                 <div class="text-left">
-                                    <p class="text-sm font-semibold">Создать дашборд</p>
-                                    <p class="text-[10px] text-gray-400">Визуализируйте важные метрики</p>
+                                    <p class="text-xs font-semibold">Создать дашборд</p>
+                                    <p class="text-[10px] text-gray-400">Визуализируйте метрики</p>
                                 </div>
                             </div>
-                            <span class="text-gray-300 group-hover:text-gray-600">→</span>
-                        </button>
+                            <svg class="icon w-3 h-3 text-gray-300 group-hover:text-gray-900"><polyline points="9 18 15 12 9 6"/></svg>
+                        </div>
                         
-                        <button class="w-full flex items-center justify-between group">
+                        <div class="flex items-center justify-between group cursor-pointer">
                             <div class="flex items-center gap-3">
-                                <span class="bg-[#E9F7D0] p-2 rounded-lg">🔍</span>
+                                <span class="bg-[#E9F7D0] p-2.5 rounded-xl"><svg class="icon w-4 h-4 text-green-700"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
                                 <div class="text-left">
-                                    <p class="text-sm font-semibold">Подключить данные</p>
-                                    <p class="text-[10px] text-gray-400">Добавьте новую базу данных</p>
+                                    <p class="text-xs font-semibold">Подключить данные</p>
+                                    <p class="text-[10px] text-gray-400">Добавить базу данных</p>
                                 </div>
                             </div>
-                            <span class="text-gray-300 group-hover:text-gray-600">→</span>
-                        </button>
+                            <svg class="icon w-3 h-3 text-gray-300 group-hover:text-gray-900"><polyline points="9 18 15 12 9 6"/></svg>
+                        </div>
 
-                        <button class="w-full flex items-center justify-between group">
+                        <div class="flex items-center justify-between group cursor-pointer">
                             <div class="flex items-center gap-3">
-                                <span class="bg-[#E9F7D0] p-2 rounded-lg">📥</span>
+                                <span class="bg-[#E9F7D0] p-2.5 rounded-xl"><svg class="icon w-4 h-4 text-green-700"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
                                 <div class="text-left">
-                                    <p class="text-sm font-semibold">Экспорт данных</p>
-                                    <p class="text-[10px] text-gray-400">Выгрузить данные в файл</p>
+                                    <p class="text-xs font-semibold">Экспорт данных</p>
+                                    <p class="text-[10px] text-gray-400">Выгрузить отчет в файл</p>
                                 </div>
                             </div>
-                            <span class="text-gray-300 group-hover:text-gray-600">→</span>
-                        </button>
+                            <svg class="icon w-3 h-3 text-gray-300 group-hover:text-gray-900"><polyline points="9 18 15 12 9 6"/></svg>
+                        </div>
                     </div>
                 </div>
             </div>
-
         </div>
     </main>
 
     <script>
-        // Проверка авторизации
-        const user = localStorage.getItem('drivee_user');
-        if (!user && window.location.pathname.includes('index.html')) {
+        // Имя пользователя из localStorage
+        const userName = localStorage.getItem('drivee_user') || 'Пользователь';
+        document.getElementById('userNameDisplay').innerText = userName;
+        document.getElementById('userAvatar').innerText = userName.charAt(0).toUpperCase();
+
+        // Простая проверка авторизации
+        if (!localStorage.getItem('drivee_user')) {
             window.location.href = 'login.html';
         }
     </script>
