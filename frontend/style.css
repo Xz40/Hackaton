@@ -44,9 +44,9 @@ body, html { height: 100vh; width: 100vw; overflow: hidden; font-family: 'Inter'
 .engine-tag { color: #BBB; font-size: 10px; font-weight: 800; display: flex; align-items: center; gap: 4px; letter-spacing: 1px; }
 
 /* КНОПКА ОТПРАВКИ (Круглая, черная) */
-.send-btn { width: 40px; height: 40px; border-radius: 50%; background: #000; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-.send-btn i { color: #fff; width: 18px; height: 18px; }
-.send-btn:hover { transform: scale(1.05); background: #333; }
+.send-btn { width: 40px; height: 40px; border-radius: 50%; background: #ffffff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+.send-btn i { color: #921313; width: 18px; height: 18px; }
+.send-btn:hover { transform: scale(1.05); background: #00e632; }
 
 /* ИСТОРИЯ И БАЗЫ (КАРТОЧКИ) */
 .scroll-container { padding: 40px 10%; }
