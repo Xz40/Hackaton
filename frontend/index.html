@@ -2,55 +2,55 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Драйвиум — Аналитическая платформа</title>
+    <title>Драйвиум</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <div class="app-container">
+<body class="bg-white">
+    <div class="app-layout">
         <aside class="sidebar">
-            <div class="logo-container">
-                <img src="logo.png" alt="Drivee" class="logo-img">
+            <div class="sidebar-top">
+                <img src="logo.png" alt="Drivee" class="main-logo">
+                
+                <button class="new-query-btn" onclick="clearChat()">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    <span>Новый запрос</span>
+                </button>
+
+                <nav class="menu">
+                    <a href="#" class="menu-item active"><i data-lucide="home"></i> Главная</a>
+                    <a href="#" class="menu-item"><i data-lucide="history"></i> История</a>
+                    <a href="#" class="menu-item"><i data-lucide="database"></i> Данные</a>
+                </nav>
             </div>
 
-            <button class="btn-new-query" onclick="clearChat()">
-                <i data-lucide="plus-square"></i> Новый запрос
-            </button>
-
-            <nav class="side-nav">
-                <a href="#" onclick="handleNav(this, 'main')" class="nav-item active"><i data-lucide="home"></i> Главная</a>
-                <a href="#" onclick="handleNav(this, 'history')" class="nav-item"><i data-lucide="history"></i> История</a>
-                <a href="#" onclick="handleNav(this, 'database')" class="nav-item"><i data-lucide="database"></i> Данные</a>
-            </nav>
-
-            <div class="sidebar-footer">
-                <div class="sidebar-promo">
-                    <img src="analitycs_for_all.png" alt="Analytics for all" class="promo-img">
-                </div>
-                <button onclick="logout()" class="nav-item logout-btn"><i data-lucide="log-out"></i> Выйти</button>
+            <div class="sidebar-bottom">
+                <img src="analitycs_for_all.png" alt="Promo" class="promo-banner">
+                <button onclick="logout()" class="logout-link">
+                    <i data-lucide="log-out"></i> Выйти
+                </button>
             </div>
         </aside>
 
-        <main class="main-content">
-            <header class="top-bar">
-                <div class="header-logo">
-                    <img src="header.png" alt="Драйвиум" class="header-img">
-                </div>
-                <div class="user-profile">
-                    <div id="userAvatar" class="user-avatar">?</div>
-                    <span id="userNameDisplay" class="user-name">Загрузка...</span>
+        <main class="main-area">
+            <header class="header">
+                <img src="header.png" alt="Драйвиум" class="header-title-img">
+                
+                <div class="user-block">
+                    <div id="userAvatar" class="avatar">?</div>
+                    <span id="userNameDisplay" class="username">...</span>
                 </div>
             </header>
 
-            <section id="chatMessages" class="content-area no-scrollbar"></section>
+            <div id="chatMessages" class="chat-viewport"></div>
 
-            <footer class="input-container">
-                <div class="input-wrapper">
+            <footer class="footer-input">
+                <div class="input-box">
                     <textarea id="queryInput" placeholder="Напишите ваш запрос..."></textarea>
-                    <div class="input-actions">
-                        <span class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">SQL AI Engine v1.2</span>
-                        <button onclick="sendQuery()" class="btn-send">
+                    <div class="input-row">
+                        <span class="engine-tag">SQL AI ENGINE V1.2</span>
+                        <button onclick="sendQuery()" class="send-btn">
                             <i data-lucide="arrow-up-right"></i>
                         </button>
                     </div>
