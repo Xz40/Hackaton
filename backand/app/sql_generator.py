@@ -1,4 +1,4 @@
-from .semantic import enrich_question
+from semantic import enrich_question
 
 def generate_sql(question: str) -> str:
     """
