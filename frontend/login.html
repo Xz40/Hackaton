@@ -2,49 +2,31 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Drivee - Авторизация</title>
+    <title>Drivee - Вход</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .drivee-bg { background-color: #A5F52C; }
-        .input-gray { background-color: #F3F4F6; }
-    </style>
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="bg-[#1A1A1A] flex items-center justify-center min-h-screen font-sans p-4">
-    <div class="bg-white rounded-[40px] p-6 md:p-12 flex flex-col md:flex-row gap-8 max-w-5xl w-full">
-        <div class="drivee-bg rounded-[32px] p-10 flex-1 flex flex-col justify-between min-h-[300px] relative overflow-hidden">
-            <h1 class="text-4xl font-bold text-[#2D2D2D] leading-tight z-10 relative">Стань частью<br>команды в Drivee</h1>
-            <div class="absolute bottom-[-40px] right-[-40px] opacity-10">
-                <svg width="300" height="300" viewBox="0 0 100 100" fill="currentColor"><path d="M50 0C22.4 0 0 22.4 0 50s22.4 50 50 50 50-22.4 50-50S77.6 0 50 0zm0 80c-16.6 0-30-13.4-30-30s13.4-30 30-30 30 13.4 30 30-13.4 30-30 30z"/></svg>
-            </div>
+    <div class="bg-white rounded-[40px] p-6 md:p-12 flex flex-col md:flex-row gap-8 max-w-5xl w-full border border-gray-800">
+        <div class="bg-[#A5F52C] rounded-[32px] p-10 flex-1 flex flex-col justify-between min-h-[350px] relative overflow-hidden border-2 border-[#8ed426]">
+            <h1 class="text-4xl font-bold text-[#2D2D2D] leading-tight z-10">Стань частью<br>команды в Drivee</h1>
+            <i data-lucide="shield-check" class="absolute bottom-[-20px] right-[-20px] w-48 h-48 text-[#8ed426] opacity-30"></i>
         </div>
-
         <div class="flex-1 flex flex-col justify-center px-4">
-            <div class="mb-10 flex items-center text-2xl font-bold italic">
-                drive<span class="text-[#A5F52C]">ee</span>
-            </div>
+            <div class="mb-10 text-2xl font-bold italic">drive<span class="text-[#A5F52C]">ee</span></div>
             <div class="space-y-4">
-                <input id="username" type="text" placeholder="Логин" class="w-full input-gray p-5 rounded-2xl outline-none focus:ring-2 ring-[#A5F52C] transition-all">
-                <input type="password" placeholder="Пароль" class="w-full input-gray p-5 rounded-2xl outline-none">
-                
-                <label class="flex items-center text-sm text-gray-500 cursor-pointer py-2">
-                    <input type="checkbox" class="mr-2 w-4 h-4 accent-[#A5F52C]"> Запомнить меня на этом устройстве
-                </label>
-
-                <button onclick="login()" class="w-full drivee-bg py-5 rounded-2xl font-bold text-[#2D2D2D] hover:shadow-lg active:scale-[0.98] transition-all">
-                    Войти в профиль
-                </button>
+                <input id="username" type="text" placeholder="Логин" class="w-full bg-gray-100 p-5 rounded-2xl outline-none border-2 border-transparent focus:border-[#A5F52C] transition-all">
+                <input type="password" placeholder="Пароль" class="w-full bg-gray-100 p-5 rounded-2xl outline-none border-2 border-transparent focus:border-[#A5F52C] transition-all">
+                <button onclick="login()" class="w-full bg-[#A5F52C] py-5 rounded-2xl font-bold text-[#2D2D2D] border-b-4 border-[#8ed426] hover:brightness-105 active:border-b-0 transition-all">Войти в профиль</button>
             </div>
         </div>
     </div>
-
     <script>
+        lucide.createIcons();
         function login() {
-            const userField = document.getElementById('username');
-            if (!userField.value) return alert('Введите логин!');
-            
-            // Сохраняем юзера для динамики
-            localStorage.setItem('drivee_user', userField.value);
+            const user = document.getElementById('username').value;
+            if (!user) return alert('Введи логин!');
+            localStorage.setItem('drivee_user', user);
             window.location.href = 'index.html';
         }
     </script>

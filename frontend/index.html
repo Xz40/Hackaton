@@ -2,76 +2,70 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Драйвиум — Аналитика</title>
+    <title>Drivee Аналитика</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
+        .sidebar-active { background-color: #F7FEE7; border: 2px solid #A5F52C; }
         .drivee-green { color: #A5F52C; }
-        .drivee-bg-green { background-color: #A5F52C; }
-        .sidebar-active { background-color: #F7FEE7; border-right: 4px solid #A5F52C; }
     </style>
 </head>
-<body class="bg-gray-50 flex h-screen">
+<body class="bg-gray-50 flex h-screen overflow-hidden text-[#2D2D2D]">
 
-    <aside class="w-72 bg-white border-r border-gray-100 flex flex-col py-8 px-4">
-        <div class="px-4 mb-12 text-2xl font-bold italic">drive<span class="drivee-green">ee</span></div>
-        
-        <nav class="flex-1 space-y-2">
-            <button class="w-full text-left px-6 py-4 border-2 border-[#A5F52C] rounded-2xl font-bold mb-6 hover:bg-gray-50 transition-all flex items-center">
-                <span class="mr-3">➕</span> Новый запрос
+    <aside class="w-72 bg-white border-r-2 border-gray-100 flex flex-col p-6">
+        <div class="mb-10 text-2xl font-bold italic px-2">drive<span class="drivee-green">ee</span></div>
+        <nav class="flex-1 space-y-3">
+            <button class="w-full flex items-center p-4 border-2 border-[#A5F52C] rounded-2xl font-bold hover:bg-[#F7FEE7] transition-all">
+                <i data-lucide="plus-circle" class="mr-3 w-5 h-5 drivee-green"></i>Новый запрос
             </button>
-            <div class="px-6 py-4 sidebar-active rounded-xl font-bold text-gray-900 flex items-center cursor-pointer">
-                <span class="mr-3">🏠</span> Главная
+            <div class="flex items-center p-4 sidebar-active rounded-2xl font-bold"><i data-lucide="home" class="mr-3 w-5 h-5"></i>Главная</div>
+            <div class="flex items-center p-4 text-gray-400 hover:bg-gray-50 rounded-2xl cursor-pointer border border-transparent hover:border-gray-200 transition-all">
+                <i data-lucide="history" class="mr-3 w-5 h-5"></i>История
             </div>
-            <div class="px-6 py-4 text-gray-400 flex items-center cursor-pointer hover:bg-gray-50 rounded-xl">
-                <span class="mr-3">🕒</span> История запросов
+            <div class="flex items-center p-4 text-gray-400 hover:bg-gray-50 rounded-2xl cursor-pointer border border-transparent hover:border-gray-200 transition-all">
+                <i data-lucide="database" class="mr-3 w-5 h-5"></i>База данных
             </div>
         </nav>
-
-        <div class="mt-auto p-4 drivee-bg-green rounded-[24px] mb-4">
-            <p class="font-bold text-sm">Аналитика доступна каждому</p>
-        </div>
-        <button onclick="logout()" class="px-6 py-4 text-gray-400 flex items-center hover:text-red-500">
-            <span class="mr-3">🚪</span> Выйти
+        <button onclick="logout()" class="flex items-center p-4 text-gray-400 hover:text-red-500 transition-colors">
+            <i data-lucide="log-out" class="mr-3 w-5 h-5"></i>Выйти
         </button>
     </aside>
 
-    <main class="flex-1 overflow-y-auto p-10 bg-white">
-        <header class="flex justify-between items-center mb-16">
-            <div class="flex items-center text-sm font-medium text-gray-500">
-                <span class="drivee-green mr-2 text-xl">✦</span> Драйвиум — Интеллектуальная аналитическая платформа
+    <main class="flex-1 overflow-y-auto p-10">
+        <header class="flex justify-between items-center mb-12">
+            <div class="flex items-center text-sm font-semibold text-gray-400 border border-gray-200 px-4 py-2 rounded-full">
+                <i data-lucide="sparkles" class="w-4 h-4 drivee-green mr-2"></i> Драйвиум — AI Аналитика
             </div>
             <div class="flex items-center gap-3">
-                <div id="avatar" class="w-10 h-10 drivee-bg-green rounded-full flex items-center justify-center font-bold text-white shadow-sm">?</div>
-                <span id="userNameDisplay" class="font-bold text-gray-800">Пользователь</span>
+                <div id="avatar" class="w-10 h-10 bg-[#A5F52C] rounded-full flex items-center justify-center font-bold text-white border-2 border-white shadow-sm">?</div>
+                <span id="userName" class="font-bold text-gray-700">Пользователь</span>
             </div>
         </header>
 
         <div class="max-w-4xl mx-auto">
-            <h1 class="text-5xl font-bold mb-6 tracking-tight">Спросил — получил данные —<br><span class="drivee-green">принял решение</span></h1>
-            <p class="text-gray-400 text-lg mb-12">Задавайте вопросы на естественном языке, а мы найдем данные в базе.</p>
-
-            <div class="bg-white border-2 border-gray-50 rounded-[32px] p-8 shadow-xl shadow-gray-100/50 mb-12">
-                <textarea id="queryInput" class="w-full h-32 outline-none text-xl placeholder-gray-300 resize-none" placeholder="Напишите ваш запрос..."></textarea>
-                <div class="flex justify-between items-center mt-6">
-                    <div class="flex gap-3">
-                        <button class="px-5 py-2.5 bg-gray-50 rounded-full text-sm font-medium text-gray-600 hover:bg-gray-100">✨ Примеры</button>
-                        <button class="px-5 py-2.5 bg-gray-50 rounded-full text-sm font-medium text-gray-600 hover:bg-gray-100">📁 Файл</button>
+            <h1 class="text-5xl font-bold mb-6">Спросил — получил — <span class="drivee-green">решил</span></h1>
+            
+            <div class="bg-white border-2 border-gray-100 rounded-[32px] p-8 shadow-lg mb-10">
+                <textarea id="queryInput" class="w-full h-32 outline-none text-xl placeholder-gray-200 resize-none" placeholder="Напишите ваш запрос..."></textarea>
+                <div class="flex justify-between items-center mt-6 pt-6 border-t border-gray-50">
+                    <div class="flex gap-2">
+                        <button class="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold hover:bg-gray-100 transition-all">✨ ПРИМЕРЫ</button>
+                        <button class="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold hover:bg-gray-100 transition-all">📁 ФАЙЛ</button>
                     </div>
-                    <button id="sendBtn" onclick="askML()" class="drivee-bg-green p-5 rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-lg shadow-[#A5F52C]/30">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                    <button id="sendBtn" onclick="askML()" class="bg-[#A5F52C] p-5 rounded-2xl hover:scale-105 active:scale-95 transition-all border-b-4 border-[#8ed426]">
+                        <i data-lucide="send" class="w-6 h-6 text-white"></i>
                     </button>
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4" id="suggestions">
-                <div onclick="useText(this)" class="p-6 border border-gray-100 rounded-3xl hover:border-[#A5F52C] cursor-pointer transition-all flex items-center">
-                    <div class="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center mr-4 text-2xl">📊</div>
-                    <span class="text-sm font-bold text-gray-700">Покажи продажи по регионам за месяц</span>
+            <div class="grid grid-cols-2 gap-4">
+                <div onclick="useText('Покажи продажи по регионам')" class="p-6 border-2 border-gray-100 rounded-3xl hover:border-[#A5F52C] hover:bg-white cursor-pointer transition-all flex items-center group shadow-sm">
+                    <div class="w-12 h-12 bg-gray-50 border border-gray-100 rounded-2xl flex items-center justify-center mr-4 group-hover:border-[#A5F52C]"><i data-lucide="bar-chart-3" class="w-6 h-6"></i></div>
+                    <span class="text-sm font-bold">Продажи по регионам</span>
                 </div>
-                <div onclick="useText(this)" class="p-6 border border-gray-100 rounded-3xl hover:border-[#A5F52C] cursor-pointer transition-all flex items-center">
-                    <div class="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center mr-4 text-2xl">🛒</div>
-                    <span class="text-sm font-bold text-gray-700">Какие заказы принесли больше прибыли?</span>
+                <div onclick="useText('Самые прибыльные заказы')" class="p-6 border-2 border-gray-100 rounded-3xl hover:border-[#A5F52C] hover:bg-white cursor-pointer transition-all flex items-center group shadow-sm">
+                    <div class="w-12 h-12 bg-gray-50 border border-gray-100 rounded-2xl flex items-center justify-center mr-4 group-hover:border-[#A5F52C]"><i data-lucide="shopping-bag" class="w-6 h-6"></i></div>
+                    <span class="text-sm font-bold">Прибыльные заказы</span>
                 </div>
             </div>
         </div>
