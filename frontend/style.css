@@ -1,66 +1,55 @@
-/* Сброс стилей */
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body, html { height: 100%; width: 100%; overflow: hidden; font-family: 'Inter', sans-serif; }
-
-.app-container { display: flex; height: 100vh; width: 100vw; background: #fff; }
-
-/* Сайдбар */
+/* --- СЕКЦИЯ САЙДБАРА --- */
 .sidebar { 
-    width: 260px; min-width: 260px; height: 100%;
-    background: #FBFBFB; border-right: 1px solid #F0F0F0;
-    display: flex; flex-direction: column; justify-content: space-between;
-    padding: 30px 20px;
-}
-.logo-img { height: 30px; width: auto; object-fit: contain; margin-bottom: 40px; align-self: flex-start; }
-
-.btn-new { 
-    width: 100%; padding: 12px; background: #fff; border: 1px solid #EAEAEA; 
-    border-radius: 12px; display: flex; align-items: center; gap: 10px;
-    font-weight: 500; cursor: pointer; margin-bottom: 25px;
+    width: 260px; 
+    min-width: 260px; 
+    height: 100vh;
+    background: #FBFBFB; 
+    border-right: 1px solid #F0F0F0;
+    display: flex; 
+    flex-direction: column; 
+    padding: 32px 24px; /* Увеличили отступы для чистоты */
 }
 
-.nav-item { 
-    display: flex; align-items: center; gap: 12px; padding: 12px; 
-    border-radius: 10px; color: #666; cursor: pointer; font-size: 14px;
+/* Настройка ЛОГОТИПА слева сверху */
+.logo-img { 
+    height: 32px;      /* Фиксированная высота как в макете */
+    width: auto;       /* Ширина подстроится автоматически */
+    object-fit: contain; 
+    margin-bottom: 40px; 
+    display: block;
 }
-.nav-item.active { background: #F0F9E6; color: #000; font-weight: 600; }
 
-.promo-img { width: 100%; border-radius: 15px; margin-bottom: 15px; }
-.logout-zone { color: #FF4D4D; display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; font-size: 14px; }
+/* Настройка ПРОМО-КАРТИНКИ слева снизу */
+.promo-img { 
+    width: 100%; 
+    height: auto; 
+    border-radius: 16px; 
+    margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* Легкая тень для стиля */
+}
 
-/* Контентная зона */
-.main-wrapper { flex: 1; display: flex; flex-direction: column; height: 100%; min-width: 0; }
-
+/* --- СЕКЦИЯ ХЕДЕРА (ШАПКИ) --- */
 .header { 
-    height: 70px; min-height: 70px; border-bottom: 1px solid #F5F5F5;
-    display: flex; align-items: center; justify-content: space-between; padding: 0 100px;
+    height: 80px;      /* Чуть увеличили высоту для "воздуха" */
+    min-height: 80px; 
+    padding: 0 40px; 
+    background: #fff;
+    border-bottom: 1px solid #F5F5F5;
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between;
 }
-.header-img { height: 22px; object-fit: contain; }
 
-.user-info { display: flex; align-items: center; gap: 12px; }
-.avatar { width: 32px; height: 32px; background: #A5F52C; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
-
-/* Чат */
-.chat-area { 
-    flex: 1; overflow-y: auto; padding: 40px; 
-    display: flex; flex-direction: column; gap: 20px;
+/* Настройка заголовка-картинки (header.png) */
+.header-img { 
+    height: 26px;      /* Оптимальный размер для читаемости */
+    width: auto; 
+    object-fit: contain;
 }
-.chat-area::-webkit-scrollbar { width: 0; } /* Прячем скроллбалл */
 
-.msg { max-width: 75%; padding: 16px 20px; border-radius: 18px; font-size: 15px; line-height: 1.5; }
-.bot { background: #F4F4F4; align-self: flex-start; border-bottom-left-radius: 4px; }
-.user { background: #F0F9E6; align-self: flex-end; border-bottom-right-radius: 4px; }
-
-/* Инпут */
-.input-section { padding: 20px 40px 40px; background: #fff; }
-.input-card { 
-    border: 1px solid #EAEAEA; border-radius: 20px; padding: 15px; 
-    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+/* Блок пользователя */
+.user-info { 
+    display: flex; 
+    align-items: center; 
+    gap: 12px; 
 }
-#queryInput { 
-    width: 100%; border: none; outline: none; height: 50px; 
-    resize: none; font-size: 15px; font-family: inherit;
-}
-.input-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
-.version { font-size: 10px; font-weight: 800; color: #CCC; letter-spacing: 1px; }
-.btn-send { background: #A5F52C; width: 44px; height: 44px; border: none; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
