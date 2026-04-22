@@ -7,19 +7,22 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap');
+        
         body { 
-            background-color: #f4f4f4; 
+            background-color: #f4f4f4; /* Светло-серый фон страницы как на скрине */
             font-family: 'Inter', sans-serif; 
         }
+
+        /* Навигация */
         .header-link { color: #2D2D2D; font-weight: 500; font-size: 18px; transition: opacity 0.2s; }
         .header-link:hover { opacity: 0.7; }
         
-        /* Стили для выпадающего меню */
+        /* Выпадающее меню "О нас" */
         .dropdown { 
             position: relative; 
             display: inline-block; 
-            padding-bottom: 20px; /* Создаем невидимый мост между кнопкой и меню */
-            margin-bottom: -20px;
+            padding-bottom: 25px; /* Тот самый "мостик", чтобы окно не закрывалось */
+            margin-bottom: -25px;
         }
         .dropdown-content {
             display: none;
@@ -30,7 +33,7 @@
             z-index: 50;
             border-radius: 20px;
             padding: 10px 0;
-            top: 45px; /* Регулируй высоту под кнопку */
+            top: 40px;
             left: 0;
             border: 1px solid rgba(0,0,0,0.05);
         }
@@ -41,30 +44,23 @@
             display: block;
             font-size: 16px;
             font-weight: 500;
-            transition: all 0.2s;
         }
-        .dropdown-content a:hover { 
-            background-color: #f9f9f9; 
-            color: #A5F52C; 
-            padding-left: 28px; /* Небольшой эффект сдвига при наведении */
-        }
-        .dropdown:hover .dropdown-content { 
-            display: block;
-            animation: fadeIn 0.2s ease;
-        }
+        .dropdown-content a:hover { background-color: #f9f9f9; color: #A5F52C; }
+        .dropdown:hover .dropdown-content { display: block; animation: fadeIn 0.2s ease; }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Карточка входа */
         .login-card { 
             background: white; 
             border-radius: 40px; 
             box-shadow: 0 4px 20px rgba(0,0,0,0.05);
         }
         .green-banner {
-            background-color: #A5F52C;
+            background-color: #A5F52C; /* Фирменный зеленый */
             border-radius: 30px;
             position: relative;
             overflow: hidden;
@@ -92,14 +88,25 @@
 
     <header class="w-full py-6 px-10 flex items-center justify-between max-w-7xl mx-auto">
         <div class="flex items-center gap-12">
-            <img src="logo.png" alt="Drivee" class="h-10 w-auto">
+           
+            <a href="/">
+                <svg width="125" height="42" viewBox="0 0 125 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 32V11H13.5C18.1944 11 22 14.8056 22 19.5V23.5C22 28.1944 18.1944 32 13.5 32H6ZM9.5 28.5H13.5C16.2614 28.5 18.5 26.2614 18.5 23.5V19.5C18.5 16.7386 16.2614 14.5 13.5 14.5H9.5V28.5Z" fill="#2D2D2D"/>
+                    <path d="M25 32V16.5H28.5V18.5C29.5 17 31.5 16.5 33 16.5V20.5C31.5 20.5 28.5 21 28.5 24.5V32H25Z" fill="#2D2D2D"/>
+                    <path d="M37 13.5V10.5H40.5V13.5H37ZM37 32V16.5H40.5V32H37Z" fill="#2D2D2D"/>
+                    <path d="M44 32L50 16.5H54L60 32H56L52 21L48 32H44Z" fill="#2D2D2D"/>
+                    <rect x="70" y="4" width="48" height="34" rx="10" fill="#A5F52C"/>
+                    <path d="M85 26C85 28.5 83 29.5 80.5 29.5C78 29.5 76 27.5 76 24.5C76 21.5 78 19.5 80.5 19.5C83 19.5 85 21.5 85 24.5M80.5 22C79.5 22 79 22.5 79 24.5C79 26.5 79.5 27 80.5 27C81.5 27 82 26.5 82 24.5C82 22.5 81.5 22 80.5 22Z" fill="#2D2D2D"/>
+                    <path d="M104 26C104 28.5 102 29.5 99.5 29.5C97 29.5 95 27.5 95 24.5C95 21.5 97 19.5 99.5 19.5C102 19.5 104 21.5 104 24.5M99.5 22C98.5 22 98 22.5 98 24.5C98 26.5 98.5 27 99.5 27C100.5 27 101 26.5 101 24.5C101 22.5 100.5 22 99.5 22Z" fill="#2D2D2D"/>
+                </svg>
+            </a>
             
             <nav class="flex gap-8 items-center">
                 <a href="https://drivee.com/partnership" target="_blank" class="header-link">Партнёрам</a>
                 
                 <div class="dropdown">
                     <button class="header-link flex items-center gap-1 outline-none">
-                        О нас <span class="text-[10px] opacity-50">▼</span>
+                        О нас <span class="text-[10px] opacity-40">▼</span>
                     </button>
                     <div class="dropdown-content">
                         <a href="https://drivee.com/about-us" target="_blank">О компании</a>
@@ -115,10 +122,14 @@
 
     <main class="flex-1 flex items-center justify-center p-4">
         <div class="login-card flex flex-col md:flex-row p-6 gap-8 max-w-5xl w-full">
+            
             <div class="green-banner flex-1 p-10 min-h-[400px] flex flex-col justify-between">
-                <h1 class="text-[44px] font-extrabold text-[#2D2D2D] leading-[1.1] z-10">Стань частью<br>команды в Drivee</h1>
+                <h1 class="text-[44px] font-extrabold text-[#2D2D2D] leading-[1.1] z-10">
+                    Стань частью<br>команды в Drivee
+                </h1>
+                
                 <div class="relative h-32 w-full flex justify-end items-end opacity-40">
-                    <svg width="180" height="180" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg width="180" height="180" viewBox="0 0 200 200" fill="none">
                         <path d="M100 160C100 160 30 110 30 65C30 40 50 25 70 25C85 25 95 35 100 45C105 35 115 25 130 25C150 25 170 40 170 65C170 110 100 160 100 160Z" stroke="white" stroke-width="12" stroke-linejoin="round"/>
                     </svg>
                 </div>
@@ -128,23 +139,14 @@
                 <div class="space-y-4">
                     <input id="username" type="text" placeholder="Логин" class="input-field text-lg">
                     <input type="password" placeholder="Пароль" class="input-field text-lg">
+                    
                     <div class="flex items-center gap-3 py-2">
                         <input type="checkbox" id="remember" class="w-5 h-5 accent-[#A5F52C] rounded">
                         <label for="remember" class="text-gray-500 text-sm cursor-pointer">Запомнить меня на этом устройстве</label>
                     </div>
-                    <button onclick="login()" class="btn-submit text-xl hover:brightness-105 transition-all">Войти в профиль</button>
+
+                    <button onclick="login()" class="btn-submit text-xl hover:brightness-105 transition-all">
+                        Войти в профиль
+                    </button>
                 </div>
             </div>
-        </div>
-    </main>
-
-    <script>
-        function login() {
-            const user = document.getElementById('username').value;
-            if (!user) return alert('Введите логин!');
-            localStorage.setItem('drivee_user', user);
-            window.location.href = 'index.html';
-        }
-    </script>
-</body>
-</html>
