@@ -38,7 +38,7 @@ body, html { height: 100vh; width: 100vw; overflow: hidden; font-family: sans-se
 
 /* ХЕДЕР: фиксированная высота */
 .header { 
-    height: 60px; min-height: 60px; padding: 0px; 
+    height: 60px; min-height: 60px; padding: 10px; 
     display: flex; align-items: center; justify-content: space-between;
     border-bottom: 1px solid #F5F5F5;
 }
