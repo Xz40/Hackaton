@@ -9,51 +9,25 @@
 </head>
 <body>
     <div class="app-container">
-        <div class="app-container">
-    <main class="main-content">
-        </main>
-
-    <aside class="right-panel">
-        <div class="side-box">
-            <h3>Быстрые действия</h3>
-            <div class="box-content">
-                <button class="action-item"><i data-lucide="bar-chart"></i> Графики</button>
-                <button class="action-item"><i data-lucide="download"></i> Экспорт</button>
-            </div>
-        </div>
-
-        <div class="side-box">
-            <h3>Популярные запросы</h3>
-            <div class="box-content">
-                <p onclick="document.getElementById('queryInput').value='Топ заказов за неделю'">📈 Топ заказов за неделю</p>
-                <p onclick="document.getElementById('queryInput').value='Отмены по городам'">📍 Отмены по городам</p>
-            </div>
-        </div>
-    </aside>
-</div>
         <aside class="sidebar">
             <div class="sidebar-top">
                 <div class="logo-wrapper">
                     <img src="logo.png" alt="Drivee">
                 </div>
-                
                 <button class="btn-new" onclick="clearChat()">
                     <i data-lucide="plus" class="w-4 h-4"></i>
                     <span>Новый запрос</span>
                 </button>
-
                 <nav class="nav">
                     <div class="nav-item active"><i data-lucide="home"></i> Главная</div>
                     <div class="nav-item"><i data-lucide="history"></i> История</div>
                     <div class="nav-item"><i data-lucide="database"></i> Данные</div>
                 </nav>
             </div>
-
             <div class="sidebar-bottom">
                 <div class="logout" onclick="logout()">
                     <i data-lucide="log-out"></i> Выйти
                 </div>
-
                 <div class="promo-wrapper">
                     <img src="analitycs_for_all.png" alt="Promo">
                 </div>
@@ -62,7 +36,6 @@
 
         <main class="main-content">
             <header class="header">
-                <div class="header-content"></div> 
                 <div class="user-block">
                     <div id="avatar" class="avatar">?</div>
                     <span id="userName">...</span>
@@ -83,6 +56,22 @@
                 </div>
             </footer>
         </main>
+
+        <aside class="right-panel">
+            <div class="side-box">
+                <h3 class="box-title">Статистика</h3>
+                <div class="box-content">
+                    <div class="stat-item">Запросов сегодня: 12</div>
+                    <div class="stat-item">Точность AI: 98%</div>
+                </div>
+            </div>
+            <div class="side-box">
+                <h3 class="box-title">Подсказки</h3>
+                <div class="box-content">
+                    <p class="hint-text">Попробуйте спросить: "Средний чек за вчера"</p>
+                </div>
+            </div>
+        </aside>
     </div>
     <script src="app.js"></script>
 </body>
