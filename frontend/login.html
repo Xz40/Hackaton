@@ -6,12 +6,40 @@
     <title>Drivee - Вход</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap');
         body { 
             background-color: #f4f4f4; 
             font-family: 'Inter', sans-serif; 
         }
-        .header-link { color: #2D2D2D; font-weight: 500; font-size: 18px; }
+        .header-link { color: #2D2D2D; font-weight: 500; font-size: 18px; transition: opacity 0.2s; }
+        .header-link:hover { opacity: 0.7; }
+        
+        /* Стили для выпадающего меню */
+        .dropdown { position: relative; display: inline-block; }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            min-width: 240px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1);
+            z-index: 50;
+            border-radius: 12px;
+            padding: 12px 0;
+            top: 100%;
+            left: 0;
+            margin-top: 10px;
+        }
+        .dropdown-content a {
+            color: #2D2D2D;
+            padding: 12px 20px;
+            text-decoration: none;
+            display: block;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        .dropdown-content a:hover { background-color: #f9f9f9; color: #A5F52C; }
+        .dropdown:hover .dropdown-content { display: block; }
+
         .login-card { 
             background: white; 
             border-radius: 40px; 
@@ -30,7 +58,6 @@
             width: 100%;
             outline: none;
             border: 2px solid transparent;
-            transition: all 0.2s;
         }
         .input-field:focus { border-color: #A5F52C; background-color: white; }
         .btn-submit {
@@ -40,15 +67,6 @@
             width: 100%;
             font-weight: 800;
             color: #2D2D2D;
-            transition: transform 0.1s;
-        }
-        .btn-submit:active { transform: scale(0.98); }
-        .heart-icon {
-            position: absolute;
-            bottom: -20px;
-            right: 10px;
-            width: 220px;
-            opacity: 0.4;
         }
     </style>
 </head>
@@ -57,11 +75,22 @@
     <header class="w-full py-6 px-10 flex items-center justify-between max-w-7xl mx-auto">
         <div class="flex items-center gap-12">
             <img src="logo.png" alt="Drivee" class="h-10 w-auto">
-            <nav class="hidden md:flex gap-8">
-                <a href="#" class="header-link flex items-center gap-1">Пассажирам <span class="text-xs">▼</span></a>
-                <a href="#" class="header-link flex items-center gap-1">Водителям <span class="text-xs">▼</span></a>
-                <a href="#" class="header-link">Партнёрам</a>
-                <a href="#" class="header-link flex items-center gap-1">О нас <span class="text-xs">▼</span></a>
+            
+            <nav class="flex gap-8 items-center">
+                <a href="https://drivee.com/partnership" target="_blank" class="header-link">Партнёрам</a>
+                
+                <div class="dropdown">
+                    <button class="header-link flex items-center gap-1 outline-none">
+                        О нас <span class="text-[10px]">▼</span>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="https://drivee.com/about-us" target="_blank">О компании</a>
+                        <a href="https://drivee.com/sustainability" target="_blank">Устойчивое развитие</a>
+                        <a href="https://drivee.com/support" target="_blank">Служба поддержки</a>
+                        <a href="https://drivee.com/blog" target="_blank">Блог</a>
+                        <a href="https://drivee.com/vacancy" target="_blank">Вакансии</a>
+                    </div>
+                </div>
             </nav>
         </div>
     </header>
@@ -69,14 +98,16 @@
     <main class="flex-1 flex items-center justify-center p-4">
         <div class="login-card flex flex-col md:flex-row p-6 gap-8 max-w-5xl w-full">
             
-            <div class="green-banner flex-1 p-10 min-h-[400px] flex flex-col">
+            <div class="green-banner flex-1 p-10 min-h-[400px] flex flex-col justify-between">
                 <h1 class="text-[44px] font-extrabold text-[#2D2D2D] leading-[1.1] z-10">
                     Стань частью<br>команды в Drivee
                 </h1>
                 
-                <svg class="heart-icon" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M100 160C100 160 30 110 30 65C30 40 50 25 70 25C85 25 95 35 100 45C105 35 115 25 130 25C150 25 170 40 170 65C170 110 100 160 100 160Z" stroke="white" stroke-width="12" stroke-linejoin="round"/>
-                </svg>
+                <div class="relative h-32 w-full flex justify-end items-end opacity-40">
+                    <svg width="180" height="180" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M100 160C100 160 30 110 30 65C30 40 50 25 70 25C85 25 95 35 100 45C105 35 115 25 130 25C150 25 170 40 170 65C170 110 100 160 100 160Z" stroke="white" stroke-width="12" stroke-linejoin="round"/>
+                    </svg>
+                </div>
             </div>
 
             <div class="flex-1 flex flex-col justify-center px-4 py-8">
@@ -86,10 +117,10 @@
                     
                     <div class="flex items-center gap-3 py-2">
                         <input type="checkbox" id="remember" class="w-5 h-5 accent-[#A5F52C] rounded">
-                        <label for="remember" class="text-gray-500 text-sm">Запомнить меня на этом устройстве</label>
+                        <label for="remember" class="text-gray-500 text-sm cursor-pointer">Запомнить меня на этом устройстве</label>
                     </div>
 
-                    <button onclick="login()" class="btn-submit text-xl shadow-lg shadow-green-200">
+                    <button onclick="login()" class="btn-submit text-xl hover:brightness-105 active:scale-[0.98] transition-all">
                         Войти в профиль
                     </button>
                 </div>
