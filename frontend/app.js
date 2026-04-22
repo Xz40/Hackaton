@@ -137,8 +137,9 @@ async function sendQuery() {
     lucide.createIcons();
 }
 
+// ИСТОРИЯ
 async function renderHistory(container) {
-    container.innerHTML = '<div class="p-10 text-center animate-pulse text-gray-400 uppercase font-bold text-xs">Загрузка архива...</div>';
+    container.innerHTML = '<div class="p-10 text-center text-gray-400">Загрузка архива...</div>';
     const user = localStorage.getItem('drivee_user');
 
     try {
@@ -148,34 +149,38 @@ async function renderHistory(container) {
         const html = history.map(h => `
             <div class="bg-white border p-5 mb-3 rounded-2xl flex justify-between items-center shadow-sm hover:border-[#A5F52C] transition-all">
                 <div>
-                    <p class="font-bold text-gray-800 text-sm">${h[0]}</p> <div class="flex gap-3 mt-2 items-center">
-                        <p class="text-[10px] text-gray-400 italic">${new Date(h[1]).toLocaleString()}</p>
-                        <span class="text-[9px] bg-gray-50 px-2 py-0.5 rounded text-gray-400 font-bold uppercase">${h[2]}</span>
+                    <p class="font-bold text-gray-800 text-sm">${h.question}</p>
+                    <div class="flex gap-3 mt-2 items-center">
+                        <p class="text-[10px] text-gray-400 italic">${new Date(h.query_date).toLocaleString()}</p>
+                        <span class="text-[9px] bg-gray-50 px-2 py-0.5 rounded text-gray-400 font-bold uppercase">Строк: ${h.row_count || 0}</span>
                     </div>
                 </div>
-                <i data-lucide="chevron-right" class="text-gray-300"></i>
+                <span class="text-[9px] font-bold uppercase px-3 py-1 rounded-full ${h.status === 'success' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}">
+                    ${h.status}
+                </span>
             </div>
         `).join('');
         
         container.innerHTML = `<div class="p-8 h-full overflow-y-auto">${html || '<p class="text-center py-10 text-gray-400">История пока пуста</p>'}</div>`;
     } catch (e) { 
-        container.innerHTML = '<div class="p-10 text-red-500 text-center uppercase font-bold">Ошибка базы</div>'; 
+        container.innerHTML = '<div class="p-10 text-red-500 text-center font-bold">ОШИБКА БАЗЫ ДАННЫХ</div>'; 
     }
     lucide.createIcons();
 }
 
+// ПРОСМОТР БАЗЫ (ORDERS)
 async function renderDatabase(container) {
-    container.innerHTML = '<div class="p-10 text-center text-gray-400 font-bold text-xs uppercase tracking-widest">Синхронизация...</div>';
+    container.innerHTML = '<div class="p-10 text-center text-gray-400">Синхронизация...</div>';
     try {
         const res = await fetch(`http://${window.location.hostname}:8080/get_data`);
         const data = await res.json();
         
         let rows = data.map(r => `
             <tr class="border-b hover:bg-gray-50">
-                <td class="p-4 text-gray-400 text-xs font-mono">#${r[0]}</td>
-                <td class="p-4 text-sm font-semibold text-gray-800">${r[1]}</td>
-                <td class="p-4 text-sm font-bold text-gray-900">${r[2].toLocaleString()}₽</td>
-                <td class="p-4"><span class="px-2 py-1 bg-green-50 text-green-600 rounded-full text-[9px] font-black uppercase">${r[3]}</span></td>
+                <td class="p-4 text-gray-400 text-xs font-mono">#${r.id}</td>
+                <td class="p-4 text-sm font-semibold text-gray-800">${r.city}</td>
+                <td class="p-4 text-sm font-bold text-gray-900">${parseFloat(r.amount).toLocaleString()}₽</td>
+                <td class="p-4"><span class="px-2 py-1 bg-green-50 text-green-600 rounded-full text-[9px] font-black uppercase">${r.status}</span></td>
             </tr>
         `).join('');
         
@@ -189,7 +194,7 @@ async function renderDatabase(container) {
                 </table>
             </div>`;
     } catch (e) { 
-        container.innerHTML = '<div class="p-10 text-red-500 text-center">Ошибка загрузки таблицы</div>'; 
+        container.innerHTML = '<div class="p-10 text-red-500 text-center">ОШИБКА ЗАГРУЗКИ ТАБЛИЦЫ</div>'; 
     }
 }
 
