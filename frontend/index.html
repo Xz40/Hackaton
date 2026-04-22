@@ -11,29 +11,38 @@
 <body>
 
 <div class="app-container">
+    
     <aside class="sidebar">
         <div class="sidebar-top">
             <div class="logo-wrapper">
                 <img src="logo.png" alt="Drivee">
             </div>
+
             <button class="btn-new" onclick="clearChat(); showView('Главная')">
-                <i data-lucide="plus"></i> Новый запрос
+                <i data-lucide="plus"></i>
+                Новый запрос
             </button>
+
             <nav class="nav">
                 <div class="nav-item active" onclick="showView('Главная')">
-                    <i data-lucide="layout-dashboard"></i> Главная
+                    <i data-lucide="layout-dashboard"></i>
+                    Главная
                 </div>
                 <div class="nav-item" onclick="showView('История')">
-                    <i data-lucide="history"></i> История
+                    <i data-lucide="history"></i>
+                    История
                 </div>
                 <div class="nav-item" onclick="showView('Данные')">
-                    <i data-lucide="database"></i> Данные
+                    <i data-lucide="database"></i>
+                    Данные
                 </div>
             </nav>
         </div>
+
         <div class="sidebar-bottom">
             <div class="logout" onclick="logout()">
-                <i data-lucide="log-out"></i> Выйти
+                <i data-lucide="log-out"></i>
+                Выйти из системы
             </div>
             <div class="promo-wrapper">
                 <img src="promo_block.png" alt="Promo" class="promo-img">
@@ -42,8 +51,9 @@
     </aside>
 
     <main class="main-content">
+        
         <header class="header">
-            <img src="header.png" alt="" class="header-bg">
+            <img src="header.png" alt="Header Background" class="header-bg">
             <div class="header-content">
                 <div class="user-block">
                     <div class="avatar" id="avatar">A</div>
@@ -53,13 +63,16 @@
         </header>
 
         <div class="workspace">
+            
             <section class="chat-container" id="mainView">
-                <div class="chat-viewport" id="chatMessages"></div>
+                <div class="chat-viewport" id="chatMessages">
+                    </div>
+
                 <div class="footer">
                     <div class="input-card">
-                        <textarea id="queryInput" placeholder="Введите ваш запрос..."></textarea>
+                        <textarea id="queryInput" placeholder="Введите ваш запрос к AI..."></textarea>
                         <div class="input-actions">
-                            <div class="engine-info">SQL ENGINE v1.0</div>
+                            <div class="engine-info">DRIVEE AI ENGINE v1.0</div>
                             <button class="send-btn" onclick="sendQuery()">
                                 <i data-lucide="arrow-up" style="color: #000;"></i>
                             </button>
@@ -71,31 +84,39 @@
             <section id="historyView" class="view-section hidden">
                 <div class="section-content">
                     <h2 class="view-title">История запросов</h2>
-                    <div class="list-container" id="historyList"></div>
+                    <div class="list-container" id="historyList">
+                        </div>
                 </div>
             </section>
 
             <section id="dataView" class="view-section hidden">
                 <div class="section-content">
                     <h2 class="view-title">Базы данных</h2>
-                    <div class="list-container" id="dbList"></div>
+                    <div class="list-container" id="dbList">
+                        </div>
                 </div>
             </section>
 
             <aside class="right-panel">
                 <div class="side-box">
-                    <div class="box-title">Статистика</div>
+                    <div class="box-title">Статистика аккаунта</div>
                     <div class="stat-item" id="statRequests">Запросов сегодня: 0</div>
-                    <div class="stat-item">Точность: 98%</div>
+                    <div class="stat-item">Точность AI: 98%</div>
                 </div>
+
                 <div class="side-box">
-                    <div class="box-title">Статус</div>
-                    <div class="status-online"><span class="dot"></span> SQL Engine Online</div>
+                    <div class="box-title">Системный статус</div>
+                    <div class="status-online">
+                        <span class="dot"></span>
+                        SQL Engine Online
+                    </div>
                 </div>
             </aside>
+
         </div>
     </main>
 </div>
+
 <script src="app.js"></script>
 </body>
 </html>
