@@ -3,81 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Драйвиум — Аналитическая платформа</title>
+    <title>Drivee Analytics | Система управления данными</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #FBFBFB; overflow: hidden; color: #2D2D2D; }
-        .sidebar { width: 280px; height: 100vh; background: #FBFBFB; border-right: 1px solid #F1F3F4; display: flex; flex-direction: column; padding: 24px; flex-shrink: 0; }
-        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; cursor: pointer; color: #5F6368; font-size: 14px; transition: all 0.2s; margin-bottom: 4px; }
-        .nav-item:hover { background: #F1F3F4; color: #2D2D2D; }
-        .nav-item.active { background: #E8F5E9; color: #2E7D32; font-weight: 600; }
-        .btn-new-query { border: 1px solid #DADCE0; border-radius: 12px; padding: 14px; display: flex; align-items: center; gap: 10px; width: 100%; font-size: 14px; margin: 24px 0; background: white; font-weight: 500; }
-        .chat-area { flex: 1; display: flex; flex-direction: column; background: white; border-radius: 32px 0 0 0; border-left: 1px solid #F1F3F4; border-top: 1px solid #F1F3F4; overflow: hidden; }
-        #main-content { overflow-y: auto; flex: 1; scroll-behavior: smooth; }
-        .message { display: flex; gap: 20px; padding: 24px 0; max-width: 850px; margin: 0 auto; width: 90%; border-bottom: 1px solid #F9FAFB; }
-        .message-avatar { width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
-        .bot-avatar { background: #F1F3F4; color: #5F6368; }
-        .user-avatar { background: #A5F52C; color: black; }
-        .message-body { flex: 1; font-size: 15px; line-height: 1.6; min-width: 0; }
-        .message-name { font-size: 11px; font-weight: 700; color: #9AA0A6; margin-bottom: 4px; text-transform: uppercase; }
-        .input-container { border: 1px solid #DADCE0; border-radius: 24px; padding: 8px 8px 8px 24px; display: flex; align-items: center; background: white; }
-        .query-input { flex: 1; border: none; outline: none; font-size: 16px; height: 48px; background: transparent; }
-        .btn-send { background: #A5F52C; width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.1s; }
-        .promo-img { width: 100%; border-radius: 16px; margin-top: 16px; object-fit: cover; }
-        .data-table-wrapper { margin-top: 15px; border: 1px solid #F1F3F4; border-radius: 12px; overflow-x: auto; background: white; }
-        .data-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
-        .data-table th { background: #F8F9FA; padding: 12px 16px; color: #5F6368; border-bottom: 1px solid #F1F3F4; }
-        .data-table td { padding: 12px 16px; border-bottom: 1px solid #F9FAFB; white-space: nowrap; }
+        body { font-family: 'Inter', sans-serif; background-color: #F3F4F6; }
+        .message { max-width: 80%; padding: 1rem; border-radius: 1.5rem; margin-bottom: 1rem; }
+        .user-message { background-color: #A5F52C; color: black; align-self: flex-end; border-bottom-right-radius: 0.2rem; }
+        .bot-message { background-color: white; color: #1F2937; align-self: flex-start; border-bottom-left-radius: 0.2rem; border: 1px solid #E5E7EB; }
+        .chat-container { display: flex; flex-direction: column; height: calc(100vh - 450px); overflow-y: auto; padding: 1.5rem; }
+        .nav-item.active { background-color: #E5E7EB; color: black; }
+        .nav-item.active i { color: #A5F52C; }
     </style>
 </head>
-<body class="flex h-screen">
-    <aside class="sidebar">
-        <div class="px-2"><img src="logo.png" alt="Drivee" style="height: 40px;"></div>
-        <button class="btn-new-query" onclick="handleNav(this, 'main')">
-            <i data-lucide="edit-3" class="w-5 h-5 text-gray-400"></i><span>Новый запрос</span>
-        </button>
-        <nav class="flex-grow overflow-y-auto">
-            <div onclick="handleNav(this, 'main')" class="nav-item active"><i data-lucide="home" class="w-5 h-5"></i><span>Главная</span></div>
-            <div onclick="handleNav(this, 'history')" class="nav-item"><i data-lucide="clock" class="w-5 h-5"></i><span>История</span></div>
-            <div onclick="handleNav(this, 'database')" class="nav-item"><i data-lucide="database" class="w-5 h-5"></i><span>База данных</span></div>
+<body class="flex h-screen overflow-hidden">
+
+    <aside class="w-20 lg:w-64 bg-white border-r flex flex-col py-6 px-4">
+        <div class="flex items-center gap-3 px-2 mb-10">
+            <img src="logo.png" alt="Drivee Logo" class="w-10 h-10 object-contain rounded-lg">
+            <span class="font-bold text-xl hidden lg:block tracking-tight">Drivee Pay</span>
+        </div>
+
+        <nav class="flex-1 space-y-1">
+            <div onclick="handleNav(this, 'main')" class="nav-item active flex items-center gap-4 p-3 rounded-xl cursor-pointer hover:bg-gray-50 transition-all">
+                <i data-lucide="message-square"></i><span class="hidden lg:block font-semibold">Аналитик</span>
+            </div>
+            <div onclick="handleNav(this, 'history')" class="nav-item flex items-center gap-4 p-3 rounded-xl cursor-pointer hover:bg-gray-50 transition-all">
+                <i data-lucide="list"></i><span class="hidden lg:block font-semibold">История</span>
+            </div>
+            <div onclick="handleNav(this, 'dashboards')" class="nav-item flex items-center gap-4 p-3 rounded-xl cursor-pointer hover:bg-gray-50 transition-all">
+                <i data-lucide="bar-chart-3"></i><span class="hidden lg:block font-semibold">Отчеты</span>
+            </div>
+            <div onclick="handleNav(this, 'database')" class="nav-item flex items-center gap-4 p-3 rounded-xl cursor-pointer hover:bg-gray-50 transition-all">
+                <i data-lucide="database"></i><span class="hidden lg:block font-semibold">Данные</span>
+            </div>
         </nav>
-        <div class="pt-4 border-t border-gray-100">
-            <div class="nav-item"><i data-lucide="help-circle" class="w-5 h-5"></i><span>Помощь</span></div>
-            <div onclick="logout()" class="nav-item"><i data-lucide="log-out" class="w-5 h-5"></i><span>Выйти</span></div>
-            <img src="analitycs_for_all.png" alt="Промо" class="promo-img">
+
+        <div class="pt-6 border-t mt-auto">
+            <div class="flex items-center gap-3 p-2">
+                <div id="avatar" class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold">U</div>
+                <div class="hidden lg:block">
+                    <p id="userName" class="text-sm font-bold text-gray-900">Загрузка...</p>
+                    <button onclick="logout()" class="text-[10px] text-red-500 font-bold uppercase hover:underline">Выйти</button>
+                </div>
+            </div>
         </div>
     </aside>
 
-    <main class="flex-1 flex flex-col min-w-0">
-        <header class="h-20 flex items-center justify-between px-10 flex-shrink-0">
-            <div class="flex items-center gap-3">
-                <i data-lucide="sparkles" class="w-6 h-6 text-green-500"></i>
-                <h1 id="screen-title" class="text-lg font-bold">Аналитический чат</h1>
-            </div>
-            <div class="flex items-center gap-3">
-                <div id="avatar" class="w-10 h-10 rounded-full bg-[#A5F52C] flex items-center justify-center font-bold"></div>
-                <span id="userName" class="font-medium text-sm"></span>
+    <main class="flex-1 flex flex-col bg-white">
+        <header class="h-20 border-b flex items-center justify-between px-8">
+            <h2 id="screen-title" class="text-xl font-bold text-gray-800 tracking-tight">Чат-аналитик</h2>
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">PostgreSQL Connected</span>
             </div>
         </header>
 
-        <div class="flex-1 flex overflow-hidden">
-            <section class="chat-area">
-                <div id="main-content" class="p-4"></div>
-                <div id="input-zone" class="p-8 border-t border-gray-50">
-                    <div class="max-w-[850px] mx-auto w-full">
-                        <div class="input-container">
-                            <input id="queryInput" type="text" placeholder="Задайте вопрос по данным..." class="query-input" onkeypress="if(event.key==='Enter') sendQuery()">
-                            <button onclick="sendQuery()" class="btn-send"><i data-lucide="send" class="w-5 h-5"></i></button>
+        <section id="main-content" class="flex-1 flex flex-col overflow-hidden relative">
+            </section>
+    </main>
+
+    <aside class="hidden xl:flex w-80 bg-gray-50 border-l flex-col p-8" id="right-panel">
+        </aside>
+
+    <script src="app.js"></script>
+
+    <script>
+        // Небольшой патч для app.js прямо тут, чтобы main экран подгружал баннер
+        const originalShowScreen = window.showScreen;
+        window.showScreen = function(type) {
+            if (type === 'main') {
+                const main = document.getElementById('main-content');
+                const title = document.getElementById('screen-title');
+                title.innerText = "Аналитический чат";
+                main.innerHTML = `
+                    <div class="px-6 pt-6">
+                        <img src="analitycs_for_all.png" alt="Analytics for all" class="w-full h-48 object-cover rounded-3xl shadow-sm border border-gray-100">
+                    </div>
+                    
+                    <div class="chat-container" id="chatMessages">
+                        <div class="bot-message message shadow-sm">Привет! Я готов проанализировать ваши данные. С чего начнем?</div>
+                    </div>
+                    
+                    <div class="p-6 bg-white border-t mt-auto">
+                        <div class="flex gap-4 max-w-4xl mx-auto">
+                            <input id="queryInput" type="text" placeholder="Напишите запрос (например, выручка по городам)..." 
+                                   class="flex-1 bg-gray-100 p-4 rounded-2xl outline-none ring-[#A5F52C] focus:ring-2 transition-all">
+                            <button onclick="sendQuery()" class="bg-[#A5F52C] px-6 rounded-2xl flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all">
+                                <i data-lucide="zap" class="text-black"></i>
+                            </button>
                         </div>
                     </div>
-                </div>
-            </section>
-            <aside id="right-panel" class="w-[320px] border-l border-gray-100 p-8 hidden xl:block bg-white"></aside>
-        </div>
-    </main>
-    <script src="app.js"></script>
-    <script>lucide.createIcons();</script>
+                `;
+                document.getElementById('right-panel').innerHTML = renderQuickActions();
+                setupChatListeners();
+                lucide.createIcons();
+            } else {
+                originalShowScreen(type);
+            }
+        }
+    </script>
 </body>
 </html>
