@@ -117,12 +117,16 @@ async function sendQuery() {
 // Загрузка реальной истории из system.db
 async function loadHistory() {
     const list = document.getElementById('historyList');
+    // Берем текущего юзера из локального хранилища
+    const currentUser = localStorage.getItem('drivee_user') || 'Admin';
+
     try {
-        const response = await fetch('http://78.36.198.54:8080/history');
+        // Передаем user_id в параметрах URL
+        const response = await fetch(`http://78.36.198.54:8080/history?user_id=${currentUser}`);
         const history = await response.json();
         
         if (history.length === 0) {
-            list.innerHTML = '<div class="item-card">История запросов пуста</div>';
+            list.innerHTML = '<div class="item-card">У вас пока нет запросов</div>';
             return;
         }
 
@@ -130,7 +134,7 @@ async function loadHistory() {
             <div class="item-card">
                 <div class="card-info">
                     <h4>${item.question}</h4>
-                    <p>${new Date(item.timestamp).toLocaleString()} • SQL выполнен</p>
+                    <p>${new Date(item.timestamp).toLocaleString()} • Личный запрос</p>
                 </div>
                 <i data-lucide="chevron-right" style="width:16px; color:#CCC"></i>
             </div>
@@ -138,7 +142,7 @@ async function loadHistory() {
         
         lucide.createIcons();
     } catch (err) {
-        list.innerHTML = '<div class="item-card" style="color:red">Ошибка загрузки истории</div>';
+        list.innerHTML = '<div class="item-card" style="color:red">Ошибка загрузки вашей истории</div>';
     }
 }
 
