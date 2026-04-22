@@ -3,27 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Драйвиум</title>
+    <title>Драйвиум — Аналитическая платформа</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body { background-color: #F9FAFB; font-family: 'Inter', sans-serif; color: #2D2D2D; margin: 0; overflow: hidden; }
-        
         .sidebar { width: 280px; border-right: 1px solid #E5E7EB; background: white; flex-shrink: 0; display: flex; flex-direction: column; }
         .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; transition: 0.2s; color: #6B7280; font-weight: 500; font-size: 14px; cursor: pointer; }
         .nav-item:hover { background: #F3F4F6; }
         .nav-item.active { background: #E9F7D0; color: #111827; }
-        
-        /* ЧАТ СВЕРХУ ВНИЗ */
-        .chat-container { flex: 1; overflow-y: auto; display: flex; flex-direction: column; padding: 20px; gap: 16px; }
-        .message { padding: 14px 18px; border-radius: 18px; max-width: 85%; font-size: 14px; line-height: 1.5; }
+        .chat-container { flex: 1; overflow-y: auto; display: flex; flex-direction: column; padding: 20px; gap: 16px; scroll-behavior: smooth; }
+        .message { padding: 14px 18px; border-radius: 18px; max-width: 80%; font-size: 14px; line-height: 1.5; }
         .user-message { background: #E9F7D0; align-self: flex-end; border-bottom-right-radius: 4px; }
         .bot-message { background: white; border: 1px solid #E5E7EB; align-self: flex-start; border-bottom-left-radius: 4px; }
-        
-        /* ПРАВАЯ КОЛОНКА ШИРЕ */
-        .right-panel { width: 400px; border-left: 1px solid #E5E7EB; background: white; flex-shrink: 0; padding: 24px; }
+        .right-panel { width: 400px; border-left: 1px solid #E5E7EB; background: white; flex-shrink: 0; padding: 24px; overflow-y: auto; }
     </style>
 </head>
 <body class="flex h-screen">
@@ -34,7 +29,6 @@
                 <img src="logo.png" alt="Drivee" class="h-7 w-auto">
                 <span class="text-xl font-extrabold tracking-tight">Драйвиум</span>
             </div>
-            
             <nav class="space-y-1">
                 <div class="nav-item active" onclick="handleNav(this, 'main')"><i data-lucide="home" class="w-5 h-5"></i><span>Главная</span></div>
                 <div class="nav-item" onclick="handleNav(this, 'history')"><i data-lucide="clock" class="w-5 h-5"></i><span>История запросов</span></div>
@@ -43,21 +37,21 @@
             </nav>
         </div>
 
-        <div class="mt-auto p-4 space-y-2">
-            <div class="nav-item"><i data-lucide="help-circle" class="w-5 h-5"></i><span>Помощь</span></div>
-            <div class="nav-item text-red-500"><i data-lucide="log-out" class="w-5 h-5"></i><span>Выход</span></div>
-            <div class="pt-4">
-                <img src="analitycs_for_all.png" alt="Analytics for all" class="w-full rounded-xl shadow-sm">
+        <div class="mt-auto p-4">
+            <div class="space-y-1 mb-4">
+                <div class="nav-item" onclick="alert('Раздел помощи')"><i data-lucide="help-circle" class="w-5 h-5"></i><span>Помощь</span></div>
+                <div class="nav-item text-red-500" onclick="logout()"><i data-lucide="log-out" class="w-5 h-5"></i><span>Выход</span></div>
             </div>
+            <img src="analitycs_for_all.png" alt="Analytics for all" class="w-full rounded-xl shadow-sm border border-gray-50">
         </div>
     </aside>
 
     <main class="flex-1 flex flex-col bg-[#F9FAFB]">
-        <header class="h-16 border-b bg-white flex items-center justify-between px-8">
-            <h2 id="screen-title" class="font-bold text-lg">Рабочее пространство</h2>
+        <header class="h-16 border-b bg-white flex items-center justify-between px-8 flex-shrink-0">
+            <h2 id="screen-title" class="font-bold text-lg text-gray-800">Аналитический чат</h2>
             <div class="flex items-center gap-3">
-                <span id="userName" class="text-sm font-semibold">Жанна</span>
-                <div id="avatar" class="w-8 h-8 bg-[#A5F52C] rounded-full flex items-center justify-center font-bold text-xs">Ж</div>
+                <span id="userName" class="text-sm font-semibold text-gray-700">Загрузка...</span>
+                <div id="avatar" class="w-9 h-9 bg-[#A5F52C] rounded-full flex items-center justify-center font-bold text-sm border-2 border-white shadow-sm text-black">?</div>
             </div>
         </header>
 
@@ -68,7 +62,6 @@
     <aside id="right-panel" class="right-panel">
         </aside>
 
-    <input type="file" id="fileInput" class="hidden">
     <script src="app.js"></script>
 </body>
 </html>
