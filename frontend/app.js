@@ -129,14 +129,14 @@ async function sendQuery() {
     lucide.createIcons();
 }
 
+// В файле app.js находим renderHistory и меняем fetch
 async function renderHistory(container) {
     container.innerHTML = '<div class="p-10 text-center animate-pulse">Загрузка вашей истории...</div>';
     
-    // Берем логин того, кто сейчас залогинен
-    const user = localStorage.getItem('drivee_user'); 
+    const user = localStorage.getItem('drivee_user'); // Получаем текущего логина
 
     try {
-        // Передаем user_id в URL как параметр
+        // Добавляем параметр ?user_id= в URL
         const res = await fetch(`http://${window.location.hostname}:8080/get_history?user_id=${user}`);
         const history = await res.json();
         

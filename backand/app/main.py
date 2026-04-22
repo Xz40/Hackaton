@@ -114,15 +114,23 @@ async def get_data():
     except Exception as e:
         return [{"id": "ERR", "city": "Ошибка БД", "amount": 0, "status": "error"}]
 
+# В файле main.py измени этот эндпоинт
 @app.get("/get_history")
-async def get_history(user_id: str): # Добавляем параметр
+async def get_history(user_id: str): # Теперь принимаем ID пользователя
     conn = database.get_db_connection()
-    with conn.cursor() as cur:
-        # Фильтруем запрос по конкретному пользователю
-        cur.execute("SELECT * FROM query_history WHERE user_id = %s ORDER BY query_date DESC", (user_id,))
-        history = cur.fetchall()
-    conn.close()
-    return history
+    try:
+        with conn.cursor() as cur:
+            # Выбираем только те записи, где user_id совпадает
+            cur.execute("""
+                SELECT question, query_date, status 
+                FROM query_history 
+                WHERE user_id = %s 
+                ORDER BY query_date DESC
+            """, (user_id,))
+            history = cur.fetchall()
+        return history
+    finally:
+        conn.close()
 
 if __name__ == "__main__":
     import uvicorn
