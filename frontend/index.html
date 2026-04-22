@@ -17,40 +17,42 @@
         .card { background: white; border: 1px solid rgba(0,0,0,0.05); border-radius: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
         .action-card { transition: all 0.2s; border: 1px solid rgba(0,0,0,0.05); }
         .action-card:hover { border-color: #A5F52C; transform: translateY(-2px); }
-        /* Стили для чата */
-        .chat-container { max-height: calc(100vh - 400px); overflow-y: auto; }
-        .message { padding: 12px 16px; border-radius: 16px; margin-bottom: 8px; max-width: 80%; }
-        .user-message { background: #E9F7D0; align-self: flex-end; margin-left: auto; }
-        .bot-message { background: white; border: 1px solid #eee; align-self: flex-start; }
+        .chat-container { max-height: calc(100vh - 420px); overflow-y: auto; display: flex; flex-direction: column; }
+        .message { padding: 12px 16px; border-radius: 16px; margin-bottom: 12px; max-width: 85%; line-height: 1.5; font-size: 14px; }
+        .user-message { background: #E9F7D0; align-self: flex-end; color: #1a1a1a; }
+        .bot-message { background: white; border: 1px solid #eee; align-self: flex-start; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
     </style>
 </head>
-<body class="flex h-screen">
+<body class="flex h-screen overflow-hidden">
 
     <aside class="sidebar flex flex-col p-6 h-full">
         <div class="mb-10 px-2 flex items-center gap-3">
             <img src="logo.png" alt="Drivee Logo" class="h-8 w-auto">
-            <span class="text-xl font-bold tracking-tight">Драйвиум</span>
+            <span class="text-xl font-bold tracking-tight text-black">Драйвиум</span>
         </div>
+        
         <button onclick="showScreen('main')" class="w-full bg-white border border-gray-200 py-3 rounded-2xl font-semibold mb-8 flex items-center justify-center gap-2 hover:shadow-sm">
             <i data-lucide="plus-circle" class="w-5 h-5"></i> Новый запрос
         </button>
+
         <nav class="space-y-2 flex-1">
-            <div class="nav-item active" onclick="handleNav(this, 'main')"><i data-lucide="home"></i> <span>Главная</span></div>
-            <div class="nav-item" onclick="handleNav(this, 'history')"><i data-lucide="clock"></i> <span>История</span></div>
-            <div class="nav-item" onclick="handleNav(this, 'dashboards')"><i data-lucide="layout-dashboard"></i> <span>Дашборды</span></div>
-            <div class="nav-item" onclick="handleNav(this, 'database')"><i data-lucide="database"></i> <span>База данных</span></div>
+            <div class="nav-item active" onclick="handleNav(this, 'main')"><i data-lucide="home" class="w-5 h-5"></i> <span>Главная</span></div>
+            <div class="nav-item" onclick="handleNav(this, 'history')"><i data-lucide="clock" class="w-5 h-5"></i> <span>История</span></div>
+            <div class="nav-item" onclick="handleNav(this, 'dashboards')"><i data-lucide="layout-dashboard" class="w-5 h-5"></i> <span>Дашборды</span></div>
+            <div class="nav-item" onclick="handleNav(this, 'database')"><i data-lucide="database" class="w-5 h-5"></i> <span>База данных</span></div>
         </nav>
+
         <div class="mt-auto pt-6 border-t border-gray-100">
             <div class="flex items-center gap-3 p-2">
-                <div id="avatar" class="w-10 h-10 bg-[#A5F52C] rounded-full flex items-center justify-center font-bold">A</div>
+                <div id="avatar" class="w-10 h-10 bg-[#A5F52C] rounded-full flex items-center justify-center font-bold text-black">A</div>
                 <div class="flex flex-col">
-                    <span id="userName" class="text-sm font-semibold">admin</span>
+                    <span id="userName" class="text-sm font-semibold text-black">admin</span>
                 </div>
             </div>
         </div>
     </aside>
 
-    <main id="main-content" class="flex-1 flex flex-col h-screen overflow-hidden bg-[#FBFBFB]">
+    <main id="main-content" class="flex-1 flex flex-col h-screen overflow-hidden">
         </main>
 
     <input type="file" id="fileInput" class="hidden" onchange="handleFileUpload(this)">
