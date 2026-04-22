@@ -13,36 +13,27 @@
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
     <div class="bg-white rounded-[40px] p-6 md:p-12 flex flex-col md:flex-row gap-8 max-w-5xl w-full shadow-2xl">
-        
         <div class="drivee-bg-green rounded-[32px] p-10 flex-1 flex flex-col justify-between min-h-[400px] relative overflow-hidden border-2 border-[#8ed426]">
-            <h1 class="text-4xl font-extrabold text-[#2D2D2D] leading-tight z-10 relative">Стань частью<br>команды в Drivee</h1>
-            
-            <div class="absolute bottom-[-40px] right-[-40px] opacity-15">
+            <h1 class="text-4xl font-bold text-[#2D2D2D] leading-tight z-10 relative">Стань частью<br>команды в Drivee</h1>
+            <div class="absolute bottom-[-30px] right-[-30px] opacity-20">
                 <svg width="250" height="250" viewBox="0 0 100 100" fill="white">
                     <path d="M50 85c-1.2 0-2.4-.5-3.3-1.4L15.4 52.3C9.5 46.4 9.5 36.9 15.4 31c5.9-5.9 15.4-5.9 21.3 0L50 44.3l13.3-13.3c5.9-5.9 15.4-5.9 21.3 0 5.9 5.9 5.9 15.4 0 21.3L53.3 83.6c-.9.9-2.1 1.4-3.3 1.4z"/>
                 </svg>
             </div>
         </div>
 
-        <div class="flex-1 flex flex-col justify-center px-4 shrink-0">
-            <div class="mb-10 flex items-center justify-center h-10 w-auto">
-                <svg width="100%" height="100%" viewBox="0 0 132 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M6 31V10H13.5C18.1944 10 22 13.8056 22 18.5V22.5C22 27.1944 18.1944 31 13.5 31H6Z" stroke="#2D2D2D" stroke-width="4"/>
-                    <path d="M22 10.5H29.5C32.5376 10.5 35 12.9624 35 16V22.5" stroke="#2D2D2D" stroke-width="4"/>
-                    <path d="M22 22.5L35 31" stroke="#2D2D2D" stroke-width="4"/>
-                    <circle cx="28.5" cy="18.5" r="1.5" fill="#2D2D2D"/>
-                    <path d="M41 31V10" stroke="#2D2D2D" stroke-width="4"/>
-                    <path d="M47 31V10H54.5C59.1944 10 63 13.8056 63 18.5V22.5C63 27.1944 59.1944 31 54.5 31H47Z" stroke="#2D2D2D" stroke-width="4"/>
-                    <rect x="70" y="2" width="60" height="36" rx="10" fill="#A5F52C"/>
-                    <circle cx="85" cy="18" r="6" stroke="#2D2D2D" stroke-width="4"/>
-                    <circle cx="115" cy="18" r="6" stroke="#2D2D2D" stroke-width="4"/>
-                </svg>
+        <div class="flex-1 flex flex-col justify-center px-4">
+            <div class="mb-10">
+                <img src="logo.png" alt="Drivee" class="h-10 w-auto">
             </div>
-
             <div class="space-y-4">
                 <input id="username" type="text" placeholder="Логин" class="w-full bg-gray-50 border-2 border-gray-100 p-5 rounded-2xl outline-none focus:border-[#A5F52C] transition-all">
                 <input type="password" placeholder="Пароль" class="w-full bg-gray-50 border-2 border-gray-100 p-5 rounded-2xl outline-none focus:border-[#A5F52C] transition-all">
                 
+                <label class="flex items-center text-sm text-gray-400 cursor-pointer py-2">
+                    <input type="checkbox" class="mr-2 w-4 h-4 accent-[#A5F52C]"> Запомнить меня на этом устройстве
+                </label>
+
                 <button onclick="login()" class="w-full drivee-bg-green py-5 rounded-2xl font-bold text-[#2D2D2D] border-b-4 border-[#8ed426] hover:brightness-105 active:border-b-0 transition-all shadow-lg">
                     Войти в профиль
                 </button>
