@@ -7,12 +7,20 @@ from sqlalchemy.orm import sessionmaker, Session
 from datetime import datetime
 from pydantic import BaseModel
 from typing import List
+from sql_generator import SQLGenerator
 
-# --- СЛУЖЕБНАЯ БД (SQLAlchemy) ---
+# Инициализируем генератор (путь к ollama.exe подтянется автоматически из нашего скрипта)
+sql_gen = SQLGenerator(model_name="qwen2.5-coder:7b")
+
+#СЛУЖЕБНАЯ БД
 SYSTEM_DB_URL = "sqlite:///./system.db"
 engine = create_engine(SYSTEM_DB_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
+
+class QuestionRequest(BaseModel):
+    user_id: str
+    question: str
 
 class User(Base):
     __tablename__ = "users"
@@ -37,7 +45,7 @@ class ConnectedDB(Base):
 
 Base.metadata.create_all(bind=engine)
 
-# --- FASTAPI CONFIG ---
+#FASTAPI CONFIG
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -53,7 +61,7 @@ def get_db():
     finally:
         db.close()
 
-# --- МОДЕЛИ ДАННЫХ ---
+#МОДЕЛИ ДАННЫХ
 class QueryRequest(BaseModel):
     question: str
     user_id: str
