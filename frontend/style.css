@@ -61,7 +61,7 @@ body, html { height: 100vh; width: 100vw; overflow: hidden; font-family: sans-se
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    padding: 0 30px;
+    padding: 5 30px;
 }
 
 /* Стили для профиля поверх фона */
