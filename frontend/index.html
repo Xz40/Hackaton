@@ -179,106 +179,97 @@
 </html>
 
 
-const chatMessages = document.getElementById('chatMessages');
-const userInput = document.getElementById('userInput');
-const sendBtn = document.getElementById('sendBtn');
+</main>
 
-// Имя пользователя из авторизации
-const userName = localStorage.getItem('drivee_user') || 'Пользователь';
-document.getElementById('userNameDisplay').innerText = userName;
-document.getElementById('userAvatar').innerText = userName.charAt(0).toUpperCase();
+    <script>
+        // Старая часть для логина
+        const userName = localStorage.getItem('drivee_user') || 'Пользователь';
+        document.getElementById('userNameDisplay').innerText = userName;
+        document.getElementById('userAvatar').innerText = userName.charAt(0).toUpperCase();
 
-// Функция создания сообщения
-function appendMessage(text, isUser = true) {
-    const msgDiv = document.createElement('div');
-    msgDiv.className = isUser ? 'flex justify-end' : 'flex justify-start';
-    
-    // Стили для баллонов сообщений в стиле Drivee
-    const innerClass = isUser 
-        ? 'bg-[#E9F7D0] text-[#2D2D2D] rounded-[18px] rounded-br-[4px] p-4 max-w-[80%] shadow-sm' 
-        : 'bg-white border border-gray-100 text-[#2D2D2D] rounded-[18px] rounded-bl-[4px] p-4 max-w-[80%] shadow-sm';
+        if (!localStorage.getItem('drivee_user')) {
+            window.location.href = 'login.html';
+        }
 
-    msgDiv.innerHTML = `
-        <div class="${innerClass}">
-            <p class="text-sm leading-relaxed">${text}</p>
-            <div class="text-[10px] opacity-40 mt-2 text-right">
-                ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} ${isUser ? '✓✓' : ''}
-            </div>
-        </div>
-    `;
-    
-    chatMessages.appendChild(msgDiv);
-    chatMessages.scrollTop = chatMessages.scrollHeight; // Автопрокрутка вниз
-}
+        // НОВАЯ ЧАСТЬ (которую ты вставил снаружи)
+        const chatMessages = document.getElementById('chatMessages');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
 
-// Эмуляция загрузки (для дизайнера важно, чтобы всё "летало")
-function appendLoader() {
-    const loader = document.createElement('div');
-    loader.id = 'temp-loader';
-    loader.className = 'flex justify-start mb-4';
-    loader.innerHTML = `
-        <div class="bg-white border border-gray-100 rounded-[18px] p-4 shadow-sm">
-            <div class="flex gap-1">
-                <div class="w-1.5 h-1.5 bg-[#A5F52C] rounded-full animate-bounce"></div>
-                <div class="w-1.5 h-1.5 bg-[#A5F52C] rounded-full animate-bounce [animation-delay:0.2s]"></div>
-                <div class="w-1.5 h-1.5 bg-[#A5F52C] rounded-full animate-bounce [animation-delay:0.4s]"></div>
-            </div>
-        </div>
-    `;
-    chatMessages.appendChild(loader);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-}
+        function appendMessage(text, isUser = true) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = isUser ? 'flex justify-end mb-4' : 'flex justify-start mb-4';
+            const innerClass = isUser 
+                ? 'bg-[#E9F7D0] text-[#2D2D2D] rounded-[18px] rounded-br-[4px] p-4 max-w-[80%] shadow-sm' 
+                : 'bg-white border border-gray-100 text-[#2D2D2D] rounded-[18px] rounded-bl-[4px] p-4 max-w-[80%] shadow-sm';
 
-// Функция отправки на бекенд
-async function handleSendMessage() {
-    const text = userInput.value.trim();
-    if (!text) return;
+            msgDiv.innerHTML = `
+                <div class="${innerClass}">
+                    <p class="text-sm leading-relaxed">${text}</p>
+                    <div class="text-[10px] opacity-40 mt-2 text-right">
+                        ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} ${isUser ? '✓✓' : ''}
+                    </div>
+                </div>
+            `;
+            chatMessages.appendChild(msgDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
 
-    // 1. Отображаем сообщение юзера
-    appendMessage(text, true);
-    userInput.value = '';
-    userInput.style.height = 'auto'; // Сброс высоты textarea
+        function appendLoader() {
+            const loader = document.createElement('div');
+            loader.id = 'temp-loader';
+            loader.className = 'flex justify-start mb-4';
+            loader.innerHTML = `
+                <div class="bg-white border border-gray-100 rounded-[18px] p-4 shadow-sm">
+                    <div class="flex gap-1">
+                        <div class="w-1.5 h-1.5 bg-[#A5F52C] rounded-full animate-bounce"></div>
+                        <div class="w-1.5 h-1.5 bg-[#A5F52C] rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                        <div class="w-1.5 h-1.5 bg-[#A5F52C] rounded-full animate-bounce [animation-delay:0.4s]"></div>
+                    </div>
+                </div>
+            `;
+            chatMessages.appendChild(loader);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
 
-    // 2. Показываем лоадер
-    appendLoader();
+        async function handleSendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
 
-    try {
-        // ТУТ ТВОЙ БЕКЕНД
-        // Замени URL на свой эндпоинт (например, http://localhost:5000/ask)
-        const response = await fetch('YOUR_BACKEND_URL_HERE', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                query: text,
-                user: userName 
-            })
+            appendMessage(text, true);
+            userInput.value = '';
+            userInput.style.height = 'auto';
+            appendLoader();
+
+            try {
+                // Не забудь заменить этот URL на свой http://localhost:5000/ask когда запустишь питон!
+                const response = await fetch('YOUR_BACKEND_URL_HERE', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: text, user: userName })
+                });
+                const data = await response.json();
+                document.getElementById('temp-loader').remove();
+                appendMessage(data.answer, false);
+            } catch (error) {
+                console.error("Ошибка бека:", error);
+                if(document.getElementById('temp-loader')) document.getElementById('temp-loader').remove();
+                appendMessage("Ошибка связи с сервером. Проверь, запущен ли питон.", false);
+            }
+        }
+
+        sendBtn.addEventListener('click', handleSendMessage);
+        userInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSendMessage();
+            }
         });
 
-        const data = await response.json();
-        
-        // Удаляем лоадер и выводим ответ
-        document.getElementById('temp-loader').remove();
-        appendMessage(data.answer, false); // Предположим, бек возвращает { "answer": "текст" }
-
-    } catch (error) {
-        console.error("Ошибка бека:", error);
-        document.getElementById('temp-loader').remove();
-        appendMessage("Ошибка связи с сервером. Проверь, запущен ли питон.", false);
-    }
-}
-
-// Слушатели событий
-sendBtn.addEventListener('click', handleSendMessage);
-
-userInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        handleSendMessage();
-    }
-});
-
-// Автовысота для текстового поля
-userInput.addEventListener('input', function() {
-    this.style.height = 'auto';
-    this.style.height = (this.scrollHeight) + 'px';
-});
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+    </script>
+</body>
+</html>
