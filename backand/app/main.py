@@ -118,8 +118,14 @@ async def ask(request: QueryRequest, db: Session = Depends(get_db)):
     return {"message": msg, "sql": sql, "data": db_results}
 
 @app.get("/history")
-async def get_history(db: Session = Depends(get_db)):
-    return db.query(QueryHistory).order_by(QueryHistory.id.desc()).limit(20).all()
+async def get_history(user_id: str = None, db: Session = Depends(get_db)):
+    query = db.query(QueryHistory)
+    
+    # Если передан ID пользователя, фильтруем только его историю
+    if user_id:
+        query = query.filter(QueryHistory.user_id == user_id)
+    
+    return query.order_by(QueryHistory.id.desc()).limit(20).all()
 
 @app.get("/databases")
 async def get_dbs(db: Session = Depends(get_db)):
