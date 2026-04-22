@@ -281,3 +281,38 @@ body, html {
 .send-btn:hover {
     transform: scale(1.05);
 }
+
+
+.hidden { display: none !important; }
+
+.view-section {
+    flex: 1;
+    overflow-y: auto;
+    padding: 40px;
+    background: #fff;
+}
+
+.view-header h2 {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 30px;
+}
+
+.list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Карточки для истории и баз */
+.item-card {
+    padding: 20px;
+    border: 1px solid #EEE;
+    border-radius: 16px;
+    transition: all 0.2s;
+}
+
+.item-card:hover {
+    border-color: #A5F52C;
+    background: #F0F9E6;
+}

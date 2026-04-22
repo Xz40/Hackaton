@@ -82,3 +82,26 @@ async function sendQuery() {
     // Прокрутка вниз
     chat.scrollTop = chat.scrollHeight;
 }
+
+function showView(mode) {
+    const chatView = document.getElementById('chatMessages');
+    const footer = document.querySelector('.footer');
+    const historyView = document.getElementById('historyView');
+    const dataView = document.getElementById('dataView');
+
+    // Прячем абсолютно всё сначала
+    chatView.classList.add('hidden');
+    footer.classList.add('hidden');
+    historyView.classList.add('hidden');
+    dataView.classList.add('hidden');
+
+    // Показываем только то, что нужно
+    if (mode === 'Главная') {
+        chatView.classList.remove('hidden');
+        footer.classList.remove('hidden');
+    } else if (mode === 'История') {
+        historyView.classList.remove('hidden');
+    } else if (mode === 'Данные') {
+        dataView.classList.remove('hidden');
+    }
+}
