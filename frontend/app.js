@@ -1,4 +1,4 @@
-ocument.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
     // 1. Проверка авторизации
     const currentUser = localStorage.getItem('drivee_user');
     if (!currentUser) {
@@ -6,13 +6,12 @@ ocument.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // 2. Отображение данных юзера в боковой панели
+    // 2. Отображение данных юзера
     const userNameElem = document.getElementById('userName');
     const avatarElem = document.getElementById('avatar');
     if (userNameElem) userNameElem.innerText = currentUser;
     if (avatarElem) avatarElem.innerText = currentUser[0].toUpperCase();
 
-    // 3. Инициализация иконок и первого экрана
     lucide.createIcons();
     showScreen('main');
 });
@@ -44,15 +43,13 @@ function showScreen(type) {
             <div class="px-6 pt-6">
                 <img src="analitycs_for_all.png" alt="Analytics" class="w-full h-44 object-cover rounded-3xl shadow-sm border border-gray-100">
             </div>
-
             <div class="chat-container flex-1" id="chatMessages">
-                <div class="bot-message message shadow-sm">Привет! Я готов проанализировать ваши данные. Что сегодня ищем?</div>
+                <div class="bot-message message shadow-sm">Привет! Я готов проанализировать данные Drivee. Какой отчет подготовить?</div>
             </div>
-
             <div class="p-6 bg-white border-t">
                 <div class="flex gap-4 max-w-4xl mx-auto">
-                    <input id="queryInput" type="text" placeholder="Напишите запрос (например, общая выручка в Якутске)..." 
-                           class="flex-1 bg-gray-50 p-4 rounded-2xl outline-none ring-[#A5F52C] focus:ring-2 border border-gray-100 transition-all">
+                    <input id="queryInput" type="text" placeholder="Например: общая выручка в Якутске..." 
+                           class="flex-1 bg-gray-50 p-4 rounded-2xl outline-none ring-[#A5F52C] focus:ring-2 border border-gray-100">
                     <button onclick="sendQuery()" class="bg-[#A5F52C] w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all">
                         <i data-lucide="zap" class="text-black"></i>
                     </button>
@@ -86,11 +83,11 @@ function renderQuickActions() {
         <h3 class="text-[10px] font-bold uppercase text-gray-400 mb-6 tracking-widest">Быстрые отчеты</h3>
         <div class="space-y-4">
             <div class="border p-5 rounded-2xl hover:border-[#A5F52C] cursor-pointer transition-all bg-white shadow-sm group" onclick="showScreen('dashboards')">
-                <div class="bg-green-50 text-green-600 w-10 h-10 rounded-xl flex items-center justify-center mb-3 group-hover:bg-[#A5F52C] group-hover:text-black transition-colors">
+                <div class="bg-green-50 text-green-600 w-10 h-10 rounded-xl flex items-center justify-center mb-3 group-hover:bg-[#A5F52C] group-hover:text-black">
                     <i data-lucide="pie-chart" class="w-5 h-5"></i>
                 </div>
-                <div class="font-bold text-sm text-gray-900">Продажи по городам</div>
-                <p class="text-[10px] text-gray-500 mt-1">Визуальный срез всех завершенных заказов</p>
+                <div class="font-bold text-sm">Продажи по городам</div>
+                <p class="text-[10px] text-gray-500 mt-1">График по всем городам</p>
             </div>
         </div>
     `;
@@ -112,34 +109,28 @@ async function sendQuery() {
         const response = await fetch(`http://${window.location.hostname}:8080/ask`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                question: text, 
-                user_id: user 
-            })
+            body: JSON.stringify({ question: text, user_id: user })
         });
 
-        if (!response.ok) throw new Error('Ошибка сервера');
-        
         const data = await response.json();
         
         chat.innerHTML += `
             <div class="bot-message message shadow-sm">
-                <div class="text-[9px] text-gray-400 font-mono border-b pb-1 mb-2 tracking-tighter uppercase">SQL: ${data.sql}</div>
+                <div class="text-[9px] text-gray-400 font-mono border-b pb-1 mb-2">SQL: ${data.sql}</div>
                 <div class="text-gray-800 font-medium">${data.message}</div>
                 <div class="mt-2 text-[10px] bg-gray-50 p-2 rounded-lg text-gray-500 font-bold">
-                    Найдено записей: ${data.row_count}
+                    Найдено строк: ${data.row_count}
                 </div>
             </div>`;
     } catch (e) {
-        chat.innerHTML += `<div class="bot-message message text-red-500 bg-red-50">Ошибка: проверьте соединение с бэкендом</div>`;
+        chat.innerHTML += `<div class="bot-message message text-red-500">Ошибка связи с сервером</div>`;
     }
     chat.scrollTop = chat.scrollHeight;
     lucide.createIcons();
 }
 
-// ИСТОРИЯ
 async function renderHistory(container) {
-    container.innerHTML = '<div class="p-10 text-center text-gray-400">Загрузка архива...</div>';
+    container.innerHTML = '<div class="p-10 text-center text-gray-400 uppercase font-bold text-xs">Загрузка...</div>';
     const user = localStorage.getItem('drivee_user');
 
     try {
@@ -161,16 +152,15 @@ async function renderHistory(container) {
             </div>
         `).join('');
         
-        container.innerHTML = `<div class="p-8 h-full overflow-y-auto">${html || '<p class="text-center py-10 text-gray-400">История пока пуста</p>'}</div>`;
+        container.innerHTML = `<div class="p-8 h-full overflow-y-auto">${html || '<p class="text-center py-10 text-gray-400">История пуста</p>'}</div>`;
     } catch (e) { 
-        container.innerHTML = '<div class="p-10 text-red-500 text-center font-bold">ОШИБКА БАЗЫ ДАННЫХ</div>'; 
+        container.innerHTML = '<div class="p-10 text-red-500 text-center font-bold">ОШИБКА БАЗЫ</div>'; 
     }
     lucide.createIcons();
 }
 
-// ПРОСМОТР БАЗЫ (ORDERS)
 async function renderDatabase(container) {
-    container.innerHTML = '<div class="p-10 text-center text-gray-400">Синхронизация...</div>';
+    container.innerHTML = '<div class="p-10 text-center text-gray-400 font-bold text-xs uppercase">Синхронизация...</div>';
     try {
         const res = await fetch(`http://${window.location.hostname}:8080/get_data`);
         const data = await res.json();
@@ -194,7 +184,7 @@ async function renderDatabase(container) {
                 </table>
             </div>`;
     } catch (e) { 
-        container.innerHTML = '<div class="p-10 text-red-500 text-center">ОШИБКА ЗАГРУЗКИ ТАБЛИЦЫ</div>'; 
+        container.innerHTML = '<div class="p-10 text-red-500 text-center uppercase font-bold">Ошибка таблицы</div>'; 
     }
 }
 
@@ -235,5 +225,5 @@ function renderDashboards(container) {
                 }
             });
         }
-    }, 200);
+    }, 150);
 }
