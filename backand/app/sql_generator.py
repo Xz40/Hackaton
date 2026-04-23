@@ -8,7 +8,7 @@ USER_NAME = os.getlogin()
 OLLAMA_PATH = rf"C:\Users\{USER_NAME}\AppData\Local\Programs\Ollama\ollama.exe"
 
 class SQLGenerator:
-    def __init__(self, model_name="qwen-hack"):
+    def __init__(self, model_name="qwen2.5-coder:1.5b"):
         self.model_name = model_name
 
     def _get_system_prompt(self):
