@@ -1,10 +1,7 @@
-// Определяем базу API один раз
 const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:8080`;
 
-// Проверка авторизации при входе
 (function checkAuth() {
     const user = localStorage.getItem('drivee_user');
-    // Если в хранилище нет юзера и мы не на странице логина — редирект
     if (!user && !window.location.pathname.includes('login.html')) {
         window.location.href = 'login.html';
     }
@@ -18,28 +15,13 @@ document.addEventListener('DOMContentLoaded', () => {
     clearChat();
 });
 
-function showView(mode) {
-    const navItems = document.querySelectorAll('.nav-item');
-    navItems.forEach(i => {
-        i.classList.remove('active');
-        if(i.innerText.includes(mode)) i.classList.add('active');
-    });
-
-    // Скрываем всё
-    ['mainView', 'historyView', 'dataView'].forEach(id => document.getElementById(id).classList.add('hidden'));
-
-    // Показываем нужное
-    if (mode === 'Главная') document.getElementById('mainView').classList.remove('hidden');
-    if (mode === 'История') { document.getElementById('historyView').classList.remove('hidden'); loadHistory(); }
-    if (mode === 'Данные') { document.getElementById('dataView').classList.remove('hidden'); loadDatabases(); }
-}
-
 async function sendQuery() {
     const input = document.getElementById('queryInput');
     const chat = document.getElementById('chatMessages');
     const text = input.value.trim();
     if (!text) return;
 
+    // Сообщение пользователя
     chat.innerHTML += `<div class="msg user">${text}</div>`;
     input.value = "";
     chat.scrollTop = chat.scrollHeight;
@@ -56,17 +38,22 @@ async function sendQuery() {
         
         const data = await response.json();
 
+        // Формируем ответ бота
         let botHtml = `<div class="msg bot">`;
-        // Если пришел SQL, показываем его в маленьком блоке
+        
+        // Показываем SQL, если он есть (полезно для отладки)
         if (data.sql) {
-            botHtml += `<pre style="font-size:10px; background:#222; padding:5px; border-radius:4px; border:1px solid #444; color:#A5F52C; overflow-x:auto;">${data.sql}</pre>`;
+            botHtml += `<div style="font-family:monospace; font-size:10px; background:rgba(0,0,0,0.3); padding:8px; margin-bottom:10px; border-left:3px solid #A5F52C; color:#eee; overflow-x:auto;">
+                            ${data.sql}
+                        </div>`;
         }
+        
         botHtml += `<div>${data.message}</div></div>`;
         
         chat.innerHTML += botHtml;
         updateStats();
     } catch (e) {
-        chat.innerHTML += `<div class="msg bot" style="color:#FF4D4D">Ошибка сервера</div>`;
+        chat.innerHTML += `<div class="msg bot" style="color:#FF4D4D">Ошибка связи с сервером</div>`;
     }
     chat.scrollTop = chat.scrollHeight;
 }
@@ -82,7 +69,7 @@ async function loadHistory() {
                     <strong>${h.question}</strong><br>
                     <small style="color:#AAA">${new Date(h.timestamp).toLocaleString()}</small>
                 </div>
-                <i data-lucide="chevron-right" style="color:#EEE"></i>
+                <i data-lucide="chevron-right"></i>
             </div>
         `).join('');
         lucide.createIcons();
@@ -112,7 +99,19 @@ async function updateStats() {
 }
 
 function clearChat() {
-    document.getElementById('chatMessages').innerHTML = '<div class="msg bot">Привет! Я готов анализировать данные Drivee. Какой отчет подготовить?</div>';
+    document.getElementById('chatMessages').innerHTML = '<div class="msg bot">Привет! Я аналитик Drivee. Какой отчет сформировать?</div>';
+}
+
+function showView(mode) {
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(i => {
+        i.classList.remove('active');
+        if(i.innerText.includes(mode)) i.classList.add('active');
+    });
+    ['mainView', 'historyView', 'dataView'].forEach(id => document.getElementById(id).classList.add('hidden'));
+    if (mode === 'Главная') document.getElementById('mainView').classList.remove('hidden');
+    if (mode === 'История') { document.getElementById('historyView').classList.remove('hidden'); loadHistory(); }
+    if (mode === 'Данные') { document.getElementById('dataView').classList.remove('hidden'); loadDatabases(); }
 }
 
 function logout() {

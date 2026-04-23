@@ -13,11 +13,17 @@ import re
 # Инициализируем генератор
 sql_gen = SQLGenerator(model_name="qwen2.5-coder:7b")
 
-# --- 1. СИСТЕМНАЯ БД (SQLite) ---
+# --- 1. СИСТЕМНАЯ БД (SQLite для истории) ---
 SYSTEM_DB_URL = "sqlite:///./system.db"
 system_engine = create_engine(SYSTEM_DB_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=system_engine)
 Base = declarative_base()
+
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True)
+    requests_count = Column(Integer, default=0)
 
 class QueryHistory(Base):
     __tablename__ = "history"
@@ -43,29 +49,30 @@ def get_system_db():
     finally:
         db.close()
 
-def extract_clean_sql(raw_text):
-    """Вытаскивает только SQL, игнорируя болтовню модели"""
-    # Убираем ANSI-коды (цвета терминала), если они есть
-    clean_text = re.sub(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])', '', raw_text)
-    # Ищем блок SELECT ... ;
-    sql_match = re.search(r"(SELECT[\s\S]+?;?)", clean_text, re.IGNORECASE)
-    if sql_match:
-        return sql_match.group(1).strip()
-    return clean_text.strip()
+def extract_sql_from_garbage(text):
+    """Вырезает только SQL из болтовни модели"""
+    if not text: return ""
+    # Убираем ANSI коды (цвета терминала)
+    text = re.sub(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])', '', text)
+    # Ищем блок SELECT ... ; (флаг IGNORECASE важен)
+    match = re.search(r"(SELECT[\s\S]+?;?)", text, re.IGNORECASE)
+    if match:
+        return match.group(1).strip()
+    return text.strip()
 
 @app.post("/ask")
 async def ask_question(request: QuestionRequest, db: Session = Depends(get_system_db)):
-    # 1. Получаем сырой ответ от модели
+    # 1. Генерируем ответ (может быть с мусором)
     gen_result = sql_gen.generate(request.question)
     
     if gen_result.get("status") == "error":
-        return {"message": "Ошибка генерации", "sql": None, "data": []}
+        return {"message": f"Ошибка LLM: {gen_result.get('error')}", "sql": None, "data": []}
 
-    # 2. Очищаем SQL от "хвастовства"
-    raw_sql = gen_result.get("sql", "")
-    sql = extract_clean_sql(raw_sql)
+    # 2. Вытаскиваем SQL
+    raw_response = gen_result.get("sql", "")
+    sql = extract_sql_from_garbage(raw_response)
     
-    # 3. Исполнение в Postgres
+    # 3. Исполнение в Postgres (Drivee Analytics)
     db_results = []
     try:
         conn = psycopg2.connect(
@@ -78,21 +85,19 @@ async def ask_question(request: QuestionRequest, db: Session = Depends(get_syste
         cursor = conn.cursor()
         cursor.execute(sql)
         db_results = cursor.fetchall()
-        msg = f"Найдено строк: {len(db_results)}"
+        
+        msg = f"Найдено строк: {len(db_results)}" if db_results else "Данные по запросу отсутствуют."
         cursor.close()
         conn.close()
     except Exception as e:
-        msg = f"Ошибка выполнения: {str(e)}"
+        msg = f"Ошибка базы: {str(e)}"
 
-    # 4. Логирование
+    # 4. Сохраняем в историю
     new_log = QueryHistory(user_id=request.user_id, question=request.question, sql_query=sql)
     db.add(new_log)
     db.commit()
 
     return {"message": msg, "sql": sql, "data": db_results}
-
-# Остальные эндпоинты (history, stats, databases) оставляем как были
-
 
 @app.get("/history")
 async def get_history(user_id: str = None, db: Session = Depends(get_system_db)):
@@ -108,9 +113,4 @@ async def get_stats(user_id: str, db: Session = Depends(get_system_db)):
 
 @app.get("/databases")
 async def get_dbs():
-    # Показываем статус нашей основной Postgres базы
-    return [{
-        "name": "Drivee_Production_Postgres",
-        "db_type": "PostgreSQL",
-        "status": "Online"
-    }]
+    return [{"name": "Drivee_Postgres_Main", "db_type": "PostgreSQL", "status": "Online"}]
