@@ -1,5 +1,5 @@
 import sqlite3
-import psycopg2 # Для Postgres
+import psycopg2 
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime
@@ -19,12 +19,6 @@ system_engine = create_engine(SYSTEM_DB_URL, connect_args={"check_same_thread": 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=system_engine)
 Base = declarative_base()
 
-class User(Base):
-    __tablename__ = "users"
-    id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True)
-    requests_count = Column(Integer, default=0)
-
 class QueryHistory(Base):
     __tablename__ = "history"
     id = Column(Integer, primary_key=True, index=True)
@@ -35,26 +29,12 @@ class QueryHistory(Base):
 
 Base.metadata.create_all(bind=system_engine)
 
-# --- 2. КОНФИГ POSTGRES (Аналитическая БД) ---
-POSTGRES_CONFIG = {
-    "dbname": "drivee_analytics",
-    "user": "postgres",
-    "password": "your_password",
-    "host": "localhost",
-    "port": "5432"
-}
-
-# --- МОДЕЛИ И API ---
 class QuestionRequest(BaseModel):
     user_id: str
     question: str
 
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
-
-def clean_ansi_codes(text):
-    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
-    return ansi_escape.sub('', text)
 
 def get_system_db():
     db = SessionLocal()
@@ -63,17 +43,30 @@ def get_system_db():
     finally:
         db.close()
 
+def extract_clean_sql(raw_text):
+    """Вытаскивает только SQL, игнорируя болтовню модели"""
+    # Убираем ANSI-коды (цвета терминала), если они есть
+    clean_text = re.sub(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])', '', raw_text)
+    # Ищем блок SELECT ... ;
+    sql_match = re.search(r"(SELECT[\s\S]+?;?)", clean_text, re.IGNORECASE)
+    if sql_match:
+        return sql_match.group(1).strip()
+    return clean_text.strip()
+
 @app.post("/ask")
 async def ask_question(request: QuestionRequest, db: Session = Depends(get_system_db)):
-    # 1. Генерируем SQL
+    # 1. Получаем сырой ответ от модели
     gen_result = sql_gen.generate(request.question)
-    if gen_result["status"] == "error":
-        return {"message": f"Ошибка: {gen_result['error']}", "sql": None}
-
-    raw_sql = gen_result["sql"]
-    sql = clean_ansi_codes(raw_sql).replace('\n', ' ').strip()
     
-    # 2. ИДЕМ В POSTGRES (а не в sqlite3!)
+    if gen_result.get("status") == "error":
+        return {"message": "Ошибка генерации", "sql": None, "data": []}
+
+    # 2. Очищаем SQL от "хвастовства"
+    raw_sql = gen_result.get("sql", "")
+    sql = extract_clean_sql(raw_sql)
+    
+    # 3. Исполнение в Postgres
+    db_results = []
     try:
         conn = psycopg2.connect(
             dbname="drivee_analytics",
@@ -85,24 +78,22 @@ async def ask_question(request: QuestionRequest, db: Session = Depends(get_syste
         cursor = conn.cursor()
         cursor.execute(sql)
         db_results = cursor.fetchall()
-        
-        if not db_results:
-            msg = "Данные по вашему запросу не найдены."
-        else:
-            msg = f"Найдено строк: {len(db_results)}"
-            
+        msg = f"Найдено строк: {len(db_results)}"
         cursor.close()
         conn.close()
     except Exception as e:
-        msg = f"Ошибка выполнения в Postgres: {str(e)}"
-        db_results = []
+        msg = f"Ошибка выполнения: {str(e)}"
 
-    # 3. ЛОГИРУЕМ В СИСТЕМНУЮ БД (SQLite остается для этого)
+    # 4. Логирование
     new_log = QueryHistory(user_id=request.user_id, question=request.question, sql_query=sql)
     db.add(new_log)
     db.commit()
 
     return {"message": msg, "sql": sql, "data": db_results}
+
+# Остальные эндпоинты (history, stats, databases) оставляем как были
+
+
 @app.get("/history")
 async def get_history(user_id: str = None, db: Session = Depends(get_system_db)):
     query = db.query(QueryHistory)

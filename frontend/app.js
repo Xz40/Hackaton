@@ -40,7 +40,6 @@ async function sendQuery() {
     const text = input.value.trim();
     if (!text) return;
 
-    // Сообщение юзера
     chat.innerHTML += `<div class="msg user">${text}</div>`;
     input.value = "";
     chat.scrollTop = chat.scrollHeight;
@@ -49,14 +48,25 @@ async function sendQuery() {
         const response = await fetch(`${API_BASE_URL}/ask`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ question: text, user_id: localStorage.getItem('drivee_user') || 'Admin' })
+            body: JSON.stringify({ 
+                question: text, 
+                user_id: localStorage.getItem('drivee_user') || 'Admin' 
+            })
         });
+        
         const data = await response.json();
-        // Ответ бота
-        chat.innerHTML += `<div class="msg bot">${data.message}</div>`;
+
+        let botHtml = `<div class="msg bot">`;
+        // Если пришел SQL, показываем его в маленьком блоке
+        if (data.sql) {
+            botHtml += `<pre style="font-size:10px; background:#222; padding:5px; border-radius:4px; border:1px solid #444; color:#A5F52C; overflow-x:auto;">${data.sql}</pre>`;
+        }
+        botHtml += `<div>${data.message}</div></div>`;
+        
+        chat.innerHTML += botHtml;
         updateStats();
     } catch (e) {
-        chat.innerHTML += `<div class="msg bot" style="color:red">Ошибка соединения с сервером</div>`;
+        chat.innerHTML += `<div class="msg bot" style="color:#FF4D4D">Ошибка сервера</div>`;
     }
     chat.scrollTop = chat.scrollHeight;
 }
