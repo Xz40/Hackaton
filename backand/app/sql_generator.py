@@ -63,32 +63,43 @@ class SQLGenerator:
             # --- МНОГОУРОВНЕВАЯ ОЧИСТКА ---
             raw_sql = result.stdout.strip()
             
-            # 1. Удаляем ANSI-мусор (управляющие символы терминала)
-            sql = re.sub(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])', '', raw_output if 'raw_output' in locals() else raw_sql)
+            # 1. Удаляем ANSI-мусор
+            sql = re.sub(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])', '', raw_sql)
             
-            # 2. Удаляем Markdown кавычки ```sql
+            # 2. Удаляем Markdown кавычки
             sql = re.sub(r'```sql|```', '', sql).strip()
 
-            # 3. ХИРУРГИЯ: Отрезаем всё, что идет ДО слова SELECT (убирает болтовню модели)
+            # 3. ХИРУРГИЯ: Ищем SELECT. Если он есть — отрезаем всё ДО.
+            # Если его НЕТ — принудительно добавляем SELECT в начало.
             match = re.search(r'SELECT', sql, re.IGNORECASE)
             if match:
                 sql = sql[match.start():]
             else:
-                return {"status": "error", "error": "Модель не сгенерировала SELECT запрос", "raw": sql}
+                # Если модель выдала "AVG(...) FROM...", просто приклеиваем SELECT
+                sql = "SELECT " + sql
 
-            # 4. ФИКС ЗАИКАНИЯ: Убираем повторы слов (например, "NULLIF(dist dist")
+            # 4. ФИКС ЗАИКАНИЯ: Убираем повторы слов
             sql = re.sub(r'\b(\w+)(?:\s+\1\b)+', r'\1', sql)
             
-            # 5. ФИКС СКЛЕЕК: Удаляем обрывки слов перед ключевыми командами (mete NULLIF -> NULLIF)
+            # 5. ФИКС СКЛЕЕК: Очищаем мусор перед ключевыми словами
             sql = re.sub(r'\w{2,}\s+(NULLIF|SELECT|FROM|WHERE|GROUP|ORDER|AVG|SUM|COUNT|AS)', r' \1', sql)
 
-            # 6. Принудительная замена 'finished' на 'done' (наша страховка)
+            # 6. Фикс для случаев, когда модель написала "FROM WHERE" без таблицы
+            if "FROM WHERE" in sql.upper():
+                sql = sql.upper().replace("FROM WHERE", "FROM orders WHERE")
+            elif "FROM" not in sql.upper():
+                 # Если вообще забыла FROM
+                 sql = sql.replace("WHERE", "FROM orders WHERE")
+
+            # 7. Принудительные замены и лимит
             sql = sql.replace("'finished'", "'done'")
-            
-            # 7. Финальная сборка в одну чистую строку
             sql = ' '.join(sql.split())
             if ';' in sql:
                 sql = sql.split(';')[0] + ';'
+            
+            # Если лимит потерялся
+            if "LIMIT" not in sql.upper():
+                sql = sql.replace(";", "") + " LIMIT 1000;"
 
             # 8. Проверка безопасности
             validation = validate_sql(sql)
