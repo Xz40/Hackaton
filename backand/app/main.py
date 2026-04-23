@@ -8,6 +8,7 @@ from sqlalchemy.orm import sessionmaker, Session
 from datetime import datetime
 from pydantic import BaseModel
 from sql_generator import SQLGenerator
+import re
 
 # Инициализируем генератор
 sql_gen = SQLGenerator(model_name="qwen2.5-coder:7b")
@@ -51,6 +52,10 @@ class QuestionRequest(BaseModel):
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
+def clean_ansi_codes(text):
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+    return ansi_escape.sub('', text)
+
 def get_system_db():
     db = SessionLocal()
     try:
@@ -65,7 +70,8 @@ async def ask_question(request: QuestionRequest, db: Session = Depends(get_syste
     if gen_result["status"] == "error":
         return {"message": f"Ошибка: {gen_result['error']}", "sql": None}
 
-    sql = gen_result["sql"]
+    raw_sql = gen_result["sql"]
+    sql = clean_ansi_codes(raw_sql).replace('\n', ' ').strip()
     
     # 2. ИДЕМ В POSTGRES (а не в sqlite3!)
     try:
