@@ -51,7 +51,7 @@ class QuestionRequest(BaseModel):
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
-def get_db():
+def get_system_db():
     db = SessionLocal()
     try:
         yield db
