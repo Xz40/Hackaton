@@ -59,7 +59,7 @@ def get_system_db():
         db.close()
 
 @app.post("/ask")
-async def ask_question(request: QuestionRequest, db: Session = Depends(get_db)):
+async def ask_question(request: QuestionRequest, db: Session = Depends(get_system_db)):
     # 1. Генерируем SQL
     gen_result = sql_gen.generate(request.question)
     if gen_result["status"] == "error":
