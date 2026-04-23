@@ -4,11 +4,11 @@ import os
 from sql_validator import validate_sql
 from semantic import get_semantic_context, enrich_question
 
-# Путь к Ollama (используем имя текущего пользователя)
+# Определяем путь к Ollama
 try:
     USER_NAME = os.getlogin()
 except:
-    USER_NAME = "User" # Фолбэк, если getlogin не сработал
+    USER_NAME = "User"
 
 OLLAMA_PATH = rf"C:\Users\{USER_NAME}\AppData\Local\Programs\Ollama\ollama.exe"
 
@@ -17,43 +17,26 @@ class SQLGenerator:
         self.model_name = model_name
 
     def _get_system_prompt(self):
-        # Подтягиваем контекст из твоего semantic.py
         semantic_info = get_semantic_context()
+        return f"""Ты — эксперт по PostgreSQL. Пиши ТОЛЬКО чистый SQL.
         
-        return f"""Ты — эксперт по PostgreSQL. Твоя задача — переводить вопросы пользователя в SQL-запросы к таблице 'orders'.
+СХЕМА: Таблица 'orders' (city_id, status_order, price_order_local, distance_in_meters, duration_in_seconds).
+СТАТУСЫ: Успешный заказ = 'done'.
 
-### СТРУКТУРА ТАБЛИЦЫ 'orders':
-- order_id (int): уникальный ID заказа
-- city_id (int): ID города
-- status_order (text): статус заказа
-- order_timestamp (timestamp): время заказа
-- distance_in_meters (float): дистанция
-- duration_in_seconds (int): время в пути
-- price_order_local (float): цена заказа (выручка)
+ПРАВИЛА:
+1. Никаких пояснений. Только SELECT запрос.
+2. Не повторяй слова. Не используй ANSI символы.
+3. Если считаешь цену за метр: price_order_local / NULLIF(distance_in_meters, 0).
+4. Всегда добавляй LIMIT 1000.
+5. СТРОГО: статус всегда 'done', если не просят иное.
 
-### СЛОВАРЬ СТАТУСОВ (ВАЖНО):
-- Если пользователь говорит "завершенный", "успешный", "продажа", "выполнен" -> используй status_order = 'done'
-- Если пользователь говорит "отмененный" -> используй status_order = 'cancel'
-- Если пользователь говорит "удаленный" -> используй status_order = 'delete'
-- Если пользователь говорит "принятый" -> используй status_order = 'accept'
-
-### ПРАВИЛА:
-1. Пиши ТОЛЬКО чистый SQL-код для PostgreSQL. Без пояснений, без кавычек ```sql.
-2. ЗАПРЕЩЕНО использовать ANSI escape-коды (\u001b), управляющие символы или форматирование терминала.
-3. По умолчанию (если не указано иное) фильтруй по status_order = 'done'.
-4. Ограничивай выборку (LIMIT 1000).
-5. Для расчета выручки используй SUM(price_order_local).
-
-МЕТРИКИ ИЗ СЕМАНТИКИ: {semantic_info}"""
+КОНТЕКСТ: {semantic_info}"""
 
     def generate(self, user_query: str) -> dict:
-        # Улучшаем вопрос через твой семантический слой
         enriched_query = enrich_question(user_query)
-        
         system_prompt = self._get_system_prompt()
-        full_prompt = f"{system_prompt}\n\nВопрос пользователя: {enriched_query}\nSQL:"
+        full_prompt = f"{system_prompt}\nВопрос: {enriched_query}\nSQL:"
 
-        # Запуск Ollama
         command = [OLLAMA_PATH, "run", self.model_name, full_prompt]
 
         try:
@@ -68,43 +51,41 @@ class SQLGenerator:
             if result.returncode != 0:
                 return {"status": "error", "error": f"Ollama error: {result.stderr}"}
 
-            # 1. Получаем сырой текст
             raw_output = result.stdout.strip()
             
-            # 2. Очистка от ANSI-мусора (те самые \u001b[5D)
+            # --- БЛОК ЖЕСТКОЙ ОЧИСТКИ ---
+            # 1. Убираем ANSI-мусор (\u001b и прочее)
             clean_sql = re.sub(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])', '', raw_output)
             
-            # 3. Убираем блоки кода Markdown, если модель их добавила
+            # 2. Убираем Markdown блоки
             clean_sql = re.sub(r'```sql|```', '', clean_sql).strip()
             
-            # 4. Берем только первую часть до точки с запятой
-            clean_sql = clean_sql.split(';')[0] + ';' if ';' in clean_sql else clean_sql
+            # 3. Фикс "заикания" модели (убираем обрывки слов типа 'dis distance')
+            # Ищем паттерн: пробел + короткое слово (2-3 буквы) + пробел + слово, которое начинается так же
+            clean_sql = re.sub(r'\b(\w{2,3})\s+(\1\w+)', r'\2', clean_sql)
             
-            # 5. Убираем лишние переносы строк для чистоты
-            clean_sql = clean_sql.replace('\n', ' ').replace('\r', ' ').strip()
+            # 4. Убираем лишние пробелы и переносы
+            clean_sql = clean_sql.replace('\n', ' ').replace('\r', ' ')
+            clean_sql = re.sub(r'\s+', ' ', clean_sql).strip()
+            
+            # 5. Берем только запрос до точки с запятой
+            if ';' in clean_sql:
+                clean_sql = clean_sql.split(';')[0] + ';'
 
-            # 6. Проверка безопасности через твой sql_validator.py
+            # Валидация
             validation = validate_sql(clean_sql)
-
             if not validation["safe"]:
-                return {
-                    "status": "error", 
-                    "error": f"Безопасность: {validation['reason']}", 
-                    "sql": clean_sql
-                }
+                return {"status": "error", "error": f"Безопасность: {validation['reason']}", "sql": clean_sql}
 
             return {
                 "status": "success",
                 "sql": validation["sql"],
-                "explanation": f"Запрос сформирован для PostgreSQL (используется статус 'done')."
+                "explanation": "Запрос очищен от артефактов генерации."
             }
 
         except Exception as e:
-            return {"status": "error", "error": f"Ошибка вызова Ollama: {str(e)}"}
+            return {"status": "error", "error": str(e)}
 
-# Мини-тест для проверки в консоли
 if __name__ == "__main__":
     generator = SQLGenerator()
-    test_query = "покажи продажи по городам"
-    print(f"Тестовый запрос: {test_query}")
-    print(generator.generate(test_query))
+    print(generator.generate("Топ 5 городов по среднему чеку"))
