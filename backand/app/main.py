@@ -59,50 +59,44 @@ def get_system_db():
         db.close()
 
 @app.post("/ask")
-async def ask_question(request: QuestionRequest, db: Session = Depends(get_system_db)):
-    # 1. Генерация SQL
+async def ask_question(request: QuestionRequest, db: Session = Depends(get_db)):
+    # 1. Генерируем SQL
     gen_result = sql_gen.generate(request.question)
     if gen_result["status"] == "error":
-        return {"message": f"Ошибка генерации: {gen_result['error']}", "sql": None}
-    
-    sql = gen_result["sql"]
+        return {"message": f"Ошибка: {gen_result['error']}", "sql": None}
 
-    # 2. Выполнение в PostgreSQL
+    sql = gen_result["sql"]
+    
+    # 2. ИДЕМ В POSTGRES (а не в sqlite3!)
     try:
-        conn = psycopg2.connect(**POSTGRES_CONFIG)
+        conn = psycopg2.connect(
+            dbname="drivee_analytics",
+            user="postgres",
+            password="postgres",
+            host="localhost",
+            port="5432"
+        )
         cursor = conn.cursor()
         cursor.execute(sql)
         db_results = cursor.fetchall()
         
-        # Формируем человеческий ответ на основе данных
         if not db_results:
-            msg = "Данные не найдены."
+            msg = "Данные по вашему запросу не найдены."
         else:
-            # Берем первый результат для простоты или выводим количество
-            val = db_results[0][0]
-            msg = f"Результат анализа: {val}"
-        
+            msg = f"Найдено строк: {len(db_results)}"
+            
         cursor.close()
         conn.close()
     except Exception as e:
-        msg = f"Ошибка в Postgres: {str(e)}"
+        msg = f"Ошибка выполнения в Postgres: {str(e)}"
         db_results = []
 
-    # 3. Сохранение логов в SQLite (system.db)
+    # 3. ЛОГИРУЕМ В СИСТЕМНУЮ БД (SQLite остается для этого)
     new_log = QueryHistory(user_id=request.user_id, question=request.question, sql_query=sql)
     db.add(new_log)
-    
-    user = db.query(User).filter(User.username == request.user_id).first()
-    if not user:
-        user = User(username=request.user_id, requests_count=1)
-        db.add(user)
-    else:
-        user.requests_count += 1
-    
     db.commit()
-    
-    return {"message": msg, "sql": sql, "data": db_results}
 
+    return {"message": msg, "sql": sql, "data": db_results}
 @app.get("/history")
 async def get_history(user_id: str = None, db: Session = Depends(get_system_db)):
     query = db.query(QueryHistory)
