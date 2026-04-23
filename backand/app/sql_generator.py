@@ -32,10 +32,11 @@ class SQLGenerator:
 - Отмененный заказ: status_order = 'cancel'
 
 ### ТЕХНИЧЕСКИЕ ПРАВИЛА:
-1. Пиши ТОЛЬКО чистый SQL-код для PostgreSQL. Без пояснений.
+1. Пиши ТОЛЬКО чистый SQL-код для PostgreSQL. Без пояснений и без ```sql.
 2. Цена за метр: price_order_local / NULLIF(distance_in_meters, 0).
 3. ЗАПРЕЩЕНО использовать ANSI escape-коды (\u001b) или форматирование терминала.
 4. Всегда добавляй LIMIT 1000.
+5. Если в вопросе нет города, не фильтруй по city_id.
 
 МЕТРИКИ: {semantic_info}"""
 
@@ -63,45 +64,50 @@ class SQLGenerator:
             # --- МНОГОУРОВНЕВАЯ ОЧИСТКА ---
             raw_sql = result.stdout.strip()
             
-            # 1. Удаляем ANSI-мусор
+            # 1. Удаляем ANSI-мусор (управляющие символы терминала)
             sql = re.sub(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])', '', raw_sql)
             
-            # 2. Удаляем Markdown кавычки
+            # 2. Удаляем Markdown кавычки ```sql
             sql = re.sub(r'```sql|```', '', sql).strip()
 
-            # 3. ХИРУРГИЯ: Ищем SELECT. Если он есть — отрезаем всё ДО.
-            # Если его НЕТ — принудительно добавляем SELECT в начало.
+            # 3. ХИРУРГИЯ: Ищем SELECT. Если есть — отрезаем всё ДО. Если нет — добавляем.
             match = re.search(r'SELECT', sql, re.IGNORECASE)
             if match:
                 sql = sql[match.start():]
             else:
-                # Если модель выдала "AVG(...) FROM...", просто приклеиваем SELECT
+                # Если модель сразу начала с AVG или колонок
                 sql = "SELECT " + sql
 
-            # 4. ФИКС ЗАИКАНИЯ: Убираем повторы слов
+            # 4. ФИКС ЗАИКАНИЯ: Убираем повторы слов (например, "NULLIF(dist dist")
             sql = re.sub(r'\b(\w+)(?:\s+\1\b)+', r'\1', sql)
             
-            # 5. ФИКС СКЛЕЕК: Очищаем мусор перед ключевыми словами
+            # 5. ФИКС СКЛЕЕК: Удаляем обрывки слов перед ключевыми командами (mete NULLIF -> NULLIF)
             sql = re.sub(r'\w{2,}\s+(NULLIF|SELECT|FROM|WHERE|GROUP|ORDER|AVG|SUM|COUNT|AS)', r' \1', sql)
 
-            # 6. Фикс для случаев, когда модель написала "FROM WHERE" без таблицы
+            # 6. ФИКС ТАБЛИЦЫ: Если модель написала FROM WHERE без имени таблицы
             if "FROM WHERE" in sql.upper():
-                sql = sql.upper().replace("FROM WHERE", "FROM orders WHERE")
-            elif "FROM" not in sql.upper():
-                 # Если вообще забыла FROM
-                 sql = sql.replace("WHERE", "FROM orders WHERE")
+                sql = re.sub(r'FROM WHERE', 'FROM orders WHERE', sql, flags=re.IGNORECASE)
+            elif "FROM" not in sql.upper() and "SELECT" in sql.upper():
+                # Если модель вообще забыла FROM, пытаемся вставить перед WHERE
+                if "WHERE" in sql.upper():
+                    sql = re.sub(r'WHERE', 'FROM orders WHERE', sql, flags=re.IGNORECASE)
+                else:
+                    # Если и WHERE нет, просто лепим в конец перед лимитом
+                    sql = sql.replace(";", "") + " FROM orders"
 
-            # 7. Принудительные замены и лимит
+            # 7. Принудительная замена 'finished' на 'done'
             sql = sql.replace("'finished'", "'done'")
+            
+            # 8. Схлопываем пробелы и убираем мусор в конце
             sql = ' '.join(sql.split())
             if ';' in sql:
                 sql = sql.split(';')[0] + ';'
             
-            # Если лимит потерялся
+            # Добавляем лимит, если его нет
             if "LIMIT" not in sql.upper():
                 sql = sql.replace(";", "") + " LIMIT 1000;"
 
-            # 8. Проверка безопасности
+            # 9. Проверка безопасности
             validation = validate_sql(sql)
             if not validation["safe"]:
                 return {
@@ -113,13 +119,14 @@ class SQLGenerator:
             return {
                 "status": "success",
                 "sql": sql,
-                "explanation": "Запрос очищен и готов к выполнению в PostgreSQL."
+                "explanation": "Запрос прошел через систему очистки артефактов."
             }
 
         except Exception as e:
             return {"status": "error", "error": f"Ошибка: {str(e)}"}
 
-# Тест-драйв
+# Тест
 if __name__ == "__main__":
     gen = SQLGenerator()
+    # Тот самый проблемный запрос
     print(gen.generate("средняя цена за метр в городе 67"))
