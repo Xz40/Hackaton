@@ -16,6 +16,7 @@ from dotenv import load_dotenv
 
 ENV_PATH = Path(__file__).resolve().parents[1] / ".env"
 load_dotenv(dotenv_path=ENV_PATH)
+ANALYTICS_TABLE = os.getenv("ANALYTICS_TABLE", "orders").strip() or "orders"
 
 def _model_for_provider(provider: str) -> str:
     def _clean(value: str) -> str:
@@ -92,6 +93,12 @@ def sanitize_raw_ollama_sql(text: str) -> str:
     cleaned = cleaned.replace("<s>", "").replace("</s>", "")
     return cleaned.strip()
 
+def remap_orders_table(sql: str) -> str:
+    """
+    Подменяет таблицу orders на фактическую таблицу из env (ANALYTICS_TABLE).
+    """
+    return re.sub(r"\borders\b", ANALYTICS_TABLE, sql, flags=re.IGNORECASE)
+
 def normalize_query_rows(rows):
     """Приводит строки psycopg2 к JSON-совместимому list[dict]."""
     normalized = []
@@ -122,6 +129,8 @@ async def ask_question(request: QuestionRequest, db: Session = Depends(get_syste
         if not validation["safe"]:
             return {"message": validation["reason"], "sql": sql, "data": []}
         sql = validation["sql"]
+
+    sql = remap_orders_table(sql)
     
     # 3. Исполнение в Postgres (Drivee Analytics)
     db_results = []
