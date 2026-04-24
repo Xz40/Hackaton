@@ -17,13 +17,11 @@ from dotenv import load_dotenv
 ENV_PATH = Path(__file__).resolve().parents[1] / ".env"
 load_dotenv(dotenv_path=ENV_PATH)
 ANALYTICS_TABLE = os.getenv("ANALYTICS_TABLE", "orders").strip() or "orders"
+current_provider = "ollama"
 
 def _model_for_provider(provider: str) -> str:
-    def _clean(value: str) -> str:
-        return (value or "").strip().strip('"').strip("'")
-    if provider == "grok":
-        return _clean(os.getenv("GROQ_MODEL", "llama-3.3-70b-specdec"))
-    return _clean(os.getenv("SQL_MODEL", "sqlcoder:latest"))
+    # Игнорируем всё, возвращаем только тяжелую модель
+    return "sqlcoder:7b-q8_0"
 
 current_provider = os.getenv("SQL_PROVIDER", "ollama").strip().lower()
 if current_provider not in {"ollama", "grok"}:
@@ -31,8 +29,8 @@ if current_provider not in {"ollama", "grok"}:
 
 # Инициализируем генератор
 sql_gen = SQLGenerator(
-    model_name=_model_for_provider(current_provider),
-    provider=current_provider
+    model_name="sqlcoder:7b-q8_0",
+    provider="ollama"
 )
 
 # --- 1. СИСТЕМНАЯ БД (SQLite для истории) ---
@@ -188,21 +186,24 @@ async def get_stats(user_id: str, db: Session = Depends(get_system_db)):
 async def get_dbs():
     return [{"name": "Drivee_Postgres_Main", "db_type": "PostgreSQL", "status": "Online"}]
 
-@app.get("/llm/config")
-async def get_llm_config():
-    return {"provider": current_provider, "model": sql_gen.model_name}
-
 @app.post("/llm/config")
 async def set_llm_config(request: LlmConfigRequest):
     global current_provider, sql_gen
-    provider = (request.provider or "").strip().lower()
-    if provider not in {"ollama", "grok"}:
-        return {"status": "error", "message": "provider must be 'ollama' or 'grok'"}
-
+    # Игнорируем то, что прислал юзер, ставим свое
+    current_provider = "ollama"
     model_name = "sqlcoder:7b-q8_0"
+    sql_gen.configure(provider=current_provider, model_name=model_name)
+    return {"status": "ok", "provider": "ollama", "model": "sqlcoder:7b-q8_0"}
+
+@app.get("/llm/config")
+async def get_llm_config():
+    # Всегда отдаем хардкод
+    return {"provider": "ollama", "model": "sqlcoder:7b-q8_0"}
+
+"""    model_name = "sqlcoder:7b-q8_0"
     sql_gen.configure(provider=provider, model_name=model_name)
     current_provider = "ollama"
-    return {"status": "ok", "provider": current_provider, "model": model_name}
+    return {"status": "ok", "provider": current_provider, "model": model_name}"""
 
 @app.get("/llm/health")
 async def llm_health(provider: str = None, model: str = None):

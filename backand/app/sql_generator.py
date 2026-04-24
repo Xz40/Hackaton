@@ -14,8 +14,8 @@ OLLAMA_PATH = os.getenv("OLLAMA_PATH", DEFAULT_OLLAMA_PATH)
 
 class SQLGenerator:
     def __init__(self, model_name="sqlcoder", provider="ollama"):
-        self.model_name = model_name
-        self.provider = provider
+        self.model_name = "sqlcoder:7b-q8_0"
+        self.provider = "ollama"
 
     def _get_system_prompt(self):
         semantic_info = get_semantic_context()
@@ -79,8 +79,9 @@ Table 'orders' (ONLY this table exists):
         return f"SELECT * FROM orders LIMIT {limit};"
 
     def configure(self, provider: str, model_name: str):
-        self.provider = provider
-        self.model_name = (model_name or "").strip().strip('"').strip("'")
+        # Игнорируем аргументы
+        self.provider = "ollama"
+        self.model_name = "sqlcoder:7b-q8_0"
 
     @staticmethod
     def _clean_env_value(value: str) -> str:
@@ -95,7 +96,12 @@ Table 'orders' (ONLY this table exists):
         )
 
     def _generate_with_ollama(self, full_prompt: str) -> dict:
-        command = [OLLAMA_PATH, "run", self.model_name, full_prompt]
+        # Добавляем --keepalive 2h, чтобы модель не выгружалась из памяти зря
+        # И используем системный вызов с фиксацией модели
+        command = [OLLAMA_PATH, "run", "sqlcoder:7b-q8_0", full_prompt]
+        
+        # Если хочешь, чтобы модель работала точнее, можно добавить 
+        # параметры через API, но для subprocess проще оставить так.
         result = subprocess.run(
             command,
             capture_output=True,
@@ -106,7 +112,6 @@ Table 'orders' (ONLY this table exists):
         if result.returncode != 0:
             return {"status": "error", "error": result.stderr.strip() or "ollama command failed"}
         return {"status": "success", "text": result.stdout.strip()}
-
     def _health_ollama(self, model_name: str) -> dict:
         command = [OLLAMA_PATH, "show", model_name]
         try:
