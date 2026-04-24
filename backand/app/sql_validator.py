@@ -27,11 +27,11 @@ def validate_sql(sql: str) -> dict:
                 "sql": None
             }
     
-    # 2. Только SELECT запросы
-    if not sql_upper.startswith('SELECT'):
+    # 2. Только read-only запросы: SELECT или WITH ... SELECT
+    if not (sql_upper.startswith('SELECT') or sql_upper.startswith('WITH')):
         return {
             "safe": False, 
-            "reason": "Разрешены только запросы на чтение данных (SELECT)",
+            "reason": "Разрешены только запросы на чтение данных (SELECT / WITH ... SELECT)",
             "sql": None
         }
 

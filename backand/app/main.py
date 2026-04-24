@@ -9,9 +9,10 @@ from sql_generator import SQLGenerator
 from sql_validator import validate_sql
 from database import get_db_connection
 import re
+import os
 
 # Инициализируем генератор
-sql_gen = SQLGenerator(model_name="qwen2.5-coder:7b")
+sql_gen = SQLGenerator(model_name=os.getenv("SQL_MODEL", "sqlcoder"))
 
 # --- 1. СИСТЕМНАЯ БД (SQLite для истории) ---
 SYSTEM_DB_URL = "sqlite:///./system.db"
