@@ -49,7 +49,7 @@ function renderDataTable(rows) {
 function updateEngineTag(provider, model) {
     const tag = document.getElementById('engineTag');
     if (!tag) return;
-    const label = provider === 'grok' ? `GROQ · ${model}` : `OLLAMA · ${model}`;
+    const label = `OLLAMA · ${model}`;
     tag.innerHTML = `<i data-lucide="zap"></i> ${escapeHtml(label)}`;
     lucide.createIcons();
 }

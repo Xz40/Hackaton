@@ -7,7 +7,6 @@ from datetime import datetime
 from pydantic import BaseModel
 from typing import Optional
 from sql_generator import SQLGenerator
-from sql_validator import validate_sql
 from database import get_db_connection
 import re
 import os
@@ -24,7 +23,7 @@ def _model_for_provider(provider: str) -> str:
     return "sqlcoder:7b-q8_0"
 
 current_provider = os.getenv("SQL_PROVIDER", "ollama").strip().lower()
-if current_provider not in {"ollama", "grok"}:
+if current_provider != "ollama":
     current_provider = "ollama"
 
 # Инициализируем генератор
@@ -73,17 +72,6 @@ def get_system_db():
     finally:
         db.close()
 
-def extract_sql_from_garbage(text):
-    """Вырезает только SQL из болтовни модели"""
-    if not text: return ""
-    # Убираем ANSI коды (цвета терминала)
-    text = re.sub(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])', '', text)
-    # Ищем блок SELECT ... ; (флаг IGNORECASE важен)
-    match = re.search(r"(SELECT[\s\S]+?;?)", text, re.IGNORECASE)
-    if match:
-        return match.group(1).strip()
-    return text.strip()
-
 def sanitize_raw_ollama_sql(text: str) -> str:
     """Минимальная очистка сырого вывода Ollama без SQL-фильтров."""
     cleaned = text or ""
@@ -119,14 +107,7 @@ async def ask_question(request: QuestionRequest, db: Session = Depends(get_syste
 
     # 2. Вытаскиваем SQL
     raw_response = gen_result.get("sql", "")
-    if current_provider == "ollama":
-        sql = sanitize_raw_ollama_sql(raw_response)
-    else:
-        sql = extract_sql_from_garbage(raw_response)
-        validation = validate_sql(sql)
-        if not validation["safe"]:
-            return {"message": validation["reason"], "sql": sql, "data": []}
-        sql = validation["sql"]
+    sql = sanitize_raw_ollama_sql(raw_response)
 
     sql = remap_orders_table(sql)
     
@@ -200,13 +181,7 @@ async def get_llm_config():
     # Всегда отдаем хардкод
     return {"provider": "ollama", "model": "sqlcoder:7b-q8_0"}
 
-"""    model_name = "sqlcoder:7b-q8_0"
-    sql_gen.configure(provider=provider, model_name=model_name)
-    current_provider = "ollama"
-    return {"status": "ok", "provider": current_provider, "model": model_name}"""
-
 @app.get("/llm/health")
 async def llm_health(provider: str = None, model: str = None):
-    target_provider = (provider or current_provider).strip().lower()
-    target_model = (model or _model_for_provider(target_provider)).strip()
-    return sql_gen.health_check(provider=target_provider, model_name=target_model)
+    target_model = (model or _model_for_provider("ollama")).strip()
+    return sql_gen.health_check(provider="ollama", model_name=target_model)
