@@ -1,4 +1,4 @@
-const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:8080`;
+const API_BASE_URL = `https://sterile-gloating-alkalize.ngrok-free.dev/`;
 
 (function checkAuth() {
     const user = localStorage.getItem('drivee_user');
