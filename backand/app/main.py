@@ -107,11 +107,14 @@ async def ask_question(request: QuestionRequest, db: Session = Depends(get_syste
 
     # 2. Вытаскиваем SQL
     raw_response = gen_result.get("sql", "")
-    sql = extract_sql_from_garbage(raw_response)
-    validation = validate_sql(sql)
-    if not validation["safe"]:
-        return {"message": validation["reason"], "sql": sql, "data": []}
-    sql = validation["sql"]
+    if current_provider == "ollama":
+        sql = (raw_response or "").strip()
+    else:
+        sql = extract_sql_from_garbage(raw_response)
+        validation = validate_sql(sql)
+        if not validation["safe"]:
+            return {"message": validation["reason"], "sql": sql, "data": []}
+        sql = validation["sql"]
     
     # 3. Исполнение в Postgres (Drivee Analytics)
     db_results = []

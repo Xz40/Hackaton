@@ -236,6 +236,10 @@ Table: orders
             if gen_response.get("status") == "error":
                 return gen_response
 
+            # Для Ollama отдаём сырой ответ модели без фильтров.
+            if self.provider == "ollama":
+                return {"status": "success", "sql": gen_response.get("text", "")}
+
             sql = self._extract_sql_candidate(gen_response.get("text", ""))
 
             # Лечим частый деградирующий ответ модели: "SELECT LIMIT 1000;"
