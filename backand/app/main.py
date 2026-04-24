@@ -1,6 +1,4 @@
-import sqlite3
-import psycopg2 
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime
 from sqlalchemy.ext.declarative import declarative_base
@@ -8,6 +6,8 @@ from sqlalchemy.orm import sessionmaker, Session
 from datetime import datetime
 from pydantic import BaseModel
 from sql_generator import SQLGenerator
+from sql_validator import validate_sql
+from database import get_db_connection
 import re
 
 # Инициализируем генератор
@@ -71,28 +71,43 @@ async def ask_question(request: QuestionRequest, db: Session = Depends(get_syste
     # 2. Вытаскиваем SQL
     raw_response = gen_result.get("sql", "")
     sql = extract_sql_from_garbage(raw_response)
+    validation = validate_sql(sql)
+    if not validation["safe"]:
+        return {"message": validation["reason"], "sql": sql, "data": []}
+    sql = validation["sql"]
     
     # 3. Исполнение в Postgres (Drivee Analytics)
     db_results = []
+    conn = None
+    cursor = None
     try:
-        conn = psycopg2.connect(
-            dbname="drivee_analytics",
-            user="postgres",
-            password="postgres",
-            host="localhost",
-            port="5432"
-        )
+        conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute(sql)
         db_results = cursor.fetchall()
         
         msg = f"Найдено строк: {len(db_results)}" if db_results else "Данные по запросу отсутствуют."
-        cursor.close()
-        conn.close()
     except Exception as e:
         msg = f"Ошибка базы: {str(e)}"
+    finally:
+        try:
+            cursor.close()
+        except Exception:
+            pass
+        try:
+            conn.close()
+        except Exception:
+            pass
 
-    # 4. Сохраняем в историю
+    # 4. Обновляем статистику пользователя
+    user = db.query(User).filter(User.username == request.user_id).first()
+    if not user:
+        user = User(username=request.user_id, requests_count=0)
+        db.add(user)
+        db.flush()
+    user.requests_count += 1
+
+    # 5. Сохраняем в историю
     new_log = QueryHistory(user_id=request.user_id, question=request.question, sql_query=sql)
     db.add(new_log)
     db.commit()

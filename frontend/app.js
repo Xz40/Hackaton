@@ -15,6 +15,15 @@ document.addEventListener('DOMContentLoaded', () => {
     clearChat();
 });
 
+function escapeHtml(value) {
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 async function sendQuery() {
     const input = document.getElementById('queryInput');
     const chat = document.getElementById('chatMessages');
@@ -22,7 +31,7 @@ async function sendQuery() {
     if (!text) return;
 
     // Сообщение пользователя
-    chat.innerHTML += `<div class="msg user">${text}</div>`;
+    chat.innerHTML += `<div class="msg user">${escapeHtml(text)}</div>`;
     input.value = "";
     chat.scrollTop = chat.scrollHeight;
 
@@ -44,11 +53,11 @@ async function sendQuery() {
         // Показываем SQL, если он есть (полезно для отладки)
         if (data.sql) {
             botHtml += `<div style="font-family:monospace; font-size:10px; background:rgba(0,0,0,0.3); padding:8px; margin-bottom:10px; border-left:3px solid #A5F52C; color:#eee; overflow-x:auto;">
-                            ${data.sql}
+                            ${escapeHtml(data.sql)}
                         </div>`;
         }
         
-        botHtml += `<div>${data.message}</div></div>`;
+        botHtml += `<div>${escapeHtml(data.message || '')}</div></div>`;
         
         chat.innerHTML += botHtml;
         updateStats();

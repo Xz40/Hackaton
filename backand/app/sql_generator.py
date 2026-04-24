@@ -4,8 +4,8 @@ import os
 from sql_validator import validate_sql
 from semantic import get_semantic_context, enrich_question
 
-USER_NAME = os.getlogin()
-OLLAMA_PATH = rf"C:\Users\{USER_NAME}\AppData\Local\Programs\Ollama\ollama.exe"
+DEFAULT_OLLAMA_PATH = os.path.expandvars(r"%LOCALAPPDATA%\Programs\Ollama\ollama.exe")
+OLLAMA_PATH = os.getenv("OLLAMA_PATH", DEFAULT_OLLAMA_PATH)
 
 class SQLGenerator:
     def __init__(self, model_name="qwen2.5-coder:1.5b"):
@@ -58,7 +58,8 @@ Rules:
             if not validation["safe"]:
                 return {"status": "error", "error": f"Security: {validation['reason']}", "sql": sql}
 
-            return {"status": "success", "sql": sql}
+            # Возвращаем уже нормализованный SQL (например, с добавленным LIMIT).
+            return {"status": "success", "sql": validation["sql"]}
 
         except Exception as e:
             return {"status": "error", "error": str(e)}
