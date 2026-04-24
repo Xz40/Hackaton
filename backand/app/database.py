@@ -18,3 +18,6 @@ DB_CONFIG = {
 def get_db_connection():
     # cursor_factory=RealDictCursor — это КЛЮЧ к успеху
     return psycopg2.connect(**DB_CONFIG, cursor_factory=RealDictCursor)
+
+
+print(get_db_connection())
