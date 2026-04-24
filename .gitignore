@@ -1,0 +1,15 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Модели и веса (они слишком тяжелые для Git)
+sql_model_finetuned/
+outputs/
+offload/
+*.safetensors
+*.bin
+
+# Логи и конфиги
+*.log
+.env
