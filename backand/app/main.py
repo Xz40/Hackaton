@@ -60,6 +60,16 @@ def extract_sql_from_garbage(text):
         return match.group(1).strip()
     return text.strip()
 
+def normalize_query_rows(rows):
+    """Приводит строки psycopg2 к JSON-совместимому list[dict]."""
+    normalized = []
+    for row in rows or []:
+        if hasattr(row, "items"):
+            normalized.append({str(k): v for k, v in row.items()})
+        else:
+            normalized.append({"value": row})
+    return normalized
+
 @app.post("/ask")
 async def ask_question(request: QuestionRequest, db: Session = Depends(get_system_db)):
     # 1. Генерируем ответ (может быть с мусором)
@@ -112,7 +122,7 @@ async def ask_question(request: QuestionRequest, db: Session = Depends(get_syste
     db.add(new_log)
     db.commit()
 
-    return {"message": msg, "sql": sql, "data": db_results}
+    return {"message": msg, "sql": sql, "data": normalize_query_rows(db_results)}
 
 @app.get("/history")
 async def get_history(user_id: str = None, db: Session = Depends(get_system_db)):
