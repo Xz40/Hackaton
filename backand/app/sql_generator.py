@@ -2,8 +2,10 @@ import subprocess
 import re
 import os
 import json
+from pathlib import Path
 from urllib import request as urllib_request
 from urllib.error import HTTPError, URLError
+from dotenv import load_dotenv
 from sql_validator import validate_sql
 from semantic import get_semantic_context, enrich_question
 
@@ -69,7 +71,11 @@ Table: orders
 
     def configure(self, provider: str, model_name: str):
         self.provider = provider
-        self.model_name = model_name
+        self.model_name = (model_name or "").strip().strip('"').strip("'")
+
+    @staticmethod
+    def _clean_env_value(value: str) -> str:
+        return (value or "").strip().strip('"').strip("'")
 
     def _build_prompt(self, user_query: str) -> str:
         enriched_query = enrich_question(user_query)
@@ -92,15 +98,104 @@ Table: orders
             return {"status": "error", "error": result.stderr.strip() or "ollama command failed"}
         return {"status": "success", "text": result.stdout.strip()}
 
+    def _health_ollama(self, model_name: str) -> dict:
+        command = [OLLAMA_PATH, "show", model_name]
+        try:
+            result = subprocess.run(
+                command,
+                capture_output=True,
+                text=True,
+                encoding='utf-8',
+                errors='ignore'
+            )
+            if result.returncode == 0:
+                return {"status": "ok", "provider": "ollama", "model": model_name}
+            error_text = re.sub(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])', '', result.stderr or "").strip()
+            return {"status": "error", "provider": "ollama", "model": model_name, "error": error_text or "model is unavailable"}
+        except Exception as exc:
+            return {"status": "error", "provider": "ollama", "model": model_name, "error": str(exc)}
+
     def _generate_with_groq(self, full_prompt: str) -> dict:
-        api_key = os.getenv("GROQ_API_KEY", "").strip()
+        api_key = self._clean_env_value(os.getenv("GROQ_API_KEY", ""))
+        if not api_key:
+            # Догружаем env на случай запуска из другого cwd.
+            env_main = Path(__file__).resolve().parents[1] / ".env"
+            env_app = Path(__file__).resolve().parent / ".env"
+            load_dotenv(dotenv_path=env_main, override=False)
+            load_dotenv(dotenv_path=env_app, override=False)
+            api_key = self._clean_env_value(os.getenv("GROQ_API_KEY", ""))
         if not api_key:
             return {"status": "error", "error": "GROQ_API_KEY is not set"}
 
+        fallback_models = [
+            self.model_name,
+            "llama-3.1-70b-versatile",
+            "llama-3.1-8b-instant",
+        ]
+        tried = []
+        last_error = None
+
+        for model in fallback_models:
+            if model in tried:
+                continue
+            tried.append(model)
+
+            payload = {
+                "model": model,
+                "messages": [{"role": "user", "content": full_prompt}],
+                "temperature": 0.1,
+            }
+            req = urllib_request.Request(
+                "https://api.groq.com/openai/v1/chat/completions",
+                data=json.dumps(payload).encode("utf-8"),
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json",
+                },
+                method="POST",
+            )
+            try:
+                with urllib_request.urlopen(req, timeout=60) as response:
+                    data = json.loads(response.read().decode("utf-8"))
+                content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
+                if not content:
+                    last_error = "Empty response from Groq"
+                    continue
+                self.model_name = model
+                return {"status": "success", "text": content}
+            except HTTPError as exc:
+                body = exc.read().decode("utf-8", errors="ignore")
+                last_error = f"Groq HTTP {exc.code}: {body}"
+                # На 401/403/404/400 пробуем следующую модель.
+                if exc.code in {400, 401, 403, 404}:
+                    continue
+                return {"status": "error", "error": last_error}
+            except URLError as exc:
+                return {"status": "error", "error": f"Groq connection error: {exc.reason}"}
+            except Exception as exc:
+                return {"status": "error", "error": str(exc)}
+
+        return {
+            "status": "error",
+            "error": f"{last_error or 'Groq request failed'}; tried models: {', '.join(tried)}"
+        }
+
+    def _health_groq(self, model_name: str) -> dict:
+        api_key = self._clean_env_value(os.getenv("GROQ_API_KEY", ""))
+        if not api_key:
+            env_main = Path(__file__).resolve().parents[1] / ".env"
+            env_app = Path(__file__).resolve().parent / ".env"
+            load_dotenv(dotenv_path=env_main, override=False)
+            load_dotenv(dotenv_path=env_app, override=False)
+            api_key = self._clean_env_value(os.getenv("GROQ_API_KEY", ""))
+        if not api_key:
+            return {"status": "error", "provider": "grok", "model": model_name, "error": "GROQ_API_KEY is not set"}
+
         payload = {
-            "model": self.model_name,
-            "messages": [{"role": "user", "content": full_prompt}],
-            "temperature": 0.1,
+            "model": model_name,
+            "messages": [{"role": "user", "content": "ping"}],
+            "temperature": 0,
+            "max_tokens": 1,
         }
         req = urllib_request.Request(
             "https://api.groq.com/openai/v1/chat/completions",
@@ -112,19 +207,23 @@ Table: orders
             method="POST",
         )
         try:
-            with urllib_request.urlopen(req, timeout=60) as response:
-                data = json.loads(response.read().decode("utf-8"))
-            content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
-            if not content:
-                return {"status": "error", "error": "Empty response from Groq"}
-            return {"status": "success", "text": content}
+            with urllib_request.urlopen(req, timeout=30):
+                pass
+            return {"status": "ok", "provider": "grok", "model": model_name}
         except HTTPError as exc:
             body = exc.read().decode("utf-8", errors="ignore")
-            return {"status": "error", "error": f"Groq HTTP {exc.code}: {body}"}
+            return {"status": "error", "provider": "grok", "model": model_name, "error": f"Groq HTTP {exc.code}: {body}"}
         except URLError as exc:
-            return {"status": "error", "error": f"Groq connection error: {exc.reason}"}
+            return {"status": "error", "provider": "grok", "model": model_name, "error": f"Groq connection error: {exc.reason}"}
         except Exception as exc:
-            return {"status": "error", "error": str(exc)}
+            return {"status": "error", "provider": "grok", "model": model_name, "error": str(exc)}
+
+    def health_check(self, provider: str = None, model_name: str = None) -> dict:
+        provider_name = (provider or self.provider or "ollama").strip().lower()
+        model = (model_name or self.model_name or "").strip()
+        if provider_name == "grok":
+            return self._health_groq(model)
+        return self._health_ollama(model)
 
     def generate(self, user_query: str) -> dict:
         full_prompt = self._build_prompt(user_query)

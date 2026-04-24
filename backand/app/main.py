@@ -5,6 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from datetime import datetime
 from pydantic import BaseModel
+from typing import Optional
 from sql_generator import SQLGenerator
 from sql_validator import validate_sql
 from database import get_db_connection
@@ -17,9 +18,11 @@ ENV_PATH = Path(__file__).resolve().parents[1] / ".env"
 load_dotenv(dotenv_path=ENV_PATH)
 
 def _model_for_provider(provider: str) -> str:
+    def _clean(value: str) -> str:
+        return (value or "").strip().strip('"').strip("'")
     if provider == "grok":
-        return os.getenv("GROQ_MODEL", "llama-3.3-70b-specdec")
-    return os.getenv("SQL_MODEL", "sqlcoder:latest")
+        return _clean(os.getenv("GROQ_MODEL", "llama-3.3-70b-specdec"))
+    return _clean(os.getenv("SQL_MODEL", "sqlcoder:latest"))
 
 current_provider = os.getenv("SQL_PROVIDER", "ollama").strip().lower()
 if current_provider not in {"ollama", "grok"}:
@@ -59,6 +62,7 @@ class QuestionRequest(BaseModel):
 
 class LlmConfigRequest(BaseModel):
     provider: str
+    model: Optional[str] = None
 
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
@@ -176,7 +180,13 @@ async def set_llm_config(request: LlmConfigRequest):
     if provider not in {"ollama", "grok"}:
         return {"status": "error", "message": "provider must be 'ollama' or 'grok'"}
 
-    model_name = _model_for_provider(provider)
+    model_name = (request.model or "").strip() or _model_for_provider(provider)
     sql_gen.configure(provider=provider, model_name=model_name)
     current_provider = provider
     return {"status": "ok", "provider": current_provider, "model": model_name}
+
+@app.get("/llm/health")
+async def llm_health(provider: str = None, model: str = None):
+    target_provider = (provider or current_provider).strip().lower()
+    target_model = (model or _model_for_provider(target_provider)).strip()
+    return sql_gen.health_check(provider=target_provider, model_name=target_model)
