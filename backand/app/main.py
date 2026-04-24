@@ -85,6 +85,13 @@ def extract_sql_from_garbage(text):
         return match.group(1).strip()
     return text.strip()
 
+def sanitize_raw_ollama_sql(text: str) -> str:
+    """Минимальная очистка сырого вывода Ollama без SQL-фильтров."""
+    cleaned = text or ""
+    cleaned = re.sub(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])', '', cleaned)
+    cleaned = cleaned.replace("<s>", "").replace("</s>", "")
+    return cleaned.strip()
+
 def normalize_query_rows(rows):
     """Приводит строки psycopg2 к JSON-совместимому list[dict]."""
     normalized = []
@@ -108,7 +115,7 @@ async def ask_question(request: QuestionRequest, db: Session = Depends(get_syste
     # 2. Вытаскиваем SQL
     raw_response = gen_result.get("sql", "")
     if current_provider == "ollama":
-        sql = (raw_response or "").strip()
+        sql = sanitize_raw_ollama_sql(raw_response)
     else:
         sql = extract_sql_from_garbage(raw_response)
         validation = validate_sql(sql)
