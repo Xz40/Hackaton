@@ -35,6 +35,26 @@ def validate_sql(sql: str) -> dict:
             "sql": None
         }
 
+    # 2.1. В запросе обязательно должен быть FROM
+    if re.search(r"\bFROM\b", sql_upper) is None:
+        return {
+            "safe": False,
+            "reason": "Некорректный SQL: отсутствует FROM",
+            "sql": None
+        }
+
+    # 2.2. Разрешаем только whitelisted-таблицы
+    from_tables = re.findall(r"\bFROM\s+([a-zA-Z_][a-zA-Z0-9_]*)", sql_clean, flags=re.IGNORECASE)
+    join_tables = re.findall(r"\bJOIN\s+([a-zA-Z_][a-zA-Z0-9_]*)", sql_clean, flags=re.IGNORECASE)
+    used_tables = {t.lower() for t in (from_tables + join_tables)}
+    allowed_tables_lower = {t.lower() for t in ALLOWED_TABLES}
+    if not used_tables or not used_tables.issubset(allowed_tables_lower):
+        return {
+            "safe": False,
+            "reason": "Разрешена работа только с таблицей orders",
+            "sql": None
+        }
+
     # 3. Наличие LIMIT (защита от выгрузки миллионов строк)
     if 'LIMIT' not in sql_upper:
         # Добавляем LIMIT, если его нет

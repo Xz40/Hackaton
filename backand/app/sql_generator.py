@@ -27,7 +27,14 @@ Rules:
         enriched_query = enrich_question(user_query)
         
         # Просим писать в одну строку — это сильно снижает риск заикания
-        full_prompt = f"{self._get_system_prompt()}\nQuestion: {enriched_query}\nWrite SQL in ONE LINE:\nSQL:"
+        full_prompt = (
+            f"{self._get_system_prompt()}\n"
+            f"Question: {enriched_query}\n"
+            "Write SQL in ONE LINE.\n"
+            "IMPORTANT: Always use FROM orders.\n"
+            "Example: SELECT * FROM orders LIMIT 10;\n"
+            "SQL:"
+        )
 
         command = [OLLAMA_PATH, "run", self.model_name, full_prompt]
 
@@ -51,8 +58,16 @@ Rules:
             sql = re.sub(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])', '', sql)
             sql = ' '.join(sql.split()).replace('```sql', '').replace('```', '').strip()
             
-            if ';' in sql: sql = sql.split(';')[0] + ';'
-            else: sql += ';'
+            if ';' in sql:
+                sql = sql.split(';')[0] + ';'
+            else:
+                sql += ';'
+
+            # Лечим частый деградирующий ответ модели: "SELECT LIMIT 1000;"
+            if re.match(r'^\s*SELECT\s+LIMIT\s+\d+\s*;?\s*$', sql, flags=re.IGNORECASE):
+                limit_match = re.search(r'LIMIT\s+(\d+)', sql, flags=re.IGNORECASE)
+                limit_value = limit_match.group(1) if limit_match else "1000"
+                sql = f"SELECT * FROM orders LIMIT {limit_value};"
 
             validation = validate_sql(sql)
             if not validation["safe"]:

@@ -24,6 +24,27 @@ function escapeHtml(value) {
         .replace(/'/g, '&#39;');
 }
 
+function renderDataTable(rows) {
+    if (!Array.isArray(rows) || rows.length === 0) return '';
+
+    const columns = Array.from(
+        rows.reduce((set, row) => {
+            Object.keys(row || {}).forEach((k) => set.add(k));
+            return set;
+        }, new Set())
+    );
+    if (columns.length === 0) return '';
+
+    const thead = `<thead><tr>${columns.map((c) => `<th style="text-align:left;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.15);">${escapeHtml(c)}</th>`).join('')}</tr></thead>`;
+    const tbody = `<tbody>${rows.map((row) => `<tr>${columns.map((c) => `<td style="padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.08);vertical-align:top;">${escapeHtml(row?.[c] ?? '')}</td>`).join('')}</tr>`).join('')}</tbody>`;
+    return `<div style="margin-top:10px;overflow:auto;max-height:280px;border:1px solid rgba(255,255,255,0.12);border-radius:8px;">
+                <table style="width:100%;border-collapse:collapse;font-size:12px;">
+                    ${thead}
+                    ${tbody}
+                </table>
+            </div>`;
+}
+
 async function sendQuery() {
     const input = document.getElementById('queryInput');
     const chat = document.getElementById('chatMessages');
@@ -57,7 +78,11 @@ async function sendQuery() {
                         </div>`;
         }
         
-        botHtml += `<div>${escapeHtml(data.message || '')}</div></div>`;
+        botHtml += `<div>${escapeHtml(data.message || '')}</div>`;
+        if (Array.isArray(data.data) && data.data.length > 0) {
+            botHtml += renderDataTable(data.data);
+        }
+        botHtml += `</div>`;
         
         chat.innerHTML += botHtml;
         updateStats();
