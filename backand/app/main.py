@@ -77,6 +77,8 @@ async def ask_question(request: QuestionRequest, db: Session = Depends(get_syste
     
     if gen_result.get("status") == "error":
         return {"message": f"Ошибка LLM: {gen_result.get('error')}", "sql": None, "data": []}
+    fallback_used = bool(gen_result.get("fallback_used"))
+    fallback_reason = gen_result.get("fallback_reason")
 
     # 2. Вытаскиваем SQL
     raw_response = gen_result.get("sql", "")
@@ -97,6 +99,8 @@ async def ask_question(request: QuestionRequest, db: Session = Depends(get_syste
         db_results = cursor.fetchall()
         
         msg = f"Найдено строк: {len(db_results)}" if db_results else "Данные по запросу отсутствуют."
+        if fallback_used:
+            msg = f"{msg} (использован безопасный fallback из-за ошибки LLM: {fallback_reason})"
     except Exception as e:
         msg = f"Ошибка базы: {str(e)}"
     finally:

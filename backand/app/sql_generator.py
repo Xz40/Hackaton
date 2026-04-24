@@ -23,6 +23,22 @@ Rules:
 - 'done' for successful orders.
 - Formulas: {semantic_info}"""
 
+    def _build_fallback_sql(self, user_query: str) -> str:
+        """
+        Детерминированный SQL на случай невалидного ответа модели.
+        """
+        query_text = (user_query or "").lower()
+        limit = 10
+        limit_match = re.search(r"\b(\d{1,4})\b", query_text)
+        if limit_match:
+            try:
+                candidate = int(limit_match.group(1))
+                if candidate > 0:
+                    limit = min(candidate, 1000)
+            except ValueError:
+                pass
+        return f"SELECT * FROM orders LIMIT {limit};"
+
     def generate(self, user_query: str) -> dict:
         enriched_query = enrich_question(user_query)
         
@@ -71,6 +87,15 @@ Rules:
 
             validation = validate_sql(sql)
             if not validation["safe"]:
+                fallback_sql = self._build_fallback_sql(user_query)
+                fallback_validation = validate_sql(fallback_sql)
+                if fallback_validation["safe"]:
+                    return {
+                        "status": "success",
+                        "sql": fallback_validation["sql"],
+                        "fallback_used": True,
+                        "fallback_reason": validation["reason"],
+                    }
                 return {"status": "error", "error": f"Security: {validation['reason']}", "sql": sql}
 
             # Возвращаем уже нормализованный SQL (например, с добавленным LIMIT).
