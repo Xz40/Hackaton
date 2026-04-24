@@ -1,6 +1,9 @@
 import subprocess
 import re
 import os
+import json
+from urllib import request as urllib_request
+from urllib.error import HTTPError, URLError
 from sql_validator import validate_sql
 from semantic import get_semantic_context, enrich_question
 
@@ -8,8 +11,9 @@ DEFAULT_OLLAMA_PATH = os.path.expandvars(r"%LOCALAPPDATA%\Programs\Ollama\ollama
 OLLAMA_PATH = os.getenv("OLLAMA_PATH", DEFAULT_OLLAMA_PATH)
 
 class SQLGenerator:
-    def __init__(self, model_name="sqlcoder"):
+    def __init__(self, model_name="sqlcoder", provider="ollama"):
         self.model_name = model_name
+        self.provider = provider
 
     def _get_system_prompt(self):
         semantic_info = get_semantic_context()
@@ -63,29 +67,77 @@ Table: orders
                 pass
         return f"SELECT * FROM orders LIMIT {limit};"
 
-    def generate(self, user_query: str) -> dict:
+    def configure(self, provider: str, model_name: str):
+        self.provider = provider
+        self.model_name = model_name
+
+    def _build_prompt(self, user_query: str) -> str:
         enriched_query = enrich_question(user_query)
-        
-        full_prompt = (
+        return (
             f"{self._get_system_prompt()}\n"
             f"### User question\n{enriched_query}\n"
             "### SQL\n"
         )
 
+    def _generate_with_ollama(self, full_prompt: str) -> dict:
         command = [OLLAMA_PATH, "run", self.model_name, full_prompt]
+        result = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            encoding='utf-8',
+            errors='ignore'
+        )
+        if result.returncode != 0:
+            return {"status": "error", "error": result.stderr.strip() or "ollama command failed"}
+        return {"status": "success", "text": result.stdout.strip()}
+
+    def _generate_with_groq(self, full_prompt: str) -> dict:
+        api_key = os.getenv("GROQ_API_KEY", "").strip()
+        if not api_key:
+            return {"status": "error", "error": "GROQ_API_KEY is not set"}
+
+        payload = {
+            "model": self.model_name,
+            "messages": [{"role": "user", "content": full_prompt}],
+            "temperature": 0.1,
+        }
+        req = urllib_request.Request(
+            "https://api.groq.com/openai/v1/chat/completions",
+            data=json.dumps(payload).encode("utf-8"),
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            },
+            method="POST",
+        )
+        try:
+            with urllib_request.urlopen(req, timeout=60) as response:
+                data = json.loads(response.read().decode("utf-8"))
+            content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
+            if not content:
+                return {"status": "error", "error": "Empty response from Groq"}
+            return {"status": "success", "text": content}
+        except HTTPError as exc:
+            body = exc.read().decode("utf-8", errors="ignore")
+            return {"status": "error", "error": f"Groq HTTP {exc.code}: {body}"}
+        except URLError as exc:
+            return {"status": "error", "error": f"Groq connection error: {exc.reason}"}
+        except Exception as exc:
+            return {"status": "error", "error": str(exc)}
+
+    def generate(self, user_query: str) -> dict:
+        full_prompt = self._build_prompt(user_query)
 
         try:
-            result = subprocess.run(
-                command,
-                capture_output=True,
-                text=True,
-                encoding='utf-8',
-                errors='ignore'
-            )
-            if result.returncode != 0:
-                return {"status": "error", "error": result.stderr.strip() or "ollama command failed"}
+            if self.provider == "grok":
+                gen_response = self._generate_with_groq(full_prompt)
+            else:
+                gen_response = self._generate_with_ollama(full_prompt)
+            if gen_response.get("status") == "error":
+                return gen_response
 
-            sql = self._extract_sql_candidate(result.stdout.strip())
+            sql = self._extract_sql_candidate(gen_response.get("text", ""))
 
             # Лечим частый деградирующий ответ модели: "SELECT LIMIT 1000;"
             if re.match(r'^\s*SELECT\s+LIMIT\s+\d+\s*;?\s*$', sql, flags=re.IGNORECASE):

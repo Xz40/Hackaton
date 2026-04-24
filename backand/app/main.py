@@ -11,8 +11,20 @@ from database import get_db_connection
 import re
 import os
 
+def _model_for_provider(provider: str) -> str:
+    if provider == "grok":
+        return os.getenv("GROQ_MODEL", "llama-3.3-70b-specdec")
+    return os.getenv("SQL_MODEL", "sqlcoder:latest")
+
+current_provider = os.getenv("SQL_PROVIDER", "ollama").strip().lower()
+if current_provider not in {"ollama", "grok"}:
+    current_provider = "ollama"
+
 # Инициализируем генератор
-sql_gen = SQLGenerator(model_name=os.getenv("SQL_MODEL", "sqlcoder"))
+sql_gen = SQLGenerator(
+    model_name=_model_for_provider(current_provider),
+    provider=current_provider
+)
 
 # --- 1. СИСТЕМНАЯ БД (SQLite для истории) ---
 SYSTEM_DB_URL = "sqlite:///./system.db"
@@ -39,6 +51,9 @@ Base.metadata.create_all(bind=system_engine)
 class QuestionRequest(BaseModel):
     user_id: str
     question: str
+
+class LlmConfigRequest(BaseModel):
+    provider: str
 
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
@@ -144,3 +159,19 @@ async def get_stats(user_id: str, db: Session = Depends(get_system_db)):
 @app.get("/databases")
 async def get_dbs():
     return [{"name": "Drivee_Postgres_Main", "db_type": "PostgreSQL", "status": "Online"}]
+
+@app.get("/llm/config")
+async def get_llm_config():
+    return {"provider": current_provider, "model": sql_gen.model_name}
+
+@app.post("/llm/config")
+async def set_llm_config(request: LlmConfigRequest):
+    global current_provider, sql_gen
+    provider = (request.provider or "").strip().lower()
+    if provider not in {"ollama", "grok"}:
+        return {"status": "error", "message": "provider must be 'ollama' or 'grok'"}
+
+    model_name = _model_for_provider(provider)
+    sql_gen.configure(provider=provider, model_name=model_name)
+    current_provider = provider
+    return {"status": "ok", "provider": current_provider, "model": model_name}

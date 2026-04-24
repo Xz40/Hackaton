@@ -62,7 +62,14 @@
                     <div class="input-container">
                         <textarea id="queryInput" placeholder="Спросите AI о данных Drivee..." rows="1"></textarea>
                         <div class="input-actions">
-                            <span class="engine-tag"><i data-lucide="zap"></i> DRIVEE AI</span>
+                            <span class="engine-tag" id="engineTag"><i data-lucide="zap"></i> DRIVEE AI</span>
+                            <select id="llmProvider" style="background:#1f1f1f;color:#fff;border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:6px 8px;font-size:12px;">
+                                <option value="ollama">SQLCoder (Ollama)</option>
+                                <option value="grok">Grok (llama-3.3-70b-specdec)</option>
+                            </select>
+                            <button class="send-btn" onclick="setLlmProvider()" title="Сменить модель" style="width:auto;padding:0 10px;">
+                                AI
+                            </button>
                             <button class="send-btn" onclick="sendQuery()">
                                 <i data-lucide="arrow-up"></i>
                             </button>

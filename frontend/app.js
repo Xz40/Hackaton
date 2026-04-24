@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
     const user = localStorage.getItem('drivee_user') || 'Admin';
     document.getElementById('userName').innerText = user;
+    loadLlmConfig();
     updateStats();
     clearChat();
 });
@@ -43,6 +44,50 @@ function renderDataTable(rows) {
                     ${tbody}
                 </table>
             </div>`;
+}
+
+function updateEngineTag(provider, model) {
+    const tag = document.getElementById('engineTag');
+    if (!tag) return;
+    const label = provider === 'grok' ? `GROQ · ${model}` : `OLLAMA · ${model}`;
+    tag.innerHTML = `<i data-lucide="zap"></i> ${escapeHtml(label)}`;
+    lucide.createIcons();
+}
+
+async function loadLlmConfig() {
+    try {
+        const res = await fetch(`${API_BASE_URL}/llm/config`);
+        const data = await res.json();
+        const select = document.getElementById('llmProvider');
+        if (select && data.provider) {
+            select.value = data.provider;
+        }
+        updateEngineTag(data.provider, data.model || '');
+    } catch (e) {}
+}
+
+async function setLlmProvider() {
+    const select = document.getElementById('llmProvider');
+    if (!select) return;
+    const provider = select.value;
+    try {
+        const res = await fetch(`${API_BASE_URL}/llm/config`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ provider })
+        });
+        const data = await res.json();
+        if (data.status === 'error') {
+            alert(data.message || 'Не удалось сменить модель');
+            return;
+        }
+        updateEngineTag(data.provider, data.model || '');
+        const chat = document.getElementById('chatMessages');
+        chat.innerHTML += `<div class="msg bot">Модель переключена: ${escapeHtml(data.provider)} (${escapeHtml(data.model || '')})</div>`;
+        chat.scrollTop = chat.scrollHeight;
+    } catch (e) {
+        alert('Ошибка при переключении модели');
+    }
 }
 
 async function sendQuery() {
