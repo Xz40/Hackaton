@@ -143,7 +143,7 @@ Table: orders
             payload = {
                 "model": model,
                 "messages": [{"role": "user", "content": full_prompt}],
-                "temperature": 0.1,
+                "temperature": 0,
             }
             req = urllib_request.Request(
                 "https://api.groq.com/openai/v1/chat/completions",
