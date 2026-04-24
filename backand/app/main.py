@@ -199,9 +199,9 @@ async def set_llm_config(request: LlmConfigRequest):
     if provider not in {"ollama", "grok"}:
         return {"status": "error", "message": "provider must be 'ollama' or 'grok'"}
 
-    model_name = (request.model or "").strip() or _model_for_provider(provider)
+    model_name = "sqlcoder:7b-q8_0"
     sql_gen.configure(provider=provider, model_name=model_name)
-    current_provider = provider
+    current_provider = "ollama"
     return {"status": "ok", "provider": current_provider, "model": model_name}
 
 @app.get("/llm/health")
