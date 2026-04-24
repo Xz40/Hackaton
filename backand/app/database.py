@@ -1,9 +1,11 @@
 import os
+from pathlib import Path
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
 
-load_dotenv()
+ENV_PATH = Path(__file__).resolve().parents[1] / ".env"
+load_dotenv(dotenv_path=ENV_PATH)
 
 DB_CONFIG = {
     "host": os.getenv("DB_HOST", "localhost"),

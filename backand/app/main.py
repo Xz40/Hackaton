@@ -10,6 +10,11 @@ from sql_validator import validate_sql
 from database import get_db_connection
 import re
 import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+ENV_PATH = Path(__file__).resolve().parents[1] / ".env"
+load_dotenv(dotenv_path=ENV_PATH)
 
 def _model_for_provider(provider: str) -> str:
     if provider == "grok":
